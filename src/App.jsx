@@ -65,6 +65,14 @@ const COLORS = {
         accentGradient: 'linear-gradient(90deg, #059669, #065F46)',
         border: '1px solid rgba(5,150,105,0.3)',
         text: 'text-white'
+    },
+    math_wild: { // NOUVELLE COULEUR MATHS (ORANGE FLASH)
+        id: 'math_wild',
+        hex: '#ffa62d',
+        gradient: 'linear-gradient(135deg, rgba(255,166,45,0.3) 0%, rgba(255,94,0,0.5) 100%)',
+        accentGradient: 'linear-gradient(90deg, #ffa62d, #ff5e00)',
+        border: '1px solid rgba(255,166,45,0.5)',
+        text: 'text-white'
     }
   }
 };
@@ -74,74 +82,118 @@ const CATEGORIES = {
   LEADERSHIP: { id: 'leadership', label: 'LEADERSHIP', colorData: COLORS.cards.leadership, icon: Crown },
   CRITICAL_THINKING: { id: 'critical_thinking', label: 'CRITICAL THINKING', colorData: COLORS.cards.critical_thinking, icon: Brain },
   EMOTIONAL_INTELLIGENCE: { id: 'emotional_intelligence', label: 'INTELLIGENCE ÉMOTIONNELLE', colorData: COLORS.cards.emotional_intelligence, icon: Heart },
-  CRÉATIVITÉ: { id: 'creativity', label: 'CRÉATIVITÉ', colorData: COLORS.cards.creativity, icon: Lightbulb },
-  LOGISTICS: { id: 'logistics', label: 'LOGISTIQUE<br/>OPÉRATIONS', colorData: COLORS.cards.logistics, icon: Tractor } // CORRECTION ICI : Ajout du <br/>
+  // CORRECTION : Suppression de l'accent pour une correspondance propre avec .toUpperCase() lors de la recherche de clé
+  CREATIVITE: { id: 'creativity', label: 'CRÉATIVITÉ', colorData: COLORS.cards.creativity, icon: Lightbulb }, 
+  LOGISTICS: { id: 'logistics', label: 'LOGISTIQUE<br/>OPÉRATIONS', colorData: COLORS.cards.logistics, icon: Tractor }, // CORRECTION ICI : Ajout du <br/>
+  MATH_WILD: { id: 'math_wild', label: 'DÉFI MATHS<br/>(WILD CARD)', colorData: COLORS.cards.math_wild, icon: Zap }, // NOUVELLE CATÉGORIE WILD
 };
 
+// VALEUR EN POINTS POUR LES CARTES
+const DEFAULT_POINTS = 1;
+const WILD_POINTS = 10; // 10 points pour les cartes mathématiques
+
 const INITIAL_CARDS = [
-  // --- Communication (8 cartes) ---
-  { id: 'c1', categoryId: 'communication', type: 'challenge', title: 'PRÉSENTATION EXPRESS', scenario: 'Les réseaux sociaux : menace ou opportunité ? Mini-discours de 1 min.', explanation: 'Conseil : Commencez par une accroche forte ("Saviez-vous que..."), donnez 2 arguments opposés, et concluez avec votre avis personnel.', duration: 60 },
-  { id: 'c2', categoryId: 'communication', type: 'challenge', title: 'PITCH DE VENTE', scenario: 'Vendez ce stylo (ou un objet proche) au jury en 45 secondes.', explanation: 'Ne vendez pas l\'objet, vendez ce qu\'il permet de faire (ex: "Signer le contrat de votre vie"). Créez le besoin.', duration: 45 },
-  { id: 'c3', categoryId: 'communication', type: 'challenge', title: 'SILENCE RADIO', scenario: 'Faites deviner "Projet en retard" sans parler, uniquement avec des gestes.', explanation: 'La communication non-verbale représente plus de 50% du message.', duration: 45 },
-  { id: 'c4', categoryId: 'communication', type: 'challenge', title: 'STORYTELLING', scenario: 'Racontez une anecdote personnelle qui vous a appris une leçon, en 1 minute.', explanation: 'Une bonne histoire a une structure : Situation initiale, Élément perturbateur, Péripéties, Résolution.', duration: 60 },
-  { id: 'c5', categoryId: 'communication', type: 'challenge', title: 'FEEDBACK SANDWICH', scenario: 'Faites un retour critique à un collègue sur son travail bâclé.', explanation: 'Commencez par un point positif, abordez le point à améliorer, et finissez par un encouragement.', duration: 45 },
-  { id: 'c_quiz_1', categoryId: 'communication', type: 'quiz', title: 'ÉCOUTE ACTIVE', scenario: 'Quelle est la clé principale de l’écoute active ?', options: ['Interrompre pour questionner', 'Reformuler ce que dit l’autre', 'Préparer sa réponse'], correctIndex: 1, explanation: 'La reformulation prouve que vous avez compris le message et invite l\'autre à préciser sa pensée.', duration: 30 },
-  { id: 'c_quiz_2', categoryId: 'communication', type: 'quiz', title: 'COMMUNICATION NON-VERBALE', scenario: 'Quel pourcentage du message passe par le non-verbal (voix + corps) ?', options: ['Environ 30%', 'Environ 50%', 'Plus de 90%'], correctIndex: 2, explanation: 'Selon la règle de Mehrabian, 93% de la communication est non-verbale (ton + gestes) lors de l\'expression d\'émotions.', duration: 30 },
-  { id: 'c_quiz_3', categoryId: 'communication', type: 'quiz', title: 'QUESTION OUVERTE', scenario: 'Laquelle est une question ouverte ?', options: ['As-tu fini ?', 'Es-tu d\'accord ?', 'Qu\'en penses-tu ?'], correctIndex: 2, explanation: 'Une question ouverte ne peut pas être répondue par Oui ou Non, elle encourage le dialogue.', duration: 30 },
+  // --- Communication (13 cartes) ---
+  { id: 'c1', categoryId: 'communication', type: 'challenge', title: 'PRÉSENTATION EXPRESS', scenario: 'Les réseaux sociaux : menace ou opportunité ? Mini-discours de 1 min.', explanation: 'Conseil : Commencez par une accroche forte ("Saviez-vous que..."), donnez 2 arguments opposés, et concluez avec votre avis personnel.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'c2', categoryId: 'communication', type: 'challenge', title: 'PITCH DE VENTE', scenario: 'Vendez ce stylo (ou un objet proche) au jury en 45 secondes.', explanation: 'Ne vendez pas l\'objet, vendez ce qu\'il permet de faire (ex: "Signer le contrat de votre vie"). Créez le besoin.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'c3', categoryId: 'communication', type: 'challenge', title: 'SILENCE RADIO', scenario: 'Faites deviner "Projet en retard" sans parler, uniquement avec des gestes.', explanation: 'La communication non-verbale représente plus de 50% du message.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'c4', categoryId: 'communication', type: 'challenge', title: 'STORYTELLING', scenario: 'Racontez une anecdote personnelle qui vous a appris une leçon, en 1 minute.', explanation: 'Une bonne histoire a une structure : Situation initiale, Élément perturbateur, Péripéties, Résolution.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'c5', categoryId: 'communication', type: 'challenge', title: 'FEEDBACK SANDWICH', scenario: 'Faites un retour critique à un collègue sur son travail bâclé.', explanation: 'Commencez par un point positif, abordez le point à améliorer, et finissez par un encouragement.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'c_quiz_1', categoryId: 'communication', type: 'quiz', title: 'ÉCOUTE ACTIVE', scenario: 'Quelle est la clé principale de l’écoute active ?', options: ['Interrompre pour questionner', 'Reformuler ce que dit l’autre', 'Préparer sa réponse'], correctIndex: 1, explanation: 'La reformulation prouve que vous avez compris le message et invite l\'autre à préciser sa pensée.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'c_quiz_2', categoryId: 'communication', type: 'quiz', title: 'COMMUNICATION NON-VERBALE', scenario: 'Quel pourcentage du message passe par le non-verbal (voix + corps) ?', options: ['Environ 30%', 'Environ 50%', 'Plus de 90%'], correctIndex: 2, explanation: 'Selon la règle de Mehrabian, 93% de la communication est non-verbale (ton + gestes) lors de l\'expression d\'émotions.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'c_quiz_3', categoryId: 'communication', type: 'quiz', title: 'QUESTION OUVERTE', scenario: 'Laquelle est une question ouverte ?', options: ['As-tu fini ?', 'Es-tu d\'accord ?', 'Qu\'en penses-tu ?'], correctIndex: 2, explanation: 'Une question ouverte ne peut pas être répondue par Oui ou Non, elle encourage le dialogue.', duration: 30, points: DEFAULT_POINTS },
+  // NOUVELLES CARTES COMMUNICATION (5)
+  { id: 'c6', categoryId: 'communication', type: 'challenge', title: 'MESSAGE DIFFUSÉ', scenario: 'Expliquez en 30 secondes un concept complexe (ex: la blockchain) à quelqu\'un qui n\'y connaît rien.', explanation: 'Utilisez des métaphores simples et des analogies pour rendre le concept accessible.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'c7', categoryId: 'communication', type: 'challenge', title: 'GÉRER L\'INTERRUPTION', scenario: 'Vous êtes interrompu pendant votre explication. Gérez la situation poliment et reprenez votre point.', explanation: 'Reconnaissez l\'interruption, et utilisez une phrase de transition ferme : "Merci, mais pour finir mon idée..."', duration: 45, points: DEFAULT_POINTS },
+  { id: 'c_quiz_4', categoryId: 'communication', type: 'quiz', title: 'LE CANAL', scenario: 'Quel canal de communication est le plus riche en informations non-verbales ?', options: ['E-mail', 'Appel téléphonique', 'Réunion en personne'], correctIndex: 2, explanation: 'La réunion en personne permet de capter la voix, le langage corporel et les expressions faciales.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'c_quiz_5', categoryId: 'communication', type: 'quiz', title: 'ASSURANCE', scenario: 'Quel comportement exprime l\'assurance et la crédibilité ?', options: ['Parler vite et fort', 'Maintenir un contact visuel modéré', 'Croiser les bras'], correctIndex: 1, explanation: 'Le contact visuel démontre l\'engagement et la sincérité sans intimider.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'c_quiz_6', categoryId: 'communication', type: 'quiz', title: 'LE BIAIS', scenario: 'Le fait de juger un message uniquement par son émetteur est un biais de...', options: ['Confirmation', 'Halo', 'Ancrage'], correctIndex: 1, explanation: 'Le biais de Halo fait que l\'opinion positive ou négative sur une personne influence le jugement sur tout ce qui la concerne.', duration: 30, points: DEFAULT_POINTS },
   
-  // --- Leadership (8 cartes) ---
-  { id: 'l1', categoryId: 'leadership', type: 'challenge', title: 'GÉRER UN CONFLIT', scenario: 'Un collègue est toujours en retard. Dites-lui fermement mais poliment.', explanation: 'Utilisez la méthode DESC : Décrire les faits, Exprimer votre ressenti, Suggérer une solution, Conclure sur les conséquences positives.', duration: 45 },
-  { id: 'l2', categoryId: 'leadership', type: 'challenge', title: 'MOTIVATION', scenario: 'Votre équipe est découragée après un échec. Remotivez-les en 1 min.', explanation: 'Reconnaissez l\'effort, dédramatisez l\'échec, et focalisez sur la prochaine étape.', duration: 60 },
-  { id: 'l3', categoryId: 'leadership', type: 'challenge', title: 'PRISE DE DÉCISION', scenario: 'Urgence : Vous devez couper le budget de 10% immédiatement. Annoncez-le à l\'équipe.', explanation: 'Soyez transparent sur les raisons, ferme sur la décision, mais ouvert à la discussion sur la mise en œuvre.', duration: 60 },
-  { id: 'l4', categoryId: 'leadership', type: 'challenge', title: 'VISION', scenario: 'Décrivez votre vision de l\'entreprise idéale en 3 phrases inspirantes.', explanation: 'Une vision doit être claire, ambitieuse et inspirante pour fédérer.', duration: 60 },
-  { id: 'l_quiz_1', categoryId: 'leadership', type: 'quiz', title: 'STYLE DE LEADERSHIP', scenario: 'Quel style implique le plus l’équipe dans la prise de décision ?', options: ['Autoritaire', 'Démocratique', 'Laissez-faire'], correctIndex: 1, explanation: 'Le style démocratique (ou participatif) invite les collaborateurs à partager leur avis avant la décision finale.', duration: 30 },
-  { id: 'l_quiz_2', categoryId: 'leadership', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Pourquoi déléguer est-il important ?', options: ['Pour moins travailler', 'Pour responsabiliser et former', 'Pour éviter les tâches ingrates'], correctIndex: 1, explanation: 'Déléguer fait grandir vos collaborateurs et vous libère du temps pour la stratégie.', duration: 30 },
-  { id: 'l_quiz_3', categoryId: 'leadership', type: 'quiz', title: 'FEEDBACK', scenario: 'Le but principal d\'un feedback correctif est :', options: ['De sanctionner une erreur', 'D\'améliorer la performance future', 'De montrer qui est le chef'], correctIndex: 1, explanation: 'Le feedback est un outil de développement, pas de punition.', duration: 30 },
-  { id: 'l_quiz_4', categoryId: 'leadership', type: 'quiz', title: 'CONFIANCE', scenario: 'Comment bâtir la confiance rapidement ?', options: ['En contrôlant tout', 'En tenant ses promesses', 'En étant ami avec tout le monde'], correctIndex: 1, explanation: 'La cohérence entre les paroles et les actes est le fondement de la confiance.', duration: 30 },
+  // --- Leadership (13 cartes) ---
+  { id: 'l1', categoryId: 'leadership', type: 'challenge', title: 'GÉRER UN CONFLIT', scenario: 'Un collègue est toujours en retard. Dites-lui fermement mais poliment.', explanation: 'Utilisez la méthode DESC : Décrire les faits, Exprimer votre ressenti, Suggérer une solution, Conclure sur les conséquences positives.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'l2', categoryId: 'leadership', type: 'challenge', title: 'MOTIVATION', scenario: 'Votre équipe est découragée après un échec. Remotivez-les en 1 min.', explanation: 'Reconnaissez l\'effort, dédramatisez l\'échec, et focalisez sur la prochaine étape.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'l3', categoryId: 'leadership', type: 'challenge', title: 'PRISE DE DÉCISION', scenario: 'Urgence : Vous devez couper le budget de 10% immédiatement. Annoncez-le à l\'équipe.', explanation: 'Soyez transparent sur les raisons, ferme sur la décision, mais ouvert à la discussion sur la mise en œuvre.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'l4', categoryId: 'leadership', type: 'challenge', title: 'VISION', scenario: 'Décrivez votre vision de l\'entreprise idéale en 3 phrases inspirantes.', explanation: 'Une vision doit être claire, ambitieuse et inspirante pour fédérer.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'l_quiz_1', categoryId: 'leadership', type: 'quiz', title: 'STYLE DE LEADERSHIP', scenario: 'Quel style implique le plus l’équipe dans la prise de décision ?', options: ['Autoritaire', 'Démocratique', 'Laissez-faire'], correctIndex: 1, explanation: 'Le style démocratique (ou participatif) invite les collaborateurs à partager leur avis avant la décision finale.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'l_quiz_2', categoryId: 'leadership', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Pourquoi déléguer est-il important ?', options: ['Pour moins travailler', 'Pour responsabiliser et former', 'Pour éviter les tâches ingrates'], correctIndex: 1, explanation: 'Déléguer fait grandir vos collaborateurs et vous libère du temps pour la stratégie.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'l_quiz_3', categoryId: 'leadership', type: 'quiz', title: 'FEEDBACK', scenario: 'Le but principal d\'un feedback correctif est :', options: ['De sanctionner une erreur', 'D\'améliorer la performance future', 'De montrer qui est le chef'], correctIndex: 1, explanation: 'Le feedback est un outil de développement, pas de punition.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'l_quiz_4', categoryId: 'leadership', type: 'quiz', title: 'CONFIANCE', scenario: 'Comment bâtir la confiance rapidement ?', options: ['En contrôlant tout', 'En tenant ses promesses', 'En étant ami avec tout le monde'], correctIndex: 1, explanation: 'La cohérence entre les paroles et les actes est le fondement de la confiance.', duration: 30, points: DEFAULT_POINTS },
+  // NOUVELLES CARTES LEADERSHIP (5)
+  { id: 'l5', categoryId: 'leadership', type: 'challenge', title: 'CRÉER L\'ENGAGEMENT', scenario: 'Un collègue est démotivé et fait le strict minimum. Proposez-lui un plan d\'action pour le réengager.', explanation: 'Utilisez la motivation intrinsèque (reconnaissance, autonomie, maîtrise) plutôt que la motivation extrinsèque (argent).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'l6', categoryId: 'leadership', type: 'challenge', title: 'ÉTABLIR LES PRIORITÉS', scenario: 'Votre équipe a trop de projets. Décidez des 3 projets prioritaires et justifiez en 45s.', explanation: 'Utilisez un critère objectif (impact vs effort) et communiquez clairement les projets qui seront mis en pause.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'l_quiz_5', categoryId: 'leadership', type: 'quiz', title: 'LEADERSHIP SITUATIONNEL', scenario: 'Face à un junior, quel style de leadership est le plus adapté au début ?', options: ['Délégatif', 'Participatif', 'Directif'], correctIndex: 2, explanation: 'Un débutant a besoin d\'instructions claires et d\'une supervision rapprochée (style directif).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'l_quiz_6', categoryId: 'leadership', type: 'quiz', title: 'COHÉSION', scenario: 'Quelle est la meilleure façon de renforcer la cohésion d\'équipe ?', options: ['Organiser des fêtes régulières', 'Célébrer les succès collectifs', 'Augmenter les salaires'], correctIndex: 1, explanation: 'La célébration des réussites partagées renforce l\'identité du groupe et la reconnaissance mutuelle.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'l_quiz_7', categoryId: 'leadership', type: 'quiz', title: 'L\'EXEMPLE', scenario: 'Le leadership commence par...', options: ['La stratégie', 'L\'exemple personnel', 'Les règles claires'], correctIndex: 1, explanation: 'Un leader doit incarner les valeurs et les comportements qu\'il attend des autres (lead by example).', duration: 30, points: DEFAULT_POINTS },
 
-  // --- Critical Thinking (8 cartes) ---
-  { id: 'ct1', categoryId: 'critical_thinking', type: 'challenge', title: 'SYSTÈME D', scenario: 'Plus d\'internet 30 min avant le rendu ! Que faites-vous ?', explanation: 'Priorité 1 : Prévenir (téléphone). Priorité 2 : Alternative (partage de connexion 4G, café voisin, clé USB).', duration: 60 },
-  { id: 'ct2', categoryId: 'critical_thinking', type: 'challenge', title: 'FAKE NEWS', scenario: 'Analysez cette info : "Une étude dit que dormir 2h suffit". Vrai ou Faux ?', explanation: 'Vérifiez la source, l\'échantillon et le consensus scientifique. C\'est biologiquement improbable pour la majorité.', duration: 45 },
-  { id: 'ct3', categoryId: 'critical_thinking', type: 'challenge', title: 'AVOCAT DU DIABLE', scenario: 'Défendez l\'idée que "L\'échec est la meilleure chose qui puisse arriver".', explanation: 'Cherchez les arguments contre-intuitifs : apprentissage, résilience, innovation forcée.', duration: 60 },
-  { id: 'ct4', categoryId: 'critical_thinking', type: 'challenge', title: 'PRIORISATION', scenario: 'Vous avez 5 tâches urgentes. Comment choisissez-vous ?', explanation: 'Matrice d\'Eisenhower : Important vs Urgent. Commencez par ce qui est Important ET Urgent.', duration: 45 },
-  { id: 'ct_quiz_1', categoryId: 'critical_thinking', type: 'quiz', title: 'LOGIQUE', scenario: 'Si "Tous les chats sont gris" est FAUX, alors...', options: ['Aucun chat n\'est gris', 'Au moins un chat n\'est pas gris', 'Tous les chats sont noirs'], correctIndex: 1, explanation: 'La négation de "Tous" n\'est pas "Aucun", mais "Il existe au moins un contre-exemple".', duration: 45 },
-  { id: 'ct_quiz_2', categoryId: 'critical_thinking', type: 'quiz', title: 'BIAIS COGNITIF', scenario: 'Qu\'est-ce que le biais de confirmation ?', options: ['Croire tout ce qu\'on lit', 'Ne chercher que les infos qui confirment nos croyances', 'Toujours douter de soi'], correctIndex: 1, explanation: 'Notre cerveau filtre naturellement les informations pour conforter ce qu\'il pense déjà.', duration: 30 },
-  { id: 'ct_quiz_3', categoryId: 'critical_thinking', type: 'quiz', title: 'CORRÉLATION', scenario: 'Corrélation n\'est pas...', options: ['Causalité', 'Statistique', 'Information'], correctIndex: 0, explanation: 'Ce n\'est pas parce que deux événements arrivent en même temps que l\'un cause l\'autre (ex: ventes de glaces et coups de soleil).', duration: 30 },
-  { id: 'ct_quiz_4', categoryId: 'critical_thinking', type: 'quiz', title: 'ARGUMENTATION', scenario: 'Qu\'est-ce qu\'un argument "Ad Hominem" ?', options: ['Une attaque contre la personne', 'Un argument basé sur l\'émotion', 'Une preuve scientifique'], correctIndex: 0, explanation: 'C\'est attaquer celui qui parle plutôt que ses arguments.', duration: 30 },
+  // --- Critical Thinking (13 cartes) ---
+  { id: 'ct1', categoryId: 'critical_thinking', type: 'challenge', title: 'SYSTÈME D', scenario: 'Plus d\'internet 30 min avant le rendu ! Que faites-vous ?', explanation: 'Priorité 1 : Prévenir (téléphone). Priorité 2 : Alternative (partage de connexion 4G, café voisin, clé USB).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'ct2', categoryId: 'critical_thinking', type: 'challenge', title: 'FAKE NEWS', scenario: 'Analysez cette info : "Une étude dit que dormir 2h suffit". Vrai ou Faux ?', explanation: 'Vérifiez la source, l\'échantillon et le consensus scientifique. C\'est biologiquement improbable pour la majorité.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ct3', categoryId: 'critical_thinking', type: 'challenge', title: 'AVOCAT DU DIABLE', scenario: 'Défendez l\'idée que "L\'échec est la meilleure chose qui puisse arriver".', explanation: 'Cherchez les arguments contre-intuitifs : apprentissage, résilience, innovation forcée.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'ct4', categoryId: 'critical_thinking', type: 'challenge', title: 'PRIORISATION', scenario: 'Vous avez 5 tâches urgentes. Comment choisissez-vous ?', explanation: 'Matrice d\'Eisenhower : Important vs Urgent. Commencez par ce qui est Important ET Urgent.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_1', categoryId: 'critical_thinking', type: 'quiz', title: 'LOGIQUE', scenario: 'Si "Tous les chats sont gris" est FAUX, alors...', options: ['Aucun chat n\'est gris', 'Au moins un chat n\'est pas gris', 'Tous les chats sont noirs'], correctIndex: 1, explanation: 'La négation de "Tous" n\'est pas "Aucun", mais "Il existe au moins un contre-exemple".', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_2', categoryId: 'critical_thinking', type: 'quiz', title: 'BIAIS COGNITIF', scenario: 'Qu\'est-ce que le biais de confirmation ?', options: ['Croire tout ce qu\'on lit', 'Ne chercher que les infos qui confirment nos croyances', 'Toujours douter de soi'], correctIndex: 1, explanation: 'Notre cerveau filtre naturellement les informations pour conforter ce qu\'il pense déjà.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_3', categoryId: 'critical_thinking', type: 'quiz', title: 'CORRÉLATION', scenario: 'Corrélation n\'est pas...', options: ['Causalité', 'Statistique', 'Information'], correctIndex: 0, explanation: 'Ce n\'est pas parce que deux événements arrivent en même temps que l\'un cause l\'autre (ex: ventes de glaces et coups de soleil).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_4', categoryId: 'critical_thinking', type: 'quiz', title: 'ARGUMENTATION', scenario: 'Qu\'est-ce qu\'un argument "Ad Hominem" ?', options: ['Une attaque contre la personne', 'Un argument basé sur l\'émotion', 'Une preuve scientifique'], correctIndex: 0, explanation: 'C\'est attaquer celui qui parle plutôt que ses arguments.', duration: 30, points: DEFAULT_POINTS },
+  // NOUVELLES CARTES CRITICAL THINKING (5)
+  { id: 'ct5', categoryId: 'critical_thinking', type: 'challenge', title: 'JUGEMENT DE VALEUR', scenario: 'Votre collègue dit: "C\'est la seule façon de faire ce projet." Remettez cette affirmation en question.', explanation: 'Posez des questions qui ouvrent des alternatives : "Y a-t-il un scénario où cela échouerait ? Quelles sont les hypothèses derrière cette affirmation ?"', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ct6', categoryId: 'critical_thinking', type: 'challenge', title: 'LE PROBLÈME RACINE', scenario: 'L\'équipe est en retard sur 3 projets. Quel est le problème racine le plus probable ?', explanation: 'Utilisez la méthode des 5 Pourquoi (5 Whys) : Manque de ressources ? Mauvaise priorisation ? Estimation initiale incorrecte ?', duration: 60, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_5', categoryId: 'critical_thinking', type: 'quiz', title: 'PENSÉE SYSTÉMIQUE', scenario: 'Voir un problème dans son contexte global et non de manière isolée est la...', options: ['Pensée divergente', 'Pensée linéaire', 'Pensée systémique'], correctIndex: 2, explanation: 'La pensée systémique permet de comprendre les interactions et les conséquences indirectes des décisions.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_6', categoryId: 'critical_thinking', type: 'quiz', title: 'FALLACE', scenario: 'Affirmer qu\'un produit est bon parce qu\'il est cher est une fallace de...', options: ['Pente glissante', 'Appel à l\'autorité', 'Prix/Valeur'], correctIndex: 2, explanation: 'C\'est un raccourci mental qui associe, souvent à tort, le coût à la qualité.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ct_quiz_7', categoryId: 'critical_thinking', type: 'quiz', title: 'HYPOTHÈSE', scenario: 'Une hypothèse de travail doit être...', options: ['Prouvée immédiatement', 'Fausse', 'Testable et réfutable'], correctIndex: 2, explanation: 'La base de la démarche scientifique est de pouvoir tester une hypothèse, et potentiellement la réfuter.', duration: 30, points: DEFAULT_POINTS },
 
-  // --- Emotional Intelligence (8 cartes) ---
-  { id: 'ei1', categoryId: 'emotional_intelligence', type: 'challenge', title: 'EMPATHIE', scenario: 'Un collègue pleure après une critique. Que dites-vous ?', explanation: 'Évitez "Calme-toi". Dites plutôt : "Je vois que ça t\'a touché, tu veux en parler ou tu préfères être seul un moment ?"', duration: 45 },
-  { id: 'ei2', categoryId: 'emotional_intelligence', type: 'challenge', title: 'AUTO-CONTRÔLE', scenario: 'Un client vous hurle dessus injustement. Réagissez.', explanation: 'Ne le prenez pas personnellement. Gardez une voix calme et basse. "Je comprends votre frustration, cherchons une solution."', duration: 45 },
-  { id: 'ei3', categoryId: 'emotional_intelligence', type: 'challenge', title: 'GESTION DU STRESS', scenario: 'Grosse présentation dans 5 min, vous paniquez. Que faites-vous ?', explanation: 'Respiration carrée (4s inspirer, 4s bloquer, 4s expirer, 4s bloquer). Visualisation positive.', duration: 45 },
-  { id: 'ei4', categoryId: 'emotional_intelligence', type: 'challenge', title: 'MÉDIATION', scenario: 'Deux amis se disputent violemment devant vous. Intervenez.', explanation: 'Restez neutre. "On ne va rien résoudre en criant. Chacun son tour, qu\'est-ce qui se passe ?"', duration: 60 },
-  { id: 'ei_quiz_1', categoryId: 'emotional_intelligence', type: 'quiz', title: 'ÉMOTION', scenario: 'À quoi sert la colère (fonction primaire) ?', options: ['À faire peur', 'À signaler une injustice/obstacle', 'À rien'], correctIndex: 1, explanation: 'La colère est une réaction de défense face à une agression, une frustration ou une injustice perçue.', duration: 30 },
-  { id: 'ei_quiz_2', categoryId: 'emotional_intelligence', type: 'quiz', title: 'EMPATHIE vs SYMPATHIE', scenario: 'La différence clé est...', options: ['L\'empathie comprend, la sympathie partage', 'C\'est la même chose', 'L\'empathie c\'est pour les psychologues'], correctIndex: 0, explanation: 'L\'empathie est la capacité de comprendre l\'émotion de l\'autre sans forcément la ressentir soi-même.', duration: 30 },
-  { id: 'ei_quiz_3', categoryId: 'emotional_intelligence', type: 'quiz', title: 'ASSERTIVITÉ', scenario: 'Être assertif, c\'est...', options: ['Imposer son point de vue', 'Ne jamais dire non', 'S\'affirmer en respectant l\'autre'], correctIndex: 2, explanation: 'Ni hérisson (agressif), ni paillasson (passif). L\'assertivité est l\'équilibre.', duration: 30 },
-  { id: 'ei_quiz_4', categoryId: 'emotional_intelligence', type: 'quiz', title: 'SIGNES DE STRESS', scenario: 'Lequel est un signe physique de stress ?', options: ['Mains moites', 'Faim excessive', 'Les deux'], correctIndex: 2, explanation: 'Le corps réagit au danger perçu par de nombreux signaux physiologiques.', duration: 30 },
+  // --- Emotional Intelligence (13 cartes) ---
+  { id: 'ei1', categoryId: 'emotional_intelligence', type: 'challenge', title: 'EMPATHIE', scenario: 'Un collègue pleure après une critique. Que dites-vous ?', explanation: 'Évitez "Calme-toi". Dites plutôt : "Je vois que ça t\'a touché, tu veux en parler ou tu préfères être seul un moment ?"', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ei2', categoryId: 'emotional_intelligence', type: 'challenge', title: 'AUTO-CONTRÔLE', scenario: 'Un client vous hurle dessus injustement. Réagissez.', explanation: 'Ne le prenez pas personnellement. Gardez une voix calme et basse. "Je comprends votre frustration, cherchons une solution."', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ei3', categoryId: 'emotional_intelligence', type: 'challenge', title: 'GESTION DU STRESS', scenario: 'Grosse présentation dans 5 min, vous paniquez. Que faites-vous ?', explanation: 'Respiration carrée (4s inspirer, 4s bloquer, 4s expirer, 4s bloquer). Visualisation positive.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ei4', categoryId: 'emotional_intelligence', type: 'challenge', title: 'MÉDIATION', scenario: 'Deux amis se disputent violemment devant vous. Intervenez.', explanation: 'Restez neutre. "On ne va rien résoudre en criant. Chacun son tour, qu\'est-ce qui se passe ?"', duration: 60, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_1', categoryId: 'emotional_intelligence', type: 'quiz', title: 'ÉMOTION', scenario: 'À quoi sert la colère (fonction primaire) ?', options: ['À faire peur', 'À signaler une injustice/obstacle', 'À rien'], correctIndex: 1, explanation: 'La colère est une réaction de défense face à une agression, une frustration ou une injustice perçue.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_2', categoryId: 'emotional_intelligence', type: 'quiz', title: 'EMPATHIE vs SYMPATHIE', scenario: 'La différence clé est...', options: ['L\'empathie comprend, la sympathie partage', 'C\'est la même chose', 'L\'empathie c\'est pour les psychologues'], correctIndex: 0, explanation: 'L\'empathie est la capacité de comprendre l\'émotion de l\'autre sans forcément la ressentir soi-même.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_3', categoryId: 'emotional_intelligence', type: 'quiz', title: 'ASSERTIVITÉ', scenario: 'Être assertif, c\'est...', options: ['Imposer son point de vue', 'Ne jamais dire non', 'S\'affirmer en respectant l\'autre'], correctIndex: 2, explanation: 'Ni hérisson (agressif), ni paillasson (passif). L\'assertivité est l\'équilibre.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_4', categoryId: 'emotional_intelligence', type: 'quiz', title: 'SIGNES DE STRESS', scenario: 'Lequel est un signe physique de stress ?', options: ['Mains moites', 'Faim excessive', 'Les deux'], correctIndex: 2, explanation: 'Le corps réagit au danger perçu par de nombreux signaux physiologiques.', duration: 30, points: DEFAULT_POINTS },
+  // NOUVELLES CARTES INTELLIGENCE ÉMOTIONNELLE (5)
+  { id: 'ei5', categoryId: 'emotional_intelligence', type: 'challenge', title: 'AUTO-RÉFLEXION', scenario: 'Décrivez une situation où votre réaction émotionnelle a été excessive et ce que vous avez appris.', explanation: 'L\'auto-réflexion est la base de l\'intelligence émotionnelle. Montrez la capacité d\'analyse et de croissance.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'ei6', categoryId: 'emotional_intelligence', type: 'challenge', title: 'COMPRENDRE LES SIGNES', scenario: 'Votre chef semble tendu. Listez 3 signes non-verbaux qui pourraient l\'indiquer et comment réagiriez-vous.', explanation: 'Ex: Posture rigide, mâchoire serrée, silence. Réponse : Demander calmement s\'il a 5 minutes pour discuter d\'un point important.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_5', categoryId: 'emotional_intelligence', type: 'quiz', title: 'DÉCLENCHEURS', scenario: 'Identifier ses propres "déclencheurs" émotionnels est une compétence de...', options: ['Gestion sociale', 'Conscience de soi', 'Motivation'], correctIndex: 1, explanation: 'La conscience de soi permet de comprendre pourquoi certaines situations provoquent des réactions fortes.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_6', categoryId: 'emotional_intelligence', type: 'quiz', title: 'LE BIEN-ÊTRE', scenario: 'Le meilleur outil contre le burnout est...', options: ['Augmenter ses heures', 'Fixer des limites claires', 'Changer de travail'], correctIndex: 1, explanation: 'La gestion des limites (dire non) est essentielle pour préserver son énergie et son bien-être.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'ei_quiz_7', categoryId: 'emotional_intelligence', type: 'quiz', title: 'LE REGARD', scenario: 'Le fait de ne pas maintenir de contact visuel en situation de conflit est souvent perçu comme...', options: ['Du respect', 'De la soumission', 'De l\'ennui'], correctIndex: 1, explanation: 'C\'est un signe de faible assertivité ou de tentative d\'évitement du conflit.', duration: 30, points: DEFAULT_POINTS },
 
-  // --- Creativity (8 cartes) ---
-  { id: 'cr1', categoryId: 'creativity', type: 'challenge', title: 'DÉTOURNEMENT', scenario: '5 utilisations inhabituelles pour une brique rouge.', explanation: 'Exemples : Cale-livre, piler des épices, chauffer un lit (brique chaude), faire de la poussière rouge pour peindre...', duration: 45 },
-  { id: 'cr2', categoryId: 'creativity', type: 'challenge', title: 'MOTS INTERDITS', scenario: 'Décrivez un "Smartphone" sans dire : Tel, Écran, Appli, Internet.', explanation: 'Utilisez des métaphores : "Ardoise magique connectée", "Lien vers le monde", "Miroir numérique"...', duration: 60 },
-  { id: 'cr3', categoryId: 'creativity', type: 'challenge', title: 'SCAMPER', scenario: 'Comment améliorer une "Chaise" ? (Ajouter, Modifier, etc.)', explanation: 'Ajouter des roues ? La rendre gonflable ? La faire chauffante ? La transformer en sac à dos ?', duration: 45 },
-  { id: 'cr4', categoryId: 'creativity', type: 'challenge', title: 'PENSÉE LATÉRALE', scenario: 'Un homme entre dans un bar et demande un verre d\'eau. Le barman sort un fusil. L\'homme dit merci et part. Pourquoi ?', explanation: 'L\'homme avait le hoquet. Le barman lui a fait peur pour le guérir. L\'homme a compris et l\'a remercié.', duration: 60 },
-  { id: 'cr_quiz_1', categoryId: 'creativity', type: 'quiz', title: 'BRAINSTORMING', scenario: 'La règle d\'or du brainstorming est :', options: ['La qualité avant tout', 'Pas de critique immédiate', 'Parler chacun son tour'], correctIndex: 1, explanation: 'Le jugement tue la créativité. On vise la quantité d\'abord, on trie ensuite (CQFD : Censure Interdite).', duration: 30 },
-  { id: 'cr_quiz_2', categoryId: 'creativity', type: 'quiz', title: 'INNOVATION', scenario: 'Qu\'est-ce que la "sérendipité" ?', options: ['Une méthode de gestion', 'Trouver quelque chose qu\'on ne cherchait pas', 'Une sorte de colle'], correctIndex: 1, explanation: 'C\'est l\'art de faire des découvertes heureuses par hasard (ex: le Post-it, la Pénicilline).', duration: 30 },
-  { id: 'cr_quiz_3', categoryId: 'creativity', type: 'quiz', title: 'OBSTACLE', scenario: 'Le pire ennemi de la créativité est...', options: ['Le manque de temps', 'La peur du ridicule', 'Le manque d\'argent'], correctIndex: 1, explanation: 'La peur du jugement des autres bride l\'imagination.', duration: 30 },
-  { id: 'cr_quiz_4', categoryId: 'creativity', type: 'quiz', title: 'DESIGN THINKING', scenario: 'La première étape du Design Thinking est...', options: ['Prototyper', 'L\'Empathie', 'Définir'], correctIndex: 1, explanation: 'Il faut d\'abord comprendre profondément les besoins de l\'utilisateur.', duration: 30 },
+  // --- Creativity (13 cartes) ---
+  // Toutes les cartes de créativité utilisent déjà l'ID 'creativity'
+  { id: 'cr1', categoryId: 'creativity', type: 'challenge', title: 'DÉTOURNEMENT', scenario: '5 utilisations inhabituelles pour une brique rouge.', explanation: 'Exemples : Cale-livre, piler des épices, chauffer un lit (brique chaude), faire de la poussière rouge pour peindre...', duration: 45, points: DEFAULT_POINTS },
+  { id: 'cr2', categoryId: 'creativity', type: 'challenge', title: 'MOTS INTERDITS', scenario: 'Décrivez un "Smartphone" sans dire : Tel, Écran, Appli, Internet.', explanation: 'Utilisez des métaphores : "Ardoise magique connectée", "Lien vers le monde", "Miroir numérique"...', duration: 60, points: DEFAULT_POINTS },
+  { id: 'cr3', categoryId: 'creativity', type: 'challenge', title: 'SCAMPER', scenario: 'Comment améliorer une "Chaise" ? (Ajouter, Modifier, etc.)', explanation: 'Ajouter des roues ? La rendre gonflable ? La faire chauffante ? La transformer en sac à dos ?', duration: 45, points: DEFAULT_POINTS },
+  { id: 'cr4', categoryId: 'creativity', type: 'challenge', title: 'PENSÉE LATÉRALE', scenario: 'Un homme entre dans un bar et demande un verre d\'eau. Le barman sort un fusil. L\'homme dit merci et part. Pourquoi ?', explanation: 'L\'homme avait le hoquet. Le barman lui a fait peur pour le guérir. L\'homme a compris et l\'a remercié.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_1', categoryId: 'creativity', type: 'quiz', title: 'BRAINSTORMING', scenario: 'La règle d\'or du brainstorming est :', options: ['La qualité avant tout', 'Pas de critique immédiate', 'Parler chacun son tour'], correctIndex: 1, explanation: 'Le jugement tue la créativité. On vise la quantité d\'abord, on trie ensuite (CQFD : Censure Interdite).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_2', categoryId: 'creativity', type: 'quiz', title: 'INNOVATION', scenario: 'Qu\'est-ce que la "sérendipité" ?', options: ['Une méthode de gestion', 'Trouver quelque chose qu\'on ne cherchait pas', 'Une sorte de colle'], correctIndex: 1, explanation: 'C\'est l\'art de faire des découvertes heureuses par hasard (ex: le Post-it, la Pénicilline).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_3', categoryId: 'creativity', type: 'quiz', title: 'OBSTACLE', scenario: 'Le pire ennemi de la créativité est...', options: ['Le manque de temps', 'La peur du ridicule', 'Le manque d\'argent'], correctIndex: 1, explanation: 'La peur du jugement des autres bride l\'imagination.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_4', categoryId: 'creativity', type: 'quiz', title: 'DESIGN THINKING', scenario: 'La première étape du Design Thinking est...', options: ['Prototyper', 'L\'Empathie', 'Définir'], correctIndex: 1, explanation: 'Il faut d\'abord comprendre profondément les besoins de l\'utilisateur.', duration: 30, points: DEFAULT_POINTS },
+  // NOUVELLES CARTES CRÉATIVITÉ (5)
+  { id: 'cr5', categoryId: 'creativity', type: 'challenge', title: 'LIAISON FORCÉE', scenario: 'Imaginez un lien entre "Montre" et "Tapis de course". (Ex: une montre qui motive à courir)', explanation: 'La liaison forcée consiste à créer une connexion entre deux objets sans rapport pour générer une idée nouvelle.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'cr6', categoryId: 'creativity', type: 'challenge', title: 'CHANGER LA PERSPECTIVE', scenario: 'Comment un enfant de 5 ans résoudrait-il le problème des embouteillages ?', explanation: 'Utilisez la pensée des enfants (naïve, sans contraintes) pour générer des idées radicalement différentes.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_5', categoryId: 'creativity', type: 'quiz', title: 'FLUIDITÉ', scenario: 'La fluidité, en créativité, c\'est la capacité à...', options: ['Trouver une seule idée parfaite', 'Générer beaucoup d\'idées', 'Résoudre des problèmes mathématiques'], correctIndex: 1, explanation: 'La fluidité est la quantité : produire le plus d\'options possible.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_6', categoryId: 'creativity', type: 'quiz', title: 'PENSÉE DIVERGENTE', scenario: 'La pensée divergente consiste à...', options: ['Choisir la meilleure solution', 'Évaluer les solutions', 'Explorer plusieurs solutions'], correctIndex: 2, explanation: 'C\'est l\'exploration créative, l\'opposé de la pensée convergente (choix).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'cr_quiz_7', categoryId: 'creativity', type: 'quiz', title: 'BLOCAGE', scenario: 'Quel type de blocage est lié à la rigidité des règles établies ?', options: ['Blocage émotionnel', 'Blocage culturel/environnemental', 'Blocage perceptuel'], correctIndex: 1, explanation: 'Les normes sociales ou organisationnelles empêchent souvent de penser différemment.', duration: 30, points: DEFAULT_POINTS },
 
   // --- Logistique/Opérations (12 cartes de base pour le défi 53) ---
-  { id: 'log1', categoryId: 'logistics', type: 'challenge', title: 'PRIORISATION IMMÉDIATE', scenario: 'Cinq tâches urgentes sur votre bureau. Ordonnez-les et justifiez votre choix en 30s.', explanation: 'Utilisez la matrice Urgent/Important (Eisenhower). Concentrez-vous d\'abord sur ce qui est Important ET Urgent.', duration: 30 },
-  { id: 'log2', categoryId: 'logistics', type: 'challenge', title: 'DÉLÉGUER UNE TÂCHE', scenario: 'Vous devez former un collègue pour reprendre une tâche complexe. Expliquez la méthode en 45s.', explanation: 'Méthode : Expliquer le pourquoi, montrer le comment, laisser faire, et vérifier/corriger.', duration: 45 },
-  { id: 'log3', categoryId: 'logistics', type: 'challenge', title: 'CLIENT INSATISFAIT', scenario: 'Un client menace de partir. Comment regagnez-vous sa confiance ?', explanation: 'Écoute active, excuses sincères, proposition de solution immédiate, et offre compensatoire (geste commercial).', duration: 60 },
-  { id: 'log4', categoryId: 'logistics', type: 'challenge', title: 'EFFICACITÉ RÉUNION', scenario: 'La réunion est inutile. Prenez la parole pour la recentrer ou y mettre fin poliment.', explanation: 'Soyez précis : "Pour être efficaces, revenons à l\'objectif initial. Avons-nous pris une décision sur le point X ?"', duration: 45 },
-  { id: 'log5', categoryId: 'logistics', type: 'challenge', title: 'AMÉLIORATION CONTINUE', scenario: 'Identifiez une perte de temps dans votre routine et proposez une solution en 30s.', explanation: 'La clé est la mesure (combien de temps perdu ?) et la proposition de solution concrète (ex: Automatiser, Regrouper les tâches).', duration: 30 },
-  { id: 'log_quiz_1', categoryId: 'logistics', type: 'quiz', title: 'MATRICE EISENHOWER', scenario: 'Où placer une tâche "Non Urgente mais Importante" ?', options: ['À faire immédiatement (Urgent)', 'À planifier (Planifier)', 'À déléguer (Déléguer)'], correctIndex: 1, explanation: 'C\'est la zone de l\'excellence où l\'on fait de la stratégie (Planification).', duration: 30 },
-  { id: 'log_quiz_2', categoryId: 'logistics', type: 'quiz', title: 'TEAMWORK', scenario: 'Quelle est la principale cause d\'inefficacité en équipe ?', options: ['Manque de ressources', 'Objectifs flous', 'Conflits de personnalité'], correctIndex: 1, explanation: 'Des objectifs clairs (SMART) alignent l\'énergie de l\'équipe et évitent les efforts inutiles.', duration: 30 },
-  { id: 'log_quiz_3', categoryId: 'logistics', type: 'quiz', title: 'SATISFACTION CLIENT', scenario: 'Le meilleur moment pour demander un feedback client est...', options: ['Avant l\'achat', 'Immédiatement après le service', 'Un mois après l\'achat'], correctIndex: 1, explanation: 'Le client est le plus engagé émotionnellement juste après l\'expérience.', duration: 30 },
-  { id: 'log_quiz_4', categoryId: 'logistics', type: 'quiz', title: 'GESTION DE PROJET', scenario: 'La méthode Agile met l\'accent sur :', options: ['La documentation exhaustive', 'L\'adaptabilité et la collaboration client', 'Le respect strict du plan initial'], correctIndex: 1, explanation: 'Agile privilégie les interactions et le logiciel fonctionnel sur la documentation et le contrat.', duration: 30 },
-  { id: 'log_quiz_5', categoryId: 'logistics', type: 'quiz', title: 'PRODUCTIVITÉ', scenario: 'Quel est le principe de Pareto (80/20) ?', options: ['80% des tâches prennent 20% du temps', '20% des efforts produisent 80% des résultats', '80% des clients sont satisfaits'], correctIndex: 1, explanation: 'Il faut identifier les 20% d\'actions qui ont le plus grand impact.', duration: 30 },
-  { id: 'log_quiz_6', categoryId: 'logistics', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Déléguer la responsabilité sans déléguer l\'autorité mène à :', options: ['Plus d\'efficacité', 'De la confusion et de la frustration', 'Une meilleure formation'], correctIndex: 1, explanation: 'L\'autorité (le pouvoir de décider) doit accompagner la responsabilité (l\'obligation de faire).', duration: 30 },
-  { id: 'log_quiz_7', categoryId: 'logistics', type: 'quiz', title: 'KPI LOGISTIQUE', scenario: 'Quelle est un KPI essentiel pour la Logistique ?', options: ['Temps passé en réunion', 'Taux de rotation des stocks', 'Nombre de likes sur les réseaux sociaux'], correctIndex: 1, explanation: 'Le Taux de Rotation mesure la vitesse à laquelle les stocks se vendent, un indicateur d\'efficacité opérationnelle.', duration: 30 },
+  { id: 'log1', categoryId: 'logistics', type: 'challenge', title: 'PRIORISATION IMMÉDIATE', scenario: 'Cinq tâches urgentes sur votre bureau. Ordonnez-les et justifiez votre choix en 30s.', explanation: 'Utilisez la matrice Urgent/Important (Eisenhower). Concentrez-vous d\'abord sur ce qui est Important ET Urgent.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log2', categoryId: 'logistics', type: 'challenge', title: 'DÉLÉGUER UNE TÂCHE', scenario: 'Vous devez former un collègue pour reprendre une tâche complexe. Expliquez la méthode en 45s.', explanation: 'Méthode : Expliquer le pourquoi, montrer le comment, laisser faire, et vérifier/corriger.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'log3', categoryId: 'logistics', type: 'challenge', title: 'CLIENT INSATISFAIT', scenario: 'Un client menace de partir. Comment regagnez-vous sa confiance ?', explanation: 'Écoute active, excuses sincères, proposition de solution immédiate, et offre compensatoire (geste commercial).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'log4', categoryId: 'logistics', type: 'challenge', title: 'EFFICACITÉ RÉUNION', scenario: 'La réunion est inutile. Prenez la parole pour la recentrer ou y mettre fin poliment.', explanation: 'Soyez précis : "Pour être efficaces, revenons à l\'objectif initial. Avons-nous pris une décision sur le point X ?"', duration: 45, points: DEFAULT_POINTS },
+  { id: 'log5', categoryId: 'logistics', type: 'challenge', title: 'AMÉLIORATION CONTINUE', scenario: 'Identifiez une perte de temps dans votre routine et proposez une solution en 30s.', explanation: 'La clé est la mesure (combien de temps perdu ?) et la proposition de solution concrète (ex: Automatiser, Regrouper les tâches).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_1', categoryId: 'logistics', type: 'quiz', title: 'MATRICE EISENHOWER', scenario: 'Où placer une tâche "Non Urgente mais Importante" ?', options: ['À faire immédiatement (Urgent)', 'À planifier (Planifier)', 'À déléguer (Déléguer)'], correctIndex: 1, explanation: 'C\'est la zone de l\'excellence où l\'on fait de la stratégie (Planification).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_2', categoryId: 'logistics', type: 'quiz', title: 'TEAMWORK', scenario: 'Quelle est la principale cause d\'inefficacité en équipe ?', options: ['Manque de ressources', 'Objectifs flous', 'Conflits de personnalité'], correctIndex: 1, explanation: 'Des objectifs clairs (SMART) alignent l\'énergie de l\'équipe et évitent les efforts inutiles.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_3', categoryId: 'logistics', type: 'quiz', title: 'SATISFACTION CLIENT', scenario: 'Le meilleur moment pour demander un feedback client est...', options: ['Avant l\'achat', 'Immédiatement après le service', 'Un mois après l\'achat'], correctIndex: 1, explanation: 'Le client est le plus engagé émotionnellement juste après l\'expérience.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_4', categoryId: 'logistics', type: 'quiz', title: 'GESTION DE PROJET', scenario: 'La méthode Agile met l\'accent sur :', options: ['La documentation exhaustive', 'L\'adaptabilité et la collaboration client', 'Le respect strict du plan initial'], correctIndex: 1, explanation: 'Agile privilégie les interactions et le logiciel fonctionnel sur la documentation et le contrat.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_5', categoryId: 'logistics', type: 'quiz', title: 'PRODUCTIVITÉ', scenario: 'Quel est le principe de Pareto (80/20) ?', options: ['80% des tâches prennent 20% du temps', '20% des efforts produisent 80% des résultats', '80% des clients sont satisfaits'], correctIndex: 1, explanation: 'Il faut identifier les 20% d\'actions qui ont le plus grand impact.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_6', categoryId: 'logistics', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Déléguer la responsabilité sans déléguer l\'autorité mène à :', options: ['Plus d\'efficacité', 'De la confusion et de la frustration', 'Une meilleure formation'], correctIndex: 1, explanation: 'L\'autorité (le pouvoir de décider) doit accompagner la responsabilité (l\'obligation de faire).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'log_quiz_7', categoryId: 'logistics', type: 'quiz', title: 'KPI LOGISTIQUE', scenario: 'Quelle est un KPI essentiel pour la Logistique ?', options: ['Temps passé en réunion', 'Taux de rotation des stocks', 'Nombre de likes sur les réseaux sociaux'], correctIndex: 1, explanation: 'Le Taux de Rotation mesure la vitesse à laquelle les stocks se vendent, un indicateur d\'efficacité opérationnelle.', duration: 30, points: DEFAULT_POINTS },
+
+  // --- MATH WILD CARDS (5 cartes à 10 points) ---
+  { id: 'm_wild_1', categoryId: 'math_wild', type: 'quiz', title: 'CALCUL MENTAL', scenario: 'Si un produit coûte 80€ et est soldé à 25%, quel est son prix final ?', options: ['65€', '60€', '55€'], correctIndex: 1, explanation: '25% de 80€ est (80 / 4) = 20€. Le prix final est 80€ - 20€ = 60€.', duration: 30, points: WILD_POINTS },
+  { id: 'm_wild_2', categoryId: 'math_wild', type: 'quiz', title: 'SUITE LOGIQUE', scenario: 'Quel est le prochain chiffre de cette série : 1, 1, 2, 3, 5, 8, ?', options: ['12', '13', '14'], correctIndex: 1, explanation: 'C\'est la suite de Fibonacci : chaque nombre est la somme des deux précédents (5 + 8 = 13).', duration: 30, points: WILD_POINTS },
+  { id: 'm_wild_3', categoryId: 'math_wild', type: 'quiz', title: 'ÉQUATION MYSTÈRE', scenario: 'Si $2x + 5 = 15$, que vaut $x$ ?', options: ['3', '5', '10'], correctIndex: 1, explanation: 'En soustrayant 5, on a $2x = 10$. En divisant par 2, on a $x = 5$.', duration: 30, points: WILD_POINTS },
+  { id: 'm_wild_4', categoryId: 'math_wild', type: 'quiz', title: 'POURCENTAGE', scenario: 'Vous devez livrer 400 colis. Vous en avez déjà livré 300. Quel pourcentage reste-t-il à livrer ?', options: ['10%', '25%', '75%'], correctIndex: 1, explanation: 'Il reste 100 colis à livrer sur 400. $100/400 = 1/4 = 25\%$.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'm_wild_5', categoryId: 'math_wild', type: 'quiz', title: 'GESTION DU TEMPS', scenario: 'Il est 14h30. Si vous avez une réunion de 90 minutes, à quelle heure finit-elle ?', options: ['15h30', '16h00', '16h30'], correctIndex: 0, explanation: '90 minutes = 1h30. 14h30 + 1h30 = 16h00.', duration: 30, points: WILD_POINTS },
 ];
 
 // --- SOUND MANAGER (Fonctions inchangées) ---
@@ -170,7 +222,7 @@ const triggerConfetti = (isWin) => {
 };
 
 const triggerMassiveConfetti = () => {
-    if (!window.confetti) return;
+    if (!window.confetti) return; // CORRECTION: Ajout de la vérification confetti
     const duration = 3000; const end = Date.now() + duration;
     (function frame() { window.confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#B02E68', '#ffffff', '#FFC20E'] }); window.confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#B02E68', '#ffffff', '#FFC20E'] }); if (Date.now() < end) requestAnimationFrame(frame); }());
 };
@@ -248,12 +300,6 @@ const CardBack = ({ category, onClick, disabled }) => {
           {/* Reflet lumineux en haut */}
           <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
 
-          {/* HEADER DE LA CARTE */}
-          <div className="w-full flex justify-between items-start z-10 opacity-60">
-            <div className="w-2 h-2 rounded-full bg-white"></div>
-            <div className="w-2 h-2 rounded-full bg-white"></div>
-          </div>
-
           {/* ICONE CENTRALE AVEC EFFET NEON */}
           <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
             <div className={`
@@ -329,8 +375,12 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
   // Style de l'accentuation basé sur la catégorie (pour les boutons, timer, etc.)
   const hexColor = category.colorData.hex;
 
+  // Affichage des points dynamiques
+  const cardPoints = card.points || DEFAULT_POINTS;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg animate-in fade-in zoom-in duration-300">
+    // MISE À JOUR : Ajout d'une classe pour la transition d'apparition
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg animate-in slide-in-from-top-full duration-300">
       {/* Utilisation du style en ligne pour le gradient background */}
       <div 
          style={{ background: category.colorData.gradient }}
@@ -366,7 +416,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                         {feedbackState === 'success' ? (
                             <div className="mb-6 transform animate-bounce">
                                 <h2 className="text-5xl font-black text-green-400 italic tracking-tighter flex items-center justify-center gap-3"><CheckCircle size={48} className="text-green-400" /> EXCELLENT !</h2>
-                                <p className="font-bold text-white text-xl mt-2 tracking-widest">+1 POINT</p>
+                                <p className="font-bold text-white text-xl mt-2 tracking-widest">+{cardPoints} POINTS</p>
                             </div>
                         ) : (
                             <div className="mb-6">
@@ -392,7 +442,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
             {/* Zone de Contenu (Scenario) - Prends 65% sur desktop, 100% sur mobile */}
             <div className="flex-1 p-6 md:p-10 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar md:border-r md:border-white/10">
                 <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-black/20 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/10 shadow-sm shrink-0">
-                    {card.type === 'quiz' ? <><Sparkles size={12} className="text-yellow-300"/> Quiz • 1 Pt</> : <><Users size={12} className="text-yellow-300"/> Défi • Jury</>}
+                    {card.type === 'quiz' ? <><Sparkles size={12} className="text-yellow-300"/> Quiz • {cardPoints} Pts</> : <><Users size={12} className="text-yellow-300"/> Défi • Jury</>}
                 </div>
                 {/* Ajustement du titre pour mobile */}
                 <h2 className="text-2xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
@@ -477,7 +527,9 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
 const ProfileScreen = ({ player, onBack }) => {
     if (!player) return <div className="text-white">Chargement du profil...</div>;
 
-    const allCategories = Object.values(CATEGORIES).filter(c => c.id !== 'logistics');
+    // Suppression de getCategoryById car elle n'était pas utilisée et sa logique était redondante avec celle de ScoreBoard.
+
+    const allCategories = Object.values(CATEGORIES).filter(c => c.id !== 'logistics' && c.id !== 'math_wild');
     
     // Calculer les scores et les max par catégorie
     const skillData = allCategories.map(cat => {
@@ -491,8 +543,8 @@ const ProfileScreen = ({ player, onBack }) => {
         };
     });
 
-    const totalScore = skillData.reduce((sum, item) => sum + item.success, 0);
-    const totalPlayed = skillData.reduce((sum, item) => sum + item.total, 0);
+    const totalScore = skillData.reduce((sum, item) => sum + item.success, 0) + (player.scoreByCategory['math_wild']?.success * WILD_POINTS || 0) + (player.scoreByCategory['logistics']?.success * DEFAULT_POINTS || 0);
+    const totalPlayed = skillData.reduce((sum, item) => sum + item.total, 0) + (player.scoreByCategory['math_wild']?.total || 0) + (player.scoreByCategory['logistics']?.total || 0);
 
     // Fonction pour générer le graphique radar (simplifié)
     const RadarChart = ({ data }) => {
@@ -610,7 +662,8 @@ const ProfileScreen = ({ player, onBack }) => {
             <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
                 <div className="mb-8 text-center">
                     <h3 className="text-3xl font-black text-white">{player.name}</h3>
-                    <p className="text-sm text-white/60 uppercase tracking-widest">Analyse des performances</p>
+                    {/* CORRECTION DE L'AFFICHAGE POUR CLARIFIER LE MODE SOLO */}
+                    <p className="text-sm text-white/60 uppercase tracking-widest">Profil Solo Champion (Cumul)</p>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-10">
@@ -619,6 +672,7 @@ const ProfileScreen = ({ player, onBack }) => {
                     {/* Centrage du graphique sur mobile */}
                     <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white/5 rounded-2xl shadow-inner border border-white/10 shrink-0">
                         <h3 className="text-xl font-bold uppercase tracking-wider mb-2 text-[#FFC20E]">Performance Globale</h3>
+                        {/* MISE À JOUR : Afficher le score global dynamique */}
                         <p className="lg text-white/70 mb-6">Total joué: {totalPlayed} cartes | Score: {totalScore} pts</p>
                         
                         {totalPlayed > 0 ? (
@@ -635,10 +689,26 @@ const ProfileScreen = ({ player, onBack }) => {
                     {/* Colonne des Détails */}
                     <div className="md:w-1/2 space-y-4">
                         <h3 className="text-xl font-bold uppercase tracking-wider border-b border-white/20 pb-2 mb-4">Détails par Compétence</h3>
-                        {skillData.map(skill => (
+                        {/* Inclure toutes les catégories dans les détails, y compris Math Wild et Logistique */}
+                        {[...skillData, 
+                            { 
+                                ...CATEGORIES.LOGISTICS, 
+                                success: player.scoreByCategory.logistics?.success || 0,
+                                total: player.scoreByCategory.logistics?.total || 0,
+                                percentage: player.scoreByCategory.logistics?.total > 0 ? Math.round((player.scoreByCategory.logistics.success / player.scoreByCategory.logistics.total) * 100) : 0,
+                                isSpecial: true
+                            },
+                            { 
+                                ...CATEGORIES.MATH_WILD, 
+                                success: player.scoreByCategory.math_wild?.success || 0,
+                                total: player.scoreByCategory.math_wild?.total || 0,
+                                percentage: player.scoreByCategory.math_wild?.total > 0 ? Math.round((player.scoreByCategory.math_wild.success / player.scoreByCategory.math_wild.total) * 100) : 0,
+                                isSpecial: true
+                            },
+                        ].map(skill => (
                             <div key={skill.id} className="bg-black/20 p-4 rounded-xl border border-white/10">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="font-black flex items-center gap-2 text-sm uppercase" style={{ color: skill.colorData.hex }}>
+                                    <span className={`font-black flex items-center gap-2 text-sm uppercase ${skill.isSpecial ? 'text-[#FFC20E]' : ''}`} style={{ color: skill.colorData.hex }}>
                                         <skill.icon size={16} /> {skill.label.replace('<br/>', '/')}
                                     </span>
                                     <span className="font-mono text-lg font-bold text-white">{skill.percentage}%</span>
@@ -652,11 +722,11 @@ const ProfileScreen = ({ player, onBack }) => {
                                         }} 
                                     />
                                 </div>
-                                <p className="text-xs text-white/50 mt-2">Réussi: {skill.success} / Total joué: {skill.total}</p>
+                                <p className="text-xs text-white/50 mt-2">Réussi: {skill.success} / Total joué: {skill.total} {skill.id === 'math_wild' && `(Rapporte ${WILD_POINTS} Pts)`}</p>
                             </div>
                         ))}
                         <div className="pt-4 mt-6 border-t border-white/10">
-                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations est inclus dans les totaux globaux mais est un mode spécial, il n'est donc pas affiché dans le graphique radar des compétences générales.</p>
+                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations et les cartes Mathématiques sont affichés ci-dessus mais exclus du graphique radar pour conserver la symétrie des 5 soft skills.</p>
                         </div>
                     </div>
                 </div>
@@ -722,8 +792,8 @@ const MainMenu = ({ onNavigate, startLogisticsChallenge, onResumeGame, gameSaved
        
        <button onClick={() => { playSound('flip'); onNavigate('setup'); }} className="w-full group bg-white text-[#B02E68] p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_30px_60px_-15px_rgba(255,255,255,0.3)] transition-all flex items-center justify-between px-8 border-4 border-transparent hover:border-[#FFC20E]"><span>NOUVELLE PARTIE</span> <Play className="group-hover:translate-x-1 transition fill-current" /></button>
        
-       {/* NOUVEAU BOUTON DÉFI LOGISTIQUE (Design immersif) */}
-       <button onClick={startLogisticsChallenge} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20"
+       {/* MODIFICATION: startLogisticsChallenge -> onNavigate('logisticsSetup') */}
+       <button onClick={() => onNavigate('logisticsSetup')} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20"
         style={{ background: COLORS.cards.logistics.accentGradient, boxShadow: `0 0 30px ${COLORS.cards.logistics.hex}50` }}>
           <span>DÉFI LOGISTIQUE</span> <Zap className="group-hover:translate-x-1 transition fill-current text-white" />
        </button>
@@ -763,6 +833,77 @@ const HistoryScreen = ({ history, onBack }) => (
     </div>
 );
 
+// NOUVEAU COMPOSANT : Écran de configuration pour le défi Logistique
+const LogisticsSetupScreen = ({ onStart, onBack, logisticsMaxRounds, categoryId, categoryLabel }) => {
+  const [mode, setMode] = useState(null);
+  const createPlayer = (id, name) => ({
+      id, 
+      name, 
+      score: 0, 
+      scoreByCategory: { 
+          communication: { success: 0, total: 0 },
+          leadership: { success: 0, total: 0 },
+          critical_thinking: { success: 0, total: 0 },
+          emotional_intelligence: { success: 0, total: 0 },
+          creativity: { success: 0, total: 0 },
+          logistics: { success: 0, total: 0 },
+          math_wild: { success: 0, total: 0 }, // AJOUT
+      }
+  });
+
+  const [players, setPlayers] = useState([createPlayer(1, 'Joueur 1'), createPlayer(2, 'Joueur 2')].map(p => p.name));
+  const [soloName, setSoloName] = useState('Défieur'); // Nom par défaut pour le mode solo logistique
+
+  const addPlayer = () => setPlayers([...players, `Joueur ${players.length + 1}`]);
+  const removePlayer = (index) => players.length > 1 && setPlayers(players.filter((_, i) => i !== index));
+  const updatePlayerName = (index, name) => { const newP = [...players]; newP[index] = name; setPlayers(newP); };
+  
+  const handleStart = () => {
+    playSound('win'); 
+    const playerList = mode === 'solo' 
+        ? [createPlayer(1, soloName)]
+        : players.map((name, i) => createPlayer(i + 1, name));
+        
+    // Lance le jeu avec le mode, le nombre de cartes logistiques et le filtre 'logistics'
+    onStart(playerList, mode, logisticsMaxRounds, categoryId); 
+  };
+
+  return (
+    <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-hidden">
+        <button onClick={!mode ? onBack : () => setMode(null)} className="absolute top-6 left-6 text-white/50 hover:text-white transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest"><RotateCcw size={14} /> Retour</button>
+        <h2 className="text-4xl font-black text-center text-white mb-2 mt-6 tracking-tighter" dangerouslySetInnerHTML={{ __html: `DÉFI ${categoryLabel.toUpperCase().replace('<BR/>', '/')}` }} />
+        <p className="text-white/60 text-sm text-center mb-8">Choisissez le mode de jeu</p>
+        {!mode ? (
+          <div className="space-y-4">
+            <button onClick={() => setMode('solo')} className="w-full bg-white text-[#B02E68] font-black text-xl py-6 rounded-3xl hover:scale-105 transition shadow-xl flex items-center justify-center gap-4"><User size={28} /> MODE SOLO</button>
+            <button onClick={() => setMode('multi')} className="w-full bg-[#B02E68] border-2 border-white/20 text-white font-black text-xl py-6 rounded-3xl hover:scale-105 transition shadow-xl flex items-center justify-center gap-4 hover:border-white"><Users size={28} /> MODE MULTI</button>
+          </div>
+        ) : (
+          <div className="animate-in fade-in slide-in-from-bottom-4">
+             <div className="mb-8">
+                <label className="text-white/60 text-xs font-bold mb-4 block uppercase tracking-widest pl-2">{mode === 'solo' ? 'Pseudo du champion' : 'Participants'}</label>
+                {mode === 'solo' ? (
+                  <input type="text" value={soloName} onChange={(e) => setSoloName(e.target.value)} className="w-full bg-white/10 border-2 border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-lg focus:outline-none focus:border-[#FFC20E] transition placeholder-white/20" placeholder="Entrez votre nom..." />
+                ) : (
+                  <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">
+                    {players.map((p, i) => (
+                      <div key={i} className="flex gap-2 items-center">
+                        <span className="text-white/40 font-black text-sm w-4">{i+1}</span>
+                        <input type="text" value={p} onChange={(e) => updatePlayerName(i, e.target.value)} className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white text-sm font-bold" />
+                        {players.length > 2 && (<button onClick={() => removePlayer(i)} className="p-3 bg-red-500/20 text-red-300 rounded-xl hover:bg-red-500 hover:text-white transition"><X size={16} /></button>)}
+                      </div>
+                    ))}
+                    <button onClick={addPlayer} className="w-full py-3 border-2 border-dashed border-white/20 rounded-xl text-white/50 hover:bg-white/10 hover:text-white hover:border-white/50 transition text-xs font-black uppercase flex items-center justify-center gap-2 mt-2"><Plus size={14} /> Ajouter un joueur</button>
+                  </div>
+                )}
+             </div>
+             <button onClick={handleStart} className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#FFC20E] to-[#ff9900] text-black font-black text-xl hover:scale-105 transition shadow-[0_0_30px_-5px_rgba(255,194,14,0.4)] flex items-center justify-center gap-3">C'EST PARTI ({logisticsMaxRounds} tours) <ArrowRight size={24} strokeWidth={3} /></button>
+          </div>
+        )}
+    </div>
+  );
+};
+
 const SetupScreen = ({ onStart, onBack }) => {
   const [mode, setMode] = useState(null);
   // CHANGEMENT: Initialisation des stats par défaut
@@ -777,6 +918,7 @@ const SetupScreen = ({ onStart, onBack }) => {
           emotional_intelligence: { success: 0, total: 0 },
           creativity: { success: 0, total: 0 },
           logistics: { success: 0, total: 0 },
+          math_wild: { success: 0, total: 0 }, // AJOUT
       }
   });
 
@@ -784,7 +926,7 @@ const SetupScreen = ({ onStart, onBack }) => {
   const [soloName, setSoloName] = useState('Joueur 1');
 
   const addPlayer = () => setPlayers([...players, `Joueur ${players.length + 1}`]);
-  const removePlayer = (index) => setPlayers(players.filter((_, i) => i !== index));
+  const removePlayer = (index) => players.length > 2 && setPlayers(players.filter((_, i) => i !== index)); // Min 2 joueurs en mode multi normal
   const updatePlayerName = (index, name) => { const newP = [...players]; newP[index] = name; setPlayers(newP); };
   
   const handleStart = () => {
@@ -833,6 +975,15 @@ const SetupScreen = ({ onStart, onBack }) => {
 
 const ScoreBoard = ({ players, missedCards, onEndGame }) => {
     useEffect(() => { playSound('gameover'); triggerMassiveConfetti(); }, []);
+    
+    // Ajout d'une fonction de recherche de catégorie sécurisée
+    const getCategoryById = (categoryId) => {
+        // Normaliser l'ID avant de le comparer aux clés de CATEGORIES (sans accent)
+        const key = categoryId?.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // On cherche par la clé majuscule, nettoyée des accents, qui est maintenant 'CREATIVITE'
+        return CATEGORIES[key];
+    };
+
     return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
         <div className="w-full max-w-2xl bg-[#B02E68] rounded-[3rem] p-10 border-4 border-white/20 text-white text-center shadow-2xl animate-in zoom-in duration-500 my-8 relative overflow-hidden">
@@ -841,7 +992,7 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
             <h2 className="text-5xl font-black italic mb-8 tracking-tighter">RÉSULTATS FINAUX</h2>
             <div className="space-y-3 mb-10 relative z-10">
                 {[...players].sort((a,b) => b.score - a.score).map((p, i) => (
-                    <div key={i} className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${i===0 ? 'bg-white text-[#B02E68] border-transparent scale-105 shadow-xl' : 'bg-black/20 border-white/10 text-white'}`}>
+                    <div key={p.id} className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${i===0 ? 'bg-white text-[#B02E68] border-transparent scale-105 shadow-xl' : 'bg-black/20 border-white/10 text-white'}`}>
                         <div className="flex items-center gap-4">
                             <span className={`font-black text-2xl w-10 h-10 flex items-center justify-center rounded-full ${i===0 ? 'bg-[#B02E68] text-white' : 'bg-white/10'}`}>{i+1}</span>
                             <span className="font-black text-xl tracking-tight">{p.name}</span>
@@ -854,15 +1005,26 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
                 <div className="mb-10 text-left bg-white text-black p-8 rounded-[2rem] shadow-xl relative z-10">
                     <h3 className="text-xl font-black uppercase mb-6 flex items-center gap-3 border-b-2 border-gray-100 pb-4 text-[#B02E68]"><BookOpen size={28} /> 🎓 Points à réviser</h3>
                     <div className="space-y-4 max-h-60 overflow-y-auto custom-scrollbar-dark pr-2">
-                        {missedCards.map((card, idx) => (
-                            <div key={idx} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                                <div className="flex flex-col mb-2">
-                                    <span className="text-[10px] font-black text-[#B02E68] uppercase tracking-widest mb-1">{CATEGORIES[card.categoryId.toUpperCase()].label}</span>
-                                    <span className="text-sm font-bold text-gray-900">{card.title}</span>
+                        {missedCards.map((card, idx) => {
+                            const category = getCategoryById(card.categoryId);
+                            
+                            // SECURITÉ : Si la catégorie n'est pas trouvée (cas improbable mais source de l'erreur)
+                            if (!category) {
+                                console.error(`Catégorie non trouvée pour l'ID: ${card.categoryId}`);
+                                return null; // Retourne null pour ignorer cet élément non valide
+                            }
+
+                            return (
+                                <div key={idx} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                    <div className="flex flex-col mb-2">
+                                        {/* ACCÈS SÉCURISÉ AUX PROPRIÉTÉS */}
+                                        <span className="text-[10px] font-black text-[#B02E68] uppercase tracking-widest mb-1" dangerouslySetInnerHTML={{ __html: category.label.toUpperCase() }} />
+                                        <span className="text-sm font-bold text-gray-900">{card.title}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600 italic leading-relaxed">"{card.explanation}"</p>
                                 </div>
-                                <p className="text-sm text-gray-600 italic leading-relaxed">"{card.explanation}"</p>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             )}
@@ -888,20 +1050,23 @@ export default function App() {
           emotional_intelligence: { success: 0, total: 0 },
           creativity: { success: 0, total: 0 },
           logistics: { success: 0, total: 0 },
+          math_wild: { success: 0, total: 0 }, // AJOUT
       }
   };
   
   // NOUVEL ÉTAT POUR DÉTECTER LA SAUVEGARDE
   const [gameSaved, setGameSaved] = useState(false);
-
+  // NOUVEL ÉTAT POUR DÉTECTER SI LE PREMIER TOUR (AVEC CHOIX DE CATÉGORIE) EST PASSÉ
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  // ÉTAT DE TRANSITION SUPPRIMÉ pour un passage instantané
+  // const [isTransitioningState, setIsTransitioningState] = useState(false); // Supprimé
+  
   // FONCTION DE CHARGEMENT DE L'ÉTAT INITIAL
-  // CORRECTION: Retirer setGameSaved de cette fonction pour éviter l'appel direct pendant le rendu
   const loadInitialState = () => {
     try {
       const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (savedState) {
         const state = JSON.parse(savedState);
-        // Ne PAS appeler setGameSaved(true) ici
         return {
           players: state.players || [initialPlayerState],
           gameMode: state.gameMode || 'solo',
@@ -913,13 +1078,13 @@ export default function App() {
           missedCards: state.missedCards || [],
           view: 'menu', // Commence toujours par le menu après chargement
           isSaved: true, // Flag pour détecter la présence d'une sauvegarde
+          isGameStarted: state.isGameStarted || false, // Charger l'état de démarrage
         };
       }
     } catch (e) {
       console.error("Erreur lors du chargement de l'état du jeu:", e);
       localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
-    // setGameSaved(false); // Ne PAS appeler setGameSaved(false) ici non plus
     return {
       players: [initialPlayerState],
       gameMode: 'solo',
@@ -931,6 +1096,7 @@ export default function App() {
       missedCards: [],
       view: 'menu',
       isSaved: false, // Pas de sauvegarde trouvée
+      isGameStarted: false,
     };
   };
 
@@ -950,10 +1116,15 @@ export default function App() {
   const [roundsPlayed, setRoundsPlayed] = useState(initialState.roundsPlayed);
   const [playedCardIds, setPlayedCardIds] = useState(initialState.playedCardIds);
   const [missedCards, setMissedCards] = useState(initialState.missedCards);
+  const [isGameStartedState, setIsGameStartedState] = useState(initialState.isGameStarted); // Utilisation d'un état séparé pour éviter la confusion
   
   // NOUVEAU useEffect pour mettre à jour gameSaved APRÈS le rendu initial
   useEffect(() => {
     setGameSaved(initialState.isSaved);
+    // Si la partie était déjà commencée (reprise), on met à jour l'état de démarrage
+    if (initialState.isSaved) {
+        setIsGameStartedState(initialState.isGameStarted);
+    }
   }, []); // [] garantit que cela ne s'exécute qu'une fois au montage
 
   useEffect(() => {
@@ -976,6 +1147,7 @@ export default function App() {
         roundsPlayed,
         playedCardIds,
         missedCards,
+        isGameStarted: isGameStartedState, // Sauvegarde l'état de démarrage
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
       setGameSaved(true);
@@ -984,12 +1156,12 @@ export default function App() {
        localStorage.removeItem(LOCAL_STORAGE_KEY);
        setGameSaved(false);
     }
-  }, [players, gameMode, currentPlayerIndex, maxRounds, deckFilter, roundsPlayed, playedCardIds, missedCards, view, showScoreboard]);
+  }, [players, gameMode, currentPlayerIndex, maxRounds, deckFilter, roundsPlayed, playedCardIds, missedCards, view, showScoreboard, isGameStartedState]);
 
   // Surveillance des états pour la sauvegarde
   useEffect(() => {
     saveGameState();
-  }, [players, roundsPlayed, view, showScoreboard, currentPlayerIndex, maxRounds, deckFilter, playedCardIds, missedCards, saveGameState]);
+  }, [players, roundsPlayed, view, showScoreboard, currentPlayerIndex, maxRounds, deckFilter, playedCardIds, missedCards, isGameStartedState, saveGameState]);
   // --- FIN LOGIQUE DE SAUVEGARDE ---
 
 
@@ -1000,38 +1172,24 @@ export default function App() {
     setPlayedCardIds([]); setMissedCards([]);
     setMaxRounds(rounds);
     setDeckFilter(filter);
+    setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
+    
+    // NOUVEAU : Si en mode Logistique, on tire la première carte automatiquement
+    // Pas de setTimeout pour un démarrage instantané
+    if (filter === 'logistics') {
+        drawRandomNextCard(); 
+        setIsGameStartedState(true); // Le mode logistique est toujours entièrement aléatoire
+    }
   };
   
   const resumeGame = () => {
     setView('playing');
-    // La fonction loadInitialState a déjà mis à jour les autres états
   };
   
-  // NOUVELLE FONCTION POUR LANCER LE DÉFI LOGISTIQUE
-  const startLogisticsChallenge = () => {
+  // MODIFICATION: startLogisticsChallenge est maintenant une fonction de navigation
+  const navigateToLogisticsSetup = () => {
       playSound('flip');
-      
-      const createLogisticsPlayer = (name) => ({
-          id: 1, 
-          name, 
-          score: 0, 
-          scoreByCategory: { 
-              communication: { success: 0, total: 0 },
-              leadership: { success: 0, total: 0 },
-              critical_thinking: { success: 0, total: 0 },
-              emotional_intelligence: { success: 0, total: 0 },
-              creativity: { success: 0, total: 0 },
-              logistics: { success: 0, total: 0 },
-          }
-      });
-      
-      // On utilise le nom du joueur solo actuel s'il existe
-      const playerName = players.length > 0 ? players[0].name : 'Défieur';
-      const defaultPlayer = [createLogisticsPlayer(playerName)];
-      
-      const LOGISTICS_MAX_ROUNDS = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
-      
-      startGame(defaultPlayer, 'solo', LOGISTICS_MAX_ROUNDS, 'logistics');
+      setView('logisticsSetup');
   };
 
   const endGame = () => {
@@ -1048,18 +1206,33 @@ export default function App() {
     
     setShowScoreboard(false); setActiveCard(null); setActiveCategory(null); setView('menu');
     setDeckFilter('all'); // Réinitialiser le filtre
+    setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
     localStorage.removeItem(LOCAL_STORAGE_KEY); // S'assurer de supprimer l'état après la fin
     setGameSaved(false);
   };
   
-  // MISE À JOUR DE LA LOGIQUE DE TIRAGE ALÉATOIRE
-  const drawRandomNextCard = () => {
+  // LOGIQUE DE TIRAGE ALÉATOIRE (Utilisé par Logistique et par le mode 'all' après le 1er tour)
+  const drawRandomNextCard = useCallback(() => {
      // Si nous sommes en mode "logistics", on filtre le pool de cartes
      const cardPool = deckFilter === 'logistics' 
          ? INITIAL_CARDS.filter(c => c.categoryId === 'logistics') 
-         : INITIAL_CARDS;
-
+         // Si c'est le mode 'all', on utilise TOUTES les cartes
+         : INITIAL_CARDS; 
+     
+     // IMPORTANT : On retire les cartes déjà jouées du pool
      const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
+     
+     // Tentative de Wild Card seulement si le deck n'est pas "logistics"
+     if (deckFilter === 'all' && Math.random() < 0.1) {
+        const wildCards = INITIAL_CARDS.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
+        if (wildCards.length > 0) {
+             const randomCard = wildCards[Math.floor(Math.random() * wildCards.length)];
+             setActiveCategory(CATEGORIES.MATH_WILD);
+             setActiveCard(randomCard);
+             setPlayedCardIds(prev => [...prev, randomCard.id]);
+             return;
+        }
+    }
      
      if (availableCards.length === 0) { 
         setActiveCard(null); 
@@ -1067,23 +1240,52 @@ export default function App() {
         setShowScoreboard(true); 
         return; 
      }
-     const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
-     setActiveCategory(Object.values(CATEGORIES).find(c => c.id === randomCard.categoryId));
-     setActiveCard(randomCard);
-     setPlayedCardIds(prev => [...prev, randomCard.id]);
-  };
 
-  // Fonction utilisée uniquement en mode 'all'
+     // Tirer une carte au hasard parmi toutes les cartes disponibles dans le deck filtré
+     const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+     
+     // Si la carte a été trouvée (ce qui devrait toujours être le cas ici)
+     if (randomCard) {
+         // Trouver la catégorie correspondante. Si l'ID est 'creativity', on cherche 'CREATIVITE'
+         const categoryIdUpper = randomCard.categoryId.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+         setActiveCategory(CATEGORIES[categoryIdUpper]);
+         setActiveCard(randomCard);
+         setPlayedCardIds(prev => [...prev, randomCard.id]);
+     }
+
+  }, [deckFilter, playedCardIds]);
+
+
+  // NOUVELLE LOGIQUE DE TIRAGE BASÉE SUR LA CATÉGORIE SÉLECTIONNÉE (pour le 1er tour du mode 'all')
   const drawCard = (categoryId) => {
-    const categoryCards = INITIAL_CARDS.filter(c => c.categoryId === categoryId && !playedCardIds.includes(c.id));
-    if (categoryCards.length === 0) { alert("Plus de cartes disponibles dans cette catégorie !"); return; }
+    // 1. Tenter un tirage Math Wild à 10%
+    if (Math.random() < 0.1) {
+        const wildCards = INITIAL_CARDS.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
+        if (wildCards.length > 0) {
+             const randomCard = wildCards[Math.floor(Math.random() * wildCards.length)];
+             setActiveCategory(CATEGORIES.MATH_WILD);
+             setActiveCard(randomCard);
+             setPlayedCardIds(prev => [...prev, randomCard.id]);
+             setIsGameStartedState(true); // Démarre le jeu en mode auto-draw
+             return;
+        }
+    }
+
+    // 2. Sinon, tirer une carte aléatoire de la catégorie choisie
+    const categoryCards = INITIAL_CARDS.filter(c => c.categoryId === categoryId && c.categoryId !== 'math_wild' && !playedCardIds.includes(c.id));
+    
+    // Si la catégorie est épuisée, ne rien faire
+    if (categoryCards.length === 0) { 
+        return; 
+    }
+    
     const randomCard = categoryCards[Math.floor(Math.random() * categoryCards.length)];
-    setActiveCategory(Object.values(CATEGORIES).find(c => c.id === randomCard.categoryId));
+    // Trouver la catégorie correspondante. Si l'ID est 'creativity', on cherche 'CREATIVITE'
+    const categoryIdUpper = randomCard.categoryId.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    setActiveCategory(CATEGORIES[categoryIdUpper]);
     setActiveCard(randomCard);
     setPlayedCardIds(prev => [...prev, randomCard.id]);
-    
-    // CORRECTION: Retire l'appel à la continuité automatique qui causait la boucle de rendu
-    // setTimeout(() => drawRandomNextCard(), 50);
+    setIsGameStartedState(true); // Démarre le jeu en mode auto-draw après le premier choix
   };
 
   const handleCardResult = (success, cardData) => {
@@ -1091,11 +1293,19 @@ export default function App() {
     const player = currentPlayers[currentPlayerIndex];
     const categoryId = cardData.categoryId;
     
+    // Points attribués
+    const points = cardData.points || DEFAULT_POINTS;
+
     // Mise à jour des stats du joueur
+    if (!player.scoreByCategory[categoryId]) {
+        // Initialisation si la catégorie n'existe pas encore (sécurité)
+        player.scoreByCategory[categoryId] = { success: 0, total: 0 };
+    }
+    
     player.scoreByCategory[categoryId].total += 1;
 
     if (success) { 
-        player.score += 1; 
+        player.score += points; // Utiliser les points spécifiques de la carte
         player.scoreByCategory[categoryId].success += 1;
         setPlayers(currentPlayers); 
     }
@@ -1108,40 +1318,47 @@ export default function App() {
     const nextRound = roundsPlayed + 1;
     setRoundsPlayed(nextRound);
     
-    // On vérifie la fin de partie par rapport au MAX_ROUNDS dynamique
-    const cardPool = deckFilter === 'logistics' 
-        ? INITIAL_CARDS.filter(c => c.categoryId === 'logistics') 
-        : INITIAL_CARDS;
-    
-    const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
-    
-    // S'assurer que le jeu quitte le mode carte avant de passer à l'écran suivant
+    // 1. SUPPRESSION DE LA TRANSITION VISUELLE INTERMÉDIAIRE
+    // activeCard=null va immédiatement retirer l'ancienne carte.
     setActiveCard(null); 
     setActiveCategory(null);
-    
-    if (nextRound >= maxRounds || availableCards.length === 0) { 
-        setShowScoreboard(true); 
+
+    // Logique de fin de partie
+    if (nextRound >= maxRounds) { 
+        // On utilise un petit délai pour permettre à React de finaliser le rendu du jeu avant le tableau de score.
+        setTimeout(() => {
+            setShowScoreboard(true); 
+        }, 50); // Maintien d'un petit délai (50ms) UNIQUEMENT pour la transition FIN DE PARTIE -> SCOREBOARD.
     } else { 
+        // 2. PASSAGE INSTANTANÉ AU JOUEUR SUIVANT ET À LA NOUVELLE CARTE/SÉLECTION
         setCurrentPlayerIndex((currentPlayerIndex + 1) % currentPlayers.length); 
-        // Lancement de la carte suivante UNIQUEMENT ici
-        drawRandomNextCard(); 
+        
+        // Si la partie est DÉMARRÉE (logistique ou 1er tour du mode 'all' est passé), on tire automatiquement
+        if (isGameStartedState) {
+            drawRandomNextCard(); // Tirage de la nouvelle carte
+        }
+        // Si non démarrée (mode 'all', retour à la sélection), activeCard est déjà null, l'écran de sélection réapparaît immédiatement.
     }
   };
 
+  // VÉRIFIE si une catégorie n'a plus de cartes non-wild disponibles
   const isCategoryEmpty = (categoryId) => {
-      const remaining = INITIAL_CARDS.filter(c => c.categoryId === categoryId && !playedCardIds.includes(c.id));
+      // Filtrer toutes les cartes non-wild de cette catégorie qui n'ont pas encore été jouées
+      const remaining = INITIAL_CARDS.filter(c => c.categoryId === categoryId && c.categoryId !== 'math_wild' && !playedCardIds.includes(c.id));
       return remaining.length === 0;
   };
 
-  // Logique pour n'afficher que les cartes pertinentes
-  const categoriesToRender = deckFilter === 'logistics' 
-    ? [CATEGORIES.LOGISTICS] 
-    : Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics'); // Dans le mode normal, on cache la carte Logistique
+  // Catégories à afficher sur l'écran de jeu
+  const categoriesToRender = Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics' && cat.id !== 'math_wild'); // Le mode normal montre les 5 catégories cliquables
   
-  // CORRECTION 2: Définir le style d'arrière-plan ici
+  // Style d'arrière-plan dynamique
   const currentBackgroundStyle = deckFilter === 'logistics' 
     ? COLORS.logisticsBackgroundStyle 
     : COLORS.defaultBackgroundStyle;
+    
+  // DONNÉES SPÉCIFIQUES LOGISTIQUE
+  const LOGISTICS_MAX_CARDS = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
+  const LOGISTICS_CATEGORY = CATEGORIES.LOGISTICS;
 
 
   return (
@@ -1160,10 +1377,45 @@ export default function App() {
         .custom-scrollbar-dark::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Animation lente de rotation pour le bouton de tirage */
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 10s linear infinite;
+        }
+        /* NOUVEAU: Animations pour la carte */
+        /* Supprimons les animations 'slide-in' et 'slide-out' pour le passage de carte à carte */
+        .card-enter { animation: slide-in-from-top-full 300ms cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-exit { animation: slide-out-to-bottom-full 150ms ease-in; }
+        
+        @keyframes slide-in-from-top-full {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes slide-out-to-bottom-full {
+          from { transform: translateY(0); opacity: 1; }
+          to { transform: translateY(100%); opacity: 0; }
+        }
       `}</style>
 
-      {view === 'menu' && <MainMenu onNavigate={setView} startLogisticsChallenge={startLogisticsChallenge} onResumeGame={resumeGame} gameSaved={gameSaved} />}
+      {view === 'menu' && <MainMenu onNavigate={setView} startLogisticsChallenge={navigateToLogisticsSetup} onResumeGame={resumeGame} gameSaved={gameSaved} />}
       {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen onStart={(p, m) => startGame(p, m, 15, 'all')} onBack={() => setView('menu')} /></div>}
+      
+      {/* NOUVEL ÉCRAN DE SETUP POUR LA LOGISTIQUE */}
+      {view === 'logisticsSetup' && (
+          <div className="flex-1 flex items-center justify-center p-4">
+              <LogisticsSetupScreen 
+                  onStart={startGame} 
+                  onBack={() => setView('menu')}
+                  logisticsMaxRounds={LOGISTICS_MAX_CARDS}
+                  categoryId={LOGISTICS_CATEGORY.id}
+                  categoryLabel={LOGISTICS_CATEGORY.label}
+              />
+          </div>
+      )}
+
       {view === 'profile' && <div className="flex-1 flex items-center justify-center p-4 z-50"><ProfileScreen player={players.length > 0 ? players[0] : initialPlayerState} onBack={() => setView('menu')} /></div>}
       {view === 'story' && <div className="flex-1 flex items-center justify-center p-4 z-50"><StoryScreen onBack={() => setView('menu')} /></div>}
       {view === 'history' && <div className="flex-1 flex items-center justify-center p-4"><HistoryScreen history={gameHistory} onBack={() => setView('menu')} /></div>}
@@ -1199,30 +1451,84 @@ export default function App() {
               </div>
               {/* Responsiveness: Taille du titre adaptée */}
               <h2 className="text-2xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
-                 {deckFilter === 'logistics' ? 'DÉFI LOGISTIQUE EN COURS' : 'CHOISISSEZ UNE CARTE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
+                 {deckFilter === 'logistics' ? 'DÉFI LOGISTIQUE (ALÉATOIRE)' : 'CHOISISSEZ UNE CATÉGORIE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
               </h2>
             </div>
-            {/* Responsiveness: Grille adaptée aux mobiles (2 colonnes) */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 auto-rows-fr pb-20">
-              {categoriesToRender.map((cat) => (
-                <CardBack 
-                    key={cat.id} 
-                    category={cat} 
-                    // Si mode logistique, le clic lance le tirage aléatoire et la continuité
-                    onClick={deckFilter === 'logistics' ? drawRandomNextCard : drawCard} 
-                    disabled={isCategoryEmpty(cat.id)} 
-                />
-              ))}
-            </div>
+            
+            {/* MISE À JOUR IMPORTANTE : 
+            1. Afficher la GRILLE DE SÉLECTION UNIQUEMENT si: deckFilter='all' ET isGameStartedState=false (premier tour)
+            2. Afficher l'ÉCRAN D'ATTENTE/BOUTON si: activeCard=null MAIS le jeu a commencé (deckFilter='logistics' OU isGameStartedState=true)
+            */}
+            
+            {/* CAS 1: Grille de sélection (Mode 'all', 1er tour SEULEMENT) */}
+            {deckFilter === 'all' && !activeCard && !isGameStartedState && (
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 auto-rows-fr pb-20 animate-in fade-in duration-500">
+                    {categoriesToRender.map((cat) => (
+                        <CardBack 
+                            key={cat.id} 
+                            category={cat} 
+                            onClick={drawCard} // Tirer la carte de la catégorie sélectionnée (avec 10% de chance de Wild)
+                            disabled={isCategoryEmpty(cat.id)} 
+                        />
+                    ))}
+                    <div className="col-span-full text-center mt-4 text-white/70 text-sm">
+                        <p className="font-bold uppercase tracking-wider text-[#ffa62d] flex items-center justify-center gap-2">
+                             <Zap size={16}/> Attention: 10% de chance de tomber sur une carte Maths (Wild Card +10 Pts) !
+                        </p>
+                    </div>
+                </div>
+            )}
+            
+            {/* CAS 2: Écran d'attente/bouton (Mode 'logistics' OU Mode 'all' APRES 1er tour) */}
+            {/* Condition: activeCard est null, mais le jeu est lancé (logistics OU isGameStartedState=true) */}
+            {(!activeCard && (deckFilter === 'logistics' || isGameStartedState)) && (
+                <div className="flex flex-col items-center justify-center h-[60vh] animate-in fade-in duration-500">
+                    <div className="relative w-80 h-80 flex items-center justify-center mb-8">
+                       <div className="absolute inset-0 border-4 border-dashed border-white/20 rounded-full animate-spin-slow"></div>
+                       <Zap size={64} className="text-[#FFC20E] animate-pulse"/>
+                    </div>
+                    
+                    {deckFilter === 'logistics' ? (
+                        // En mode Logistique, on doit toujours cliquer pour tirer
+                       <button 
+                            onClick={drawRandomNextCard} 
+                            className="group bg-white text-[#B02E68] font-black text-xl py-5 px-10 rounded-3xl hover:scale-105 transition shadow-2xl flex items-center justify-center gap-4 hover:shadow-white/30"
+                        >
+                            TIRER LA PROCHAINE CARTE LOGISTIQUE
+                            <ArrowRight className="group-hover:translate-x-1 transition fill-current" />
+                        </button>
+                    ) : (
+                        // En mode 'all' après le 1er tour, le tirage est automatique et rapide (c'est l'écran de transition)
+                         <p className="text-xl font-bold text-white/80 animate-pulse">
+                             Carte tirée... Veuillez patienter !
+                         </p>
+                    )}
+                    
+                    <p className="mt-4 text-sm text-white/70 italic">
+                        Tour actuel: {roundsPlayed + 1} / {maxRounds}
+                    </p>
+                </div>
+            )}
+            
           </main>
         </>
       )}
+
+      {/* OVERLAY DE TRANSITION (TOTALEMENT SUPPRIMÉ, car il créait le clignotement) */}
+      {/* L'état isTransitioningState n'est plus nécessaire. */}
 
       {activeCard && activeCategory && (
         <CardFront key={activeCard.id} card={activeCard} category={activeCategory} onClose={() => { setActiveCard(null); setActiveCategory(null); }} onResult={handleCardResult} playerName={players[currentPlayerIndex]?.name} />
       )}
 
       {showScoreboard && <ScoreBoard players={players} missedCards={missedCards} onEndGame={endGame} />}
+
+      {/* NOUVEAU: Copyright Footer */}
+      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'setup' || view === 'logisticsSetup') && (
+        <footer className="w-full text-center py-4 text-xs font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
+            © {new Date().getFullYear()} SKILLSMASTER. Tous droits réservés. Développé par Gabriel Emrick Tognimanbou DAHISSIHO.
+        </footer>
+      )}
     </div>
   );
 }
