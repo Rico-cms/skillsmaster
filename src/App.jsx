@@ -1,45 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor } from 'lucide-react';
 
 // --- Configuration & Données ---
 
+// Palette de couleurs structurée pour éviter les problèmes de purge Tailwind en production
 const COLORS = {
-  // On ajoute une propriété 'style' safe pour la production
-  backgroundStyle: {
+  // MISE À JOUR : Style par défaut (Rose/Violet)
+  defaultBackgroundStyle: {
     background: 'radial-gradient(ellipse at top, #db4d86, #B02E68, #6d133b)',
-    backgroundColor: '#B02E68' // Fallback
+    backgroundColor: '#B02E68',
+    minHeight: '100vh'
   },
-  // On garde les classes Tailwind pour le dev, mais on ajoute 'style' pour la prod
+  // NOUVEAU : Style pour le mode Logistique (Vert/Noir)
+  logisticsBackgroundStyle: {
+    background: 'radial-gradient(ellipse at top, #059669, #065F46, #000000)', 
+    backgroundColor: '#065F46',
+    minHeight: '100vh'
+  },
   cards: {
     communication: { 
         id: 'communication',
-        shadow: 'shadow-green-500/40',
-        text: 'text-white',
-        style: { background: 'linear-gradient(135deg, #00d468 0%, #007a3b 100%)' }
+        hex: '#00d468', // Couleur principale pour les ombres/bordures
+        gradient: 'linear-gradient(135deg, rgba(0,212,104,0.2) 0%, rgba(0,122,59,0.4) 100%)',
+        accentGradient: 'linear-gradient(90deg, #00d468, #007a3b)',
+        border: '1px solid rgba(0,212,104,0.3)',
+        text: 'text-white' 
     },
     leadership: { 
         id: 'leadership',
-        shadow: 'shadow-orange-500/40',
-        text: 'text-white',
-        style: { background: 'linear-gradient(135deg, #ff8c55 0%, #c4460b 100%)' }
+        hex: '#ff8c55',
+        gradient: 'linear-gradient(135deg, rgba(255,140,85,0.2) 0%, rgba(196,70,11,0.4) 100%)',
+        accentGradient: 'linear-gradient(90deg, #ff8c55, #c4460b)',
+        border: '1px solid rgba(255,140,85,0.3)',
+        text: 'text-white' 
     },
     critical_thinking: { 
         id: 'critical_thinking',
-        shadow: 'shadow-red-500/40',
-        text: 'text-white',
-        style: { background: 'linear-gradient(135deg, #ff6b61 0%, #b32016 100%)' }
+        hex: '#ff6b61',
+        gradient: 'linear-gradient(135deg, rgba(255,107,97,0.2) 0%, rgba(179,32,22,0.4) 100%)',
+        accentGradient: 'linear-gradient(90deg, #ff6b61, #b32016)',
+        border: '1px solid rgba(255,107,97,0.3)',
+        text: 'text-white' 
     },
     emotional_intelligence: { 
         id: 'emotional_intelligence',
-        shadow: 'shadow-sky-500/40',
-        text: 'text-white',
-        style: { background: 'linear-gradient(135deg, #4dd4ff 0%, #0086b8 100%)' }
+        hex: '#4dd4ff',
+        gradient: 'linear-gradient(135deg, rgba(77,212,255,0.2) 0%, rgba(0,134,184,0.4) 100%)',
+        accentGradient: 'linear-gradient(90deg, #4dd4ff, #0086b8)',
+        border: '1px solid rgba(77,212,255,0.3)',
+        text: 'text-white' 
     },
     creativity: { 
         id: 'creativity',
-        shadow: 'shadow-yellow-500/40',
-        text: 'text-white',
-        style: { background: 'linear-gradient(135deg, #ffe066 0%, #cca300 100%)' }
+        hex: '#ffe066',
+        gradient: 'linear-gradient(135deg, rgba(255,224,102,0.2) 0%, rgba(204,163,0,0.4) 100%)',
+        accentGradient: 'linear-gradient(90deg, #ffe066, #cca300)',
+        border: '1px solid rgba(255,224,102,0.3)',
+        text: 'text-white' 
+    },
+    logistics: { // COULEUR LOGISTIQUE : Vert Émeraude / Séquoia
+        id: 'logistics',
+        hex: '#059669', 
+        gradient: 'linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(5,150,105,0.4) 100%)',
+        accentGradient: 'linear-gradient(90deg, #059669, #065F46)',
+        border: '1px solid rgba(5,150,105,0.3)',
+        text: 'text-white'
     }
   }
 };
@@ -49,39 +74,77 @@ const CATEGORIES = {
   LEADERSHIP: { id: 'leadership', label: 'LEADERSHIP', colorData: COLORS.cards.leadership, icon: Crown },
   CRITICAL_THINKING: { id: 'critical_thinking', label: 'CRITICAL THINKING', colorData: COLORS.cards.critical_thinking, icon: Brain },
   EMOTIONAL_INTELLIGENCE: { id: 'emotional_intelligence', label: 'INTELLIGENCE ÉMOTIONNELLE', colorData: COLORS.cards.emotional_intelligence, icon: Heart },
-  CREATIVITY: { id: 'creativity', label: 'CRÉATIVITÉ', colorData: COLORS.cards.creativity, icon: Lightbulb }
+  CRÉATIVITÉ: { id: 'creativity', label: 'CRÉATIVITÉ', colorData: COLORS.cards.creativity, icon: Lightbulb },
+  LOGISTICS: { id: 'logistics', label: 'LOGISTIQUE<br/>OPÉRATIONS', colorData: COLORS.cards.logistics, icon: Tractor } // CORRECTION ICI : Ajout du <br/>
 };
 
 const INITIAL_CARDS = [
-  // --- Communication ---
+  // --- Communication (8 cartes) ---
   { id: 'c1', categoryId: 'communication', type: 'challenge', title: 'PRÉSENTATION EXPRESS', scenario: 'Les réseaux sociaux : menace ou opportunité ? Mini-discours de 1 min.', explanation: 'Conseil : Commencez par une accroche forte ("Saviez-vous que..."), donnez 2 arguments opposés, et concluez avec votre avis personnel.', duration: 60 },
   { id: 'c2', categoryId: 'communication', type: 'challenge', title: 'PITCH DE VENTE', scenario: 'Vendez ce stylo (ou un objet proche) au jury en 45 secondes.', explanation: 'Ne vendez pas l\'objet, vendez ce qu\'il permet de faire (ex: "Signer le contrat de votre vie"). Créez le besoin.', duration: 45 },
   { id: 'c3', categoryId: 'communication', type: 'challenge', title: 'SILENCE RADIO', scenario: 'Faites deviner "Projet en retard" sans parler, uniquement avec des gestes.', explanation: 'La communication non-verbale représente plus de 50% du message.', duration: 45 },
+  { id: 'c4', categoryId: 'communication', type: 'challenge', title: 'STORYTELLING', scenario: 'Racontez une anecdote personnelle qui vous a appris une leçon, en 1 minute.', explanation: 'Une bonne histoire a une structure : Situation initiale, Élément perturbateur, Péripéties, Résolution.', duration: 60 },
+  { id: 'c5', categoryId: 'communication', type: 'challenge', title: 'FEEDBACK SANDWICH', scenario: 'Faites un retour critique à un collègue sur son travail bâclé.', explanation: 'Commencez par un point positif, abordez le point à améliorer, et finissez par un encouragement.', duration: 45 },
   { id: 'c_quiz_1', categoryId: 'communication', type: 'quiz', title: 'ÉCOUTE ACTIVE', scenario: 'Quelle est la clé principale de l’écoute active ?', options: ['Interrompre pour questionner', 'Reformuler ce que dit l’autre', 'Préparer sa réponse'], correctIndex: 1, explanation: 'La reformulation prouve que vous avez compris le message et invite l\'autre à préciser sa pensée.', duration: 30 },
+  { id: 'c_quiz_2', categoryId: 'communication', type: 'quiz', title: 'COMMUNICATION NON-VERBALE', scenario: 'Quel pourcentage du message passe par le non-verbal (voix + corps) ?', options: ['Environ 30%', 'Environ 50%', 'Plus de 90%'], correctIndex: 2, explanation: 'Selon la règle de Mehrabian, 93% de la communication est non-verbale (ton + gestes) lors de l\'expression d\'émotions.', duration: 30 },
+  { id: 'c_quiz_3', categoryId: 'communication', type: 'quiz', title: 'QUESTION OUVERTE', scenario: 'Laquelle est une question ouverte ?', options: ['As-tu fini ?', 'Es-tu d\'accord ?', 'Qu\'en penses-tu ?'], correctIndex: 2, explanation: 'Une question ouverte ne peut pas être répondue par Oui ou Non, elle encourage le dialogue.', duration: 30 },
   
-  // --- Leadership ---
+  // --- Leadership (8 cartes) ---
   { id: 'l1', categoryId: 'leadership', type: 'challenge', title: 'GÉRER UN CONFLIT', scenario: 'Un collègue est toujours en retard. Dites-lui fermement mais poliment.', explanation: 'Utilisez la méthode DESC : Décrire les faits, Exprimer votre ressenti, Suggérer une solution, Conclure sur les conséquences positives.', duration: 45 },
   { id: 'l2', categoryId: 'leadership', type: 'challenge', title: 'MOTIVATION', scenario: 'Votre équipe est découragée après un échec. Remotivez-les en 1 min.', explanation: 'Reconnaissez l\'effort, dédramatisez l\'échec, et focalisez sur la prochaine étape.', duration: 60 },
+  { id: 'l3', categoryId: 'leadership', type: 'challenge', title: 'PRISE DE DÉCISION', scenario: 'Urgence : Vous devez couper le budget de 10% immédiatement. Annoncez-le à l\'équipe.', explanation: 'Soyez transparent sur les raisons, ferme sur la décision, mais ouvert à la discussion sur la mise en œuvre.', duration: 60 },
+  { id: 'l4', categoryId: 'leadership', type: 'challenge', title: 'VISION', scenario: 'Décrivez votre vision de l\'entreprise idéale en 3 phrases inspirantes.', explanation: 'Une vision doit être claire, ambitieuse et inspirante pour fédérer.', duration: 60 },
   { id: 'l_quiz_1', categoryId: 'leadership', type: 'quiz', title: 'STYLE DE LEADERSHIP', scenario: 'Quel style implique le plus l’équipe dans la prise de décision ?', options: ['Autoritaire', 'Démocratique', 'Laissez-faire'], correctIndex: 1, explanation: 'Le style démocratique (ou participatif) invite les collaborateurs à partager leur avis avant la décision finale.', duration: 30 },
-  { id: 'l_quiz_2', categoryId: 'leadership', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Pourquoi déléguer est-il important ?', options: ['Pour moins travailler', 'Pour responsabiliser et former', 'Pour éviter les tâches ingrates'], correctIndex: 1, explanation: 'Déléguer fait grandir vos collaborateurs.', duration: 30 },
+  { id: 'l_quiz_2', categoryId: 'leadership', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Pourquoi déléguer est-il important ?', options: ['Pour moins travailler', 'Pour responsabiliser et former', 'Pour éviter les tâches ingrates'], correctIndex: 1, explanation: 'Déléguer fait grandir vos collaborateurs et vous libère du temps pour la stratégie.', duration: 30 },
+  { id: 'l_quiz_3', categoryId: 'leadership', type: 'quiz', title: 'FEEDBACK', scenario: 'Le but principal d\'un feedback correctif est :', options: ['De sanctionner une erreur', 'D\'améliorer la performance future', 'De montrer qui est le chef'], correctIndex: 1, explanation: 'Le feedback est un outil de développement, pas de punition.', duration: 30 },
+  { id: 'l_quiz_4', categoryId: 'leadership', type: 'quiz', title: 'CONFIANCE', scenario: 'Comment bâtir la confiance rapidement ?', options: ['En contrôlant tout', 'En tenant ses promesses', 'En étant ami avec tout le monde'], correctIndex: 1, explanation: 'La cohérence entre les paroles et les actes est le fondement de la confiance.', duration: 30 },
 
-  // --- Critical Thinking ---
+  // --- Critical Thinking (8 cartes) ---
   { id: 'ct1', categoryId: 'critical_thinking', type: 'challenge', title: 'SYSTÈME D', scenario: 'Plus d\'internet 30 min avant le rendu ! Que faites-vous ?', explanation: 'Priorité 1 : Prévenir (téléphone). Priorité 2 : Alternative (partage de connexion 4G, café voisin, clé USB).', duration: 60 },
-  { id: 'ct2', categoryId: 'critical_thinking', type: 'challenge', title: 'FAKE NEWS', scenario: 'Analysez cette info : "Une étude dit que dormir 2h suffit". Vrai ou Faux ?', explanation: 'Vérifiez la source, l\'échantillon et le consensus scientifique.', duration: 45 },
+  { id: 'ct2', categoryId: 'critical_thinking', type: 'challenge', title: 'FAKE NEWS', scenario: 'Analysez cette info : "Une étude dit que dormir 2h suffit". Vrai ou Faux ?', explanation: 'Vérifiez la source, l\'échantillon et le consensus scientifique. C\'est biologiquement improbable pour la majorité.', duration: 45 },
+  { id: 'ct3', categoryId: 'critical_thinking', type: 'challenge', title: 'AVOCAT DU DIABLE', scenario: 'Défendez l\'idée que "L\'échec est la meilleure chose qui puisse arriver".', explanation: 'Cherchez les arguments contre-intuitifs : apprentissage, résilience, innovation forcée.', duration: 60 },
+  { id: 'ct4', categoryId: 'critical_thinking', type: 'challenge', title: 'PRIORISATION', scenario: 'Vous avez 5 tâches urgentes. Comment choisissez-vous ?', explanation: 'Matrice d\'Eisenhower : Important vs Urgent. Commencez par ce qui est Important ET Urgent.', duration: 45 },
   { id: 'ct_quiz_1', categoryId: 'critical_thinking', type: 'quiz', title: 'LOGIQUE', scenario: 'Si "Tous les chats sont gris" est FAUX, alors...', options: ['Aucun chat n\'est gris', 'Au moins un chat n\'est pas gris', 'Tous les chats sont noirs'], correctIndex: 1, explanation: 'La négation de "Tous" n\'est pas "Aucun", mais "Il existe au moins un contre-exemple".', duration: 45 },
+  { id: 'ct_quiz_2', categoryId: 'critical_thinking', type: 'quiz', title: 'BIAIS COGNITIF', scenario: 'Qu\'est-ce que le biais de confirmation ?', options: ['Croire tout ce qu\'on lit', 'Ne chercher que les infos qui confirment nos croyances', 'Toujours douter de soi'], correctIndex: 1, explanation: 'Notre cerveau filtre naturellement les informations pour conforter ce qu\'il pense déjà.', duration: 30 },
+  { id: 'ct_quiz_3', categoryId: 'critical_thinking', type: 'quiz', title: 'CORRÉLATION', scenario: 'Corrélation n\'est pas...', options: ['Causalité', 'Statistique', 'Information'], correctIndex: 0, explanation: 'Ce n\'est pas parce que deux événements arrivent en même temps que l\'un cause l\'autre (ex: ventes de glaces et coups de soleil).', duration: 30 },
+  { id: 'ct_quiz_4', categoryId: 'critical_thinking', type: 'quiz', title: 'ARGUMENTATION', scenario: 'Qu\'est-ce qu\'un argument "Ad Hominem" ?', options: ['Une attaque contre la personne', 'Un argument basé sur l\'émotion', 'Une preuve scientifique'], correctIndex: 0, explanation: 'C\'est attaquer celui qui parle plutôt que ses arguments.', duration: 30 },
 
-  // --- Emotional Intelligence ---
+  // --- Emotional Intelligence (8 cartes) ---
   { id: 'ei1', categoryId: 'emotional_intelligence', type: 'challenge', title: 'EMPATHIE', scenario: 'Un collègue pleure après une critique. Que dites-vous ?', explanation: 'Évitez "Calme-toi". Dites plutôt : "Je vois que ça t\'a touché, tu veux en parler ou tu préfères être seul un moment ?"', duration: 45 },
-  { id: 'ei2', categoryId: 'emotional_intelligence', type: 'challenge', title: 'AUTO-CONTRÔLE', scenario: 'Un client vous hurle dessus injustement. Réagissez.', explanation: 'Ne le prenez pas personnellement. Gardez une voix calme et basse.', duration: 45 },
+  { id: 'ei2', categoryId: 'emotional_intelligence', type: 'challenge', title: 'AUTO-CONTRÔLE', scenario: 'Un client vous hurle dessus injustement. Réagissez.', explanation: 'Ne le prenez pas personnellement. Gardez une voix calme et basse. "Je comprends votre frustration, cherchons une solution."', duration: 45 },
+  { id: 'ei3', categoryId: 'emotional_intelligence', type: 'challenge', title: 'GESTION DU STRESS', scenario: 'Grosse présentation dans 5 min, vous paniquez. Que faites-vous ?', explanation: 'Respiration carrée (4s inspirer, 4s bloquer, 4s expirer, 4s bloquer). Visualisation positive.', duration: 45 },
+  { id: 'ei4', categoryId: 'emotional_intelligence', type: 'challenge', title: 'MÉDIATION', scenario: 'Deux amis se disputent violemment devant vous. Intervenez.', explanation: 'Restez neutre. "On ne va rien résoudre en criant. Chacun son tour, qu\'est-ce qui se passe ?"', duration: 60 },
   { id: 'ei_quiz_1', categoryId: 'emotional_intelligence', type: 'quiz', title: 'ÉMOTION', scenario: 'À quoi sert la colère (fonction primaire) ?', options: ['À faire peur', 'À signaler une injustice/obstacle', 'À rien'], correctIndex: 1, explanation: 'La colère est une réaction de défense face à une agression, une frustration ou une injustice perçue.', duration: 30 },
+  { id: 'ei_quiz_2', categoryId: 'emotional_intelligence', type: 'quiz', title: 'EMPATHIE vs SYMPATHIE', scenario: 'La différence clé est...', options: ['L\'empathie comprend, la sympathie partage', 'C\'est la même chose', 'L\'empathie c\'est pour les psychologues'], correctIndex: 0, explanation: 'L\'empathie est la capacité de comprendre l\'émotion de l\'autre sans forcément la ressentir soi-même.', duration: 30 },
+  { id: 'ei_quiz_3', categoryId: 'emotional_intelligence', type: 'quiz', title: 'ASSERTIVITÉ', scenario: 'Être assertif, c\'est...', options: ['Imposer son point de vue', 'Ne jamais dire non', 'S\'affirmer en respectant l\'autre'], correctIndex: 2, explanation: 'Ni hérisson (agressif), ni paillasson (passif). L\'assertivité est l\'équilibre.', duration: 30 },
+  { id: 'ei_quiz_4', categoryId: 'emotional_intelligence', type: 'quiz', title: 'SIGNES DE STRESS', scenario: 'Lequel est un signe physique de stress ?', options: ['Mains moites', 'Faim excessive', 'Les deux'], correctIndex: 2, explanation: 'Le corps réagit au danger perçu par de nombreux signaux physiologiques.', duration: 30 },
 
-  // --- Creativity ---
+  // --- Creativity (8 cartes) ---
   { id: 'cr1', categoryId: 'creativity', type: 'challenge', title: 'DÉTOURNEMENT', scenario: '5 utilisations inhabituelles pour une brique rouge.', explanation: 'Exemples : Cale-livre, piler des épices, chauffer un lit (brique chaude), faire de la poussière rouge pour peindre...', duration: 45 },
-  { id: 'cr2', categoryId: 'creativity', type: 'challenge', title: 'MOTS INTERDITS', scenario: 'Décrivez un "Smartphone" sans dire : Tel, Écran, Appli, Internet.', explanation: 'Utilisez des métaphores : "Ardoise magique connectée", "Lien vers le monde"...', duration: 60 },
-  { id: 'cr_quiz_1', categoryId: 'creativity', type: 'quiz', title: 'BRAINSTORMING', scenario: 'La règle d\'or du brainstorming est :', options: ['La qualité avant tout', 'Pas de critique immédiate', 'Parler chacun son tour'], correctIndex: 1, explanation: 'Le jugement tue la créativité. On vise la quantité d\'abord, on trie ensuite (CQFD : Censure Interdite).', duration: 30 }
+  { id: 'cr2', categoryId: 'creativity', type: 'challenge', title: 'MOTS INTERDITS', scenario: 'Décrivez un "Smartphone" sans dire : Tel, Écran, Appli, Internet.', explanation: 'Utilisez des métaphores : "Ardoise magique connectée", "Lien vers le monde", "Miroir numérique"...', duration: 60 },
+  { id: 'cr3', categoryId: 'creativity', type: 'challenge', title: 'SCAMPER', scenario: 'Comment améliorer une "Chaise" ? (Ajouter, Modifier, etc.)', explanation: 'Ajouter des roues ? La rendre gonflable ? La faire chauffante ? La transformer en sac à dos ?', duration: 45 },
+  { id: 'cr4', categoryId: 'creativity', type: 'challenge', title: 'PENSÉE LATÉRALE', scenario: 'Un homme entre dans un bar et demande un verre d\'eau. Le barman sort un fusil. L\'homme dit merci et part. Pourquoi ?', explanation: 'L\'homme avait le hoquet. Le barman lui a fait peur pour le guérir. L\'homme a compris et l\'a remercié.', duration: 60 },
+  { id: 'cr_quiz_1', categoryId: 'creativity', type: 'quiz', title: 'BRAINSTORMING', scenario: 'La règle d\'or du brainstorming est :', options: ['La qualité avant tout', 'Pas de critique immédiate', 'Parler chacun son tour'], correctIndex: 1, explanation: 'Le jugement tue la créativité. On vise la quantité d\'abord, on trie ensuite (CQFD : Censure Interdite).', duration: 30 },
+  { id: 'cr_quiz_2', categoryId: 'creativity', type: 'quiz', title: 'INNOVATION', scenario: 'Qu\'est-ce que la "sérendipité" ?', options: ['Une méthode de gestion', 'Trouver quelque chose qu\'on ne cherchait pas', 'Une sorte de colle'], correctIndex: 1, explanation: 'C\'est l\'art de faire des découvertes heureuses par hasard (ex: le Post-it, la Pénicilline).', duration: 30 },
+  { id: 'cr_quiz_3', categoryId: 'creativity', type: 'quiz', title: 'OBSTACLE', scenario: 'Le pire ennemi de la créativité est...', options: ['Le manque de temps', 'La peur du ridicule', 'Le manque d\'argent'], correctIndex: 1, explanation: 'La peur du jugement des autres bride l\'imagination.', duration: 30 },
+  { id: 'cr_quiz_4', categoryId: 'creativity', type: 'quiz', title: 'DESIGN THINKING', scenario: 'La première étape du Design Thinking est...', options: ['Prototyper', 'L\'Empathie', 'Définir'], correctIndex: 1, explanation: 'Il faut d\'abord comprendre profondément les besoins de l\'utilisateur.', duration: 30 },
+
+  // --- Logistique/Opérations (12 cartes de base pour le défi 53) ---
+  { id: 'log1', categoryId: 'logistics', type: 'challenge', title: 'PRIORISATION IMMÉDIATE', scenario: 'Cinq tâches urgentes sur votre bureau. Ordonnez-les et justifiez votre choix en 30s.', explanation: 'Utilisez la matrice Urgent/Important (Eisenhower). Concentrez-vous d\'abord sur ce qui est Important ET Urgent.', duration: 30 },
+  { id: 'log2', categoryId: 'logistics', type: 'challenge', title: 'DÉLÉGUER UNE TÂCHE', scenario: 'Vous devez former un collègue pour reprendre une tâche complexe. Expliquez la méthode en 45s.', explanation: 'Méthode : Expliquer le pourquoi, montrer le comment, laisser faire, et vérifier/corriger.', duration: 45 },
+  { id: 'log3', categoryId: 'logistics', type: 'challenge', title: 'CLIENT INSATISFAIT', scenario: 'Un client menace de partir. Comment regagnez-vous sa confiance ?', explanation: 'Écoute active, excuses sincères, proposition de solution immédiate, et offre compensatoire (geste commercial).', duration: 60 },
+  { id: 'log4', categoryId: 'logistics', type: 'challenge', title: 'EFFICACITÉ RÉUNION', scenario: 'La réunion est inutile. Prenez la parole pour la recentrer ou y mettre fin poliment.', explanation: 'Soyez précis : "Pour être efficaces, revenons à l\'objectif initial. Avons-nous pris une décision sur le point X ?"', duration: 45 },
+  { id: 'log5', categoryId: 'logistics', type: 'challenge', title: 'AMÉLIORATION CONTINUE', scenario: 'Identifiez une perte de temps dans votre routine et proposez une solution en 30s.', explanation: 'La clé est la mesure (combien de temps perdu ?) et la proposition de solution concrète (ex: Automatiser, Regrouper les tâches).', duration: 30 },
+  { id: 'log_quiz_1', categoryId: 'logistics', type: 'quiz', title: 'MATRICE EISENHOWER', scenario: 'Où placer une tâche "Non Urgente mais Importante" ?', options: ['À faire immédiatement (Urgent)', 'À planifier (Planifier)', 'À déléguer (Déléguer)'], correctIndex: 1, explanation: 'C\'est la zone de l\'excellence où l\'on fait de la stratégie (Planification).', duration: 30 },
+  { id: 'log_quiz_2', categoryId: 'logistics', type: 'quiz', title: 'TEAMWORK', scenario: 'Quelle est la principale cause d\'inefficacité en équipe ?', options: ['Manque de ressources', 'Objectifs flous', 'Conflits de personnalité'], correctIndex: 1, explanation: 'Des objectifs clairs (SMART) alignent l\'énergie de l\'équipe et évitent les efforts inutiles.', duration: 30 },
+  { id: 'log_quiz_3', categoryId: 'logistics', type: 'quiz', title: 'SATISFACTION CLIENT', scenario: 'Le meilleur moment pour demander un feedback client est...', options: ['Avant l\'achat', 'Immédiatement après le service', 'Un mois après l\'achat'], correctIndex: 1, explanation: 'Le client est le plus engagé émotionnellement juste après l\'expérience.', duration: 30 },
+  { id: 'log_quiz_4', categoryId: 'logistics', type: 'quiz', title: 'GESTION DE PROJET', scenario: 'La méthode Agile met l\'accent sur :', options: ['La documentation exhaustive', 'L\'adaptabilité et la collaboration client', 'Le respect strict du plan initial'], correctIndex: 1, explanation: 'Agile privilégie les interactions et le logiciel fonctionnel sur la documentation et le contrat.', duration: 30 },
+  { id: 'log_quiz_5', categoryId: 'logistics', type: 'quiz', title: 'PRODUCTIVITÉ', scenario: 'Quel est le principe de Pareto (80/20) ?', options: ['80% des tâches prennent 20% du temps', '20% des efforts produisent 80% des résultats', '80% des clients sont satisfaits'], correctIndex: 1, explanation: 'Il faut identifier les 20% d\'actions qui ont le plus grand impact.', duration: 30 },
+  { id: 'log_quiz_6', categoryId: 'logistics', type: 'quiz', title: 'DÉLÉGATION', scenario: 'Déléguer la responsabilité sans déléguer l\'autorité mène à :', options: ['Plus d\'efficacité', 'De la confusion et de la frustration', 'Une meilleure formation'], correctIndex: 1, explanation: 'L\'autorité (le pouvoir de décider) doit accompagner la responsabilité (l\'obligation de faire).', duration: 30 },
+  { id: 'log_quiz_7', categoryId: 'logistics', type: 'quiz', title: 'KPI LOGISTIQUE', scenario: 'Quelle est un KPI essentiel pour la Logistique ?', options: ['Temps passé en réunion', 'Taux de rotation des stocks', 'Nombre de likes sur les réseaux sociaux'], correctIndex: 1, explanation: 'Le Taux de Rotation mesure la vitesse à laquelle les stocks se vendent, un indicateur d\'efficacité opérationnelle.', duration: 30 },
 ];
 
-// --- SOUND MANAGER ---
+// --- SOUND MANAGER (Fonctions inchangées) ---
 const playSound = (type, volume = 0.5) => {
   if (typeof window === 'undefined' || !window.AudioContext) return;
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -146,62 +209,96 @@ const Timer = ({ duration, onComplete, autoStart = false, isStopped = false }) =
   );
 };
 
-// --- NOUVEAU DESIGN PREMIUM POUR LE DOS DES CARTES ---
+// --- REDESIGN COMPLET : CARTE DE CHOIX PREMIUM ---
 const CardBack = ({ category, onClick, disabled }) => {
   const Icon = category.icon;
   
+  // Styles inline dynamiques pour le gradient et la bordure (safe pour production)
+  const cardStyle = {
+    background: disabled ? '#2d2d2d' : category.colorData.gradient,
+    border: disabled ? '1px solid #444' : category.colorData.border,
+    boxShadow: disabled ? 'none' : `0 0 40px ${category.colorData.hex}30`, // Ombre plus prononcée
+  };
+
   return (
-    <button 
-      onClick={() => { if(!disabled) { playSound('flip'); onClick(category.id); }}}
-      disabled={disabled}
-      // On utilise le style en ligne pour le gradient pour éviter la purge Tailwind en prod
-      style={!disabled ? category.colorData.style : {}}
-      className={`relative w-full aspect-[3/4] rounded-[2.5rem] transition-all duration-500 group perspective-1000 p-[3px] shadow-xl overflow-hidden
-        ${disabled ? 'bg-gray-600 opacity-40 grayscale cursor-not-allowed scale-95' : 'hover:scale-[1.03] hover:-translate-y-2 cursor-pointer'}
+    <div
+      className={`
+        relative w-full aspect-[3/4] rounded-[32px] transition-all duration-500
+        ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : 'group cursor-pointer'}
       `}
+      style={{
+          transform: disabled ? 'none' : 'translateY(0)',
+          marginBottom: disabled ? 0 : '40px', // Ajout d'une marge pour le bouton qui apparaît en dessous
+      }}
     >
-      {/* Contenu interne */}
-          <div className="absolute inset-[3px] bg-black/10 rounded-[2.3rem] flex flex-col items-center justify-between p-6 relative overflow-hidden backdrop-blur-sm">
-             
-             {/* Background Effects */}
-             <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/20 pointer-events-none"></div>
-             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-3xl pointer-events-none"></div>
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
+        {/* Le corps de la carte est cliquable et se soulève */}
+        <button 
+          onClick={() => { if(!disabled) { playSound('flip'); onClick(category.id); }}}
+          disabled={disabled}
+          className={`
+            relative w-full h-full rounded-[32px] transition-all duration-500
+            flex flex-col items-center justify-between p-6 overflow-hidden
+            group-hover:-translate-y-3 group-hover:shadow-2xl
+          `}
+          style={cardStyle}
+        >
+          {/* Texture de fond bruitée pour aspect premium */}
+          <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
+          
+          {/* Reflet lumineux en haut */}
+          <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>
 
-             {/* Top Decoration */}
-             <div className="w-12 h-1 bg-white/30 rounded-full mb-4"></div>
-
-             {/* Icone Centrale Premium */}
-             <div className="relative z-10 flex-grow flex items-center justify-center">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-white/20 blur-xl rounded-full scale-150 animate-pulse"></div>
-                    <div className="w-24 h-24 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                        <Icon size={48} className="text-white drop-shadow-md" strokeWidth={1.5} />
-                    </div>
-                </div>
-             </div>
-
-             {/* Label Category */}
-             <div className="relative z-10 w-full text-center mt-4">
-                <h3 className="text-white font-black text-lg md:text-xl tracking-tight uppercase leading-tight drop-shadow-lg">
-                    {category.label}
-                </h3>
-                <div className="w-8 h-1 bg-white/40 rounded-full mx-auto mt-3 group-hover:w-16 transition-all duration-500"></div>
-             </div>
-
-             {/* Shine Effect Overlay */}
-             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out pointer-events-none z-20"></div>
+          {/* HEADER DE LA CARTE */}
+          <div className="w-full flex justify-between items-start z-10 opacity-60">
+            <div className="w-2 h-2 rounded-full bg-white"></div>
+            <div className="w-2 h-2 rounded-full bg-white"></div>
           </div>
-      
-      {/* Badge "Tirer" au survol */}
-      {!disabled && (
-        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 z-30">
-           <div className="bg-white text-black text-xs font-black px-5 py-2 rounded-full uppercase tracking-widest shadow-lg flex items-center gap-2 scale-90 group-hover:scale-100 transition-transform">
-             <Plus size={14} strokeWidth={4} className="text-[#B02E68]" /> JOUER
-           </div>
-        </div>
-      )}
-    </button>
+
+          {/* ICONE CENTRALE AVEC EFFET NEON */}
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
+            <div className={`
+                 relative w-28 h-28 rounded-3xl flex items-center justify-center 
+                 bg-white/10 backdrop-blur-md border-2 border-white/20
+                 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]
+                 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3
+            `}>
+                 {/* Glow derrière l'icone */}
+                 <div className="absolute inset-0 rounded-3xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500" style={{ backgroundColor: category.colorData.hex }}></div>
+                 <Icon size={56} className="text-white drop-shadow-md relative z-10" strokeWidth={1.5} />
+            </div>
+          </div>
+
+          {/* TITRE - CORRECTION ICI */}
+          <div className="relative z-10 w-full mt-4 flex flex-col items-center">
+             <h3 
+                className="font-black text-white text-lg tracking-tight uppercase text-center mb-2 drop-shadow-lg leading-tight"
+                // Utilisation de dangerouslySetInnerHTML pour le <br/>
+                dangerouslySetInnerHTML={{ __html: category.label }}
+             />
+             
+             {/* Ligne décorative qui se transforme */}
+             <div className={`w-12 h-1 bg-white/50 rounded-full transition-all duration-300 ${!disabled && 'group-hover:w-full group-hover:bg-white'}`}></div>
+          </div>
+
+          {/* Bordure intérieure brillante */}
+          <div className="absolute inset-[1px] rounded-[31px] border border-white/10 pointer-events-none"></div>
+        </button>
+
+        {/* Bouton JOUER qui apparaît SOUS la carte au survol (non superposé) */}
+        {!disabled && (
+             <div 
+                className="absolute left-1/2 -bottom-10 w-[80%] transform -translate-x-1/2 opacity-0 transition-all duration-500 pointer-events-none group-hover:opacity-100 group-hover:-translate-y-1"
+             >
+                 <button 
+                    onClick={() => { playSound('flip'); onClick(category.id); }}
+                    className="w-full text-black px-6 py-2 rounded-xl font-black text-sm uppercase tracking-widest shadow-2xl flex items-center justify-center gap-2 transform scale-100 transition-all duration-300 pointer-events-auto"
+                    style={{ background: category.colorData.hex, boxShadow: `0 10px 20px -5px ${category.colorData.hex}80` }}
+                 >
+                    <Plus size={16} strokeWidth={4} className="text-black/80" /> JOUER
+                 </button>
+             </div>
+        )}
+    </div>
   );
 };
 
@@ -229,11 +326,14 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
 
   const handleNext = () => onResult(feedbackState === 'success', card);
 
+  // Style de l'accentuation basé sur la catégorie (pour les boutons, timer, etc.)
+  const hexColor = category.colorData.hex;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg animate-in fade-in zoom-in duration-300">
       {/* Utilisation du style en ligne pour le gradient background */}
       <div 
-         style={category.colorData.style}
+         style={{ background: category.colorData.gradient }}
          className={`relative w-full md:max-w-6xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
       >
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
@@ -251,7 +351,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                     <span className="text-[10px] uppercase tracking-[0.2em] opacity-60 block leading-none mb-1">Catégorie</span>
                     <span className="font-bold text-sm text-white leading-none">{category.label}</span>
                 </div>
-                <div className="text-3xl bg-white/10 w-10 h-10 flex items-center justify-center rounded-xl">{/* Ici on utilise l'icone Lucide */} <category.icon size={24} /></div>
+                <div className="text-3xl w-10 h-10 flex items-center justify-center rounded-xl" style={{ backgroundColor: `${hexColor}20`, border: `1px solid ${hexColor}60` }}> <category.icon size={24} style={{ color: hexColor }} /></div>
                 <button onClick={onClose} className="ml-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition"><X size={20}/></button>
             </div>
         </div>
@@ -281,7 +381,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                                 </div>
                             )}
                         </div>
-                        <button onClick={handleNext} className="w-full bg-white text-black font-black py-4 rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-3 text-xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.4)]">CONTINUER <ArrowRight size={24} strokeWidth={3} /></button>
+                        <button onClick={handleNext} className="w-full text-black font-black py-4 rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-3 text-xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.4)]" style={{ background: hexColor }}>CONTINUER <ArrowRight size={24} strokeWidth={3} /></button>
                     </div>
                 </div>
             )}
@@ -290,9 +390,10 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                 <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-black/20 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/10 shadow-sm shrink-0">
                     {card.type === 'quiz' ? <><Sparkles size={12} className="text-yellow-300"/> Quiz • 1 Pt</> : <><Users size={12} className="text-yellow-300"/> Défi • Jury</>}
                 </div>
-                <h2 className="text-3xl md:text-5xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
+                {/* CORRECTION 1: Diminution des tailles de police pour un meilleur ajustement vertical */}
+                <h2 className="text-3xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
                 <div className="bg-black/10 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm w-full max-w-2xl">
-                    <p className="text-xl md:text-3xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90">"{card.scenario}"</p>
+                    <p className="text-xl md:text-2xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90">"{card.scenario}"</p>
                 </div>
             </div>
 
@@ -301,12 +402,46 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                     {card.type === 'quiz' ? (
                         <div className="space-y-3 w-full">
                             <span className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2 block text-center">Choisissez la bonne réponse</span>
-                            {card.options.map((option, idx) => (
-                                <button key={idx} onClick={() => handleQuizOptionClick(idx)} disabled={isAnswerRevealed} className={`w-full p-4 rounded-xl text-left text-base font-bold transition-all border-2 flex items-center gap-4 group relative overflow-hidden ${selectedOption === idx ? (idx === card.correctIndex ? 'bg-green-500 border-green-400 text-white' : 'bg-red-500 border-red-400 text-white') : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 active:scale-[0.98]'}`}>
-                                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center shrink-0 text-xs font-black transition-colors ${selectedOption === idx ? 'border-white bg-white/20' : 'border-white/30 bg-white/5 group-hover:border-white group-hover:bg-white text-white group-hover:text-black'}`}>{idx === 0 ? 'A' : idx === 1 ? 'B' : 'C'}</div>
+                            {card.options.map((option, idx) => {
+                                // Définition du style du bouton
+                                const isSelected = selectedOption === idx;
+                                const isCorrect = idx === card.correctIndex;
+                                const baseStyle = 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 active:scale-[0.98]';
+                                let statusClass = baseStyle;
+                                let statusCircleStyle = { border: '2px solid rgba(255,255,255,0.3)', color: 'white' };
+                                let buttonStyle = {};
+
+                                if (isAnswerRevealed) {
+                                    if (isCorrect) {
+                                        statusClass = 'bg-green-600 border-green-400 text-white shadow-[0_0_15px_rgba(0,255,0,0.5)]';
+                                        statusCircleStyle = { border: '2px solid white', backgroundColor: 'white', color: '#047857' };
+                                    } else if (isSelected) {
+                                        statusClass = 'bg-red-600 border-red-400 text-white opacity-60';
+                                        statusCircleStyle = { border: '2px solid white', backgroundColor: 'white', color: '#b91c1c' };
+                                    } else {
+                                        statusClass = 'bg-white/5 border-white/10 opacity-40';
+                                    }
+                                } else if (isSelected) {
+                                     // Style lorsqu'une option est sélectionnée mais pas encore révélée
+                                     buttonStyle = { border: `2px solid ${hexColor}` };
+                                     statusCircleStyle = { border: `2px solid ${hexColor}`, backgroundColor: `${hexColor}30`, color: hexColor };
+                                }
+                                
+                                return (
+                                <button 
+                                    key={idx} 
+                                    onClick={() => handleQuizOptionClick(idx)} 
+                                    disabled={isAnswerRevealed} 
+                                    className={`w-full p-4 rounded-xl text-left text-base font-bold transition-all border-2 flex items-center gap-4 group relative overflow-hidden ${statusClass}`}
+                                    style={buttonStyle}
+                                >
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-black transition-colors`} style={statusCircleStyle}>
+                                        {idx === 0 ? 'A' : idx === 1 ? 'B' : 'C'}
+                                    </div>
                                     <span className="leading-tight z-10 relative">{option}</span>
                                 </button>
-                            ))}
+                            );
+                            })}
                         </div>
                     ) : (
                          <div className="flex flex-col items-center justify-center h-full text-white/60 text-center py-4">
@@ -319,8 +454,8 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                     <Timer duration={card.duration} isStopped={timerStopped || isAnswerRevealed} />
                     {card.type === 'challenge' && !feedbackState && (
                         <div className="flex gap-3 mt-4">
-                            <button onClick={() => handleResult(false)} className="flex-1 group bg-red-500/10 hover:bg-red-500 text-white border border-red-500/30 hover:border-red-500 font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2"><XCircle size={20} className="group-hover:scale-110 transition"/> Raté</button>
-                            <button onClick={() => handleResult(true)} className="flex-1 group bg-green-500/10 hover:bg-green-500 text-white border border-green-500/30 hover:border-green-500 font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg"><Check size={20} className="group-hover:scale-110 transition"/> Réussi</button>
+                            <button onClick={() => handleResult(false)} className="flex-1 group text-white border border-red-500/30 font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: 'linear-gradient(90deg, #dc262620, #b91c1c50)', borderColor: '#b91c1c' }}><XCircle size={20} className="group-hover:scale-110 transition"/> Raté</button>
+                            <button onClick={() => handleResult(true)} className="flex-1 group text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg" style={{ background: 'linear-gradient(90deg, #10b981, #059669)', borderColor: '#059669' }}><Check size={20} className="group-hover:scale-110 transition"/> Réussi</button>
                         </div>
                     )}
                  </div>
@@ -331,7 +466,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
   );
 };
 
-// --- ECRAN HISTOIRE ---
+// --- ECRAN HISTOIRE (Inchangé) ---
 const StoryScreen = ({ onBack }) => (
     <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
@@ -370,7 +505,7 @@ const StoryScreen = ({ onBack }) => (
 );
 
 // --- Ecrans Menu, History, Setup ---
-const MainMenu = ({ onNavigate }) => (
+const MainMenu = ({ onNavigate, startLogisticsChallenge }) => ( // Ajout de startLogisticsChallenge
   <div className="flex flex-col items-center justify-center h-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
      <div className="text-center mb-8 relative">
         <div className="absolute -inset-10 bg-gradient-to-r from-[#FFC20E] to-[#B02E68] blur-3xl opacity-20 animate-pulse"></div>
@@ -379,11 +514,20 @@ const MainMenu = ({ onNavigate }) => (
      </div>
      <div className="w-full max-w-xs space-y-4 relative z-10">
        <button onClick={() => { playSound('flip'); onNavigate('setup'); }} className="w-full group bg-white text-[#B02E68] p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_30px_60px_-15px_rgba(255,255,255,0.3)] transition-all flex items-center justify-between px-8 border-4 border-transparent hover:border-[#FFC20E]"><span>JOUER</span> <Play className="group-hover:translate-x-1 transition fill-current" /></button>
+       
+       {/* NOUVEAU BOUTON DÉFI LOGISTIQUE (Design immersif) */}
+       <button onClick={startLogisticsChallenge} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20"
+        style={{ background: COLORS.cards.logistics.accentGradient, boxShadow: `0 0 30px ${COLORS.cards.logistics.hex}50` }}>
+          <span>DÉFI LOGISTIQUE</span> <Zap className="group-hover:translate-x-1 transition fill-current text-white" />
+       </button>
+       
        <button onClick={() => { playSound('flip'); onNavigate('story'); }} className="w-full bg-[#B02E68]/40 hover:bg-[#B02E68]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>L'HISTOIRE</span> <BookOpen size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
      </div>
   </div>
 );
+
+// Composants History et Setup (inchangés) ... [omitted for brevity, they are unchanged]
 
 const HistoryScreen = ({ history, onBack }) => (
     <div className="w-full max-w-2xl bg-black/30 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/10 animate-in zoom-in-95 duration-300 h-[80vh] flex flex-col shadow-2xl">
@@ -422,8 +566,8 @@ const SetupScreen = ({ onStart, onBack }) => {
   
   const handleStart = () => {
     playSound('win'); 
-    if (mode === 'solo') onStart([{ id: 1, name: soloName, score: 0 }], 'solo');
-    else onStart(players.map((p, i) => ({ id: i + 1, name: p, score: 0 })), 'multi');
+    if (mode === 'solo') onStart([{ id: 1, name: soloName, score: 0 }], 'solo', 15, 'all');
+    else onStart(players.map((p, i) => ({ id: i + 1, name: p, score: 0 })), 'multi', 15, 'all');
   };
 
   return (
@@ -514,7 +658,10 @@ export default function App() {
   const [gameHistory, setGameHistory] = useState([]);
   const [showScoreboard, setShowScoreboard] = useState(false);
   
-  const MAX_ROUNDS = 15;
+  // NOUVEAUX ÉTATS POUR GÉRER LE MODE SPÉCIAL
+  const [maxRounds, setMaxRounds] = useState(15);
+  const [deckFilter, setDeckFilter] = useState('all'); // 'all' | 'logistics'
+
   const [roundsPlayed, setRoundsPlayed] = useState(0);
   const [playedCardIds, setPlayedCardIds] = useState([]);
   const [missedCards, setMissedCards] = useState([]);
@@ -527,20 +674,43 @@ export default function App() {
     return () => { document.body.removeChild(script); }
   }, []);
 
-  const startGame = (playerList, mode) => {
+  // MISE À JOUR : Ajout des paramètres rounds et deckFilter
+  const startGame = (playerList, mode, rounds, filter) => {
     setPlayers(playerList); setGameMode(mode); setView('playing');
     setCurrentPlayerIndex(0); setShowScoreboard(false); setRoundsPlayed(0);
     setPlayedCardIds([]); setMissedCards([]);
+    setMaxRounds(rounds);
+    setDeckFilter(filter);
+  };
+  
+  // NOUVELLE FONCTION POUR LANCER LE DÉFI LOGISTIQUE
+  const startLogisticsChallenge = () => {
+      playSound('flip');
+      // On force le mode solo pour l'instant
+      const defaultPlayer = [{ id: 1, name: 'Défieur', score: 0 }];
+      // On met à jour MAX_ROUNDS pour utiliser toutes les cartes Logistique disponibles
+      const LOGISTICS_MAX_ROUNDS = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
+      
+      // On lance la partie Logistique avec une seule carte au début (pour forcer l'affichage)
+      startGame(defaultPlayer, 'solo', LOGISTICS_MAX_ROUNDS, 'logistics');
   };
 
   const endGame = () => {
     const newHistoryEntry = { date: new Date().toISOString(), mode: gameMode, results: [...players].sort((a,b) => b.score - a.score) };
     setGameHistory([newHistoryEntry, ...gameHistory]);
     setShowScoreboard(false); setActiveCard(null); setActiveCategory(null); setView('menu');
+    setDeckFilter('all'); // Réinitialiser le filtre
   };
-
+  
+  // MISE À JOUR DE LA LOGIQUE DE TIRAGE ALÉATOIRE
   const drawRandomNextCard = () => {
-     const availableCards = INITIAL_CARDS.filter(c => !playedCardIds.includes(c.id));
+     // Si nous sommes en mode "logistics", on filtre le pool de cartes
+     const cardPool = deckFilter === 'logistics' 
+         ? INITIAL_CARDS.filter(c => c.categoryId === 'logistics') 
+         : INITIAL_CARDS;
+
+     const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
+     
      if (availableCards.length === 0) { 
         setActiveCard(null); 
         setActiveCategory(null);
@@ -553,11 +723,12 @@ export default function App() {
      setPlayedCardIds(prev => [...prev, randomCard.id]);
   };
 
+  // Fonction utilisée uniquement en mode 'all'
   const drawCard = (categoryId) => {
     const categoryCards = INITIAL_CARDS.filter(c => c.categoryId === categoryId && !playedCardIds.includes(c.id));
     if (categoryCards.length === 0) { alert("Plus de cartes disponibles dans cette catégorie !"); return; }
     const randomCard = categoryCards[Math.floor(Math.random() * categoryCards.length)];
-    setActiveCategory(Object.values(CATEGORIES).find(c => c.id === categoryId));
+    setActiveCategory(Object.values(CATEGORIES).find(c => c.id === randomCard.categoryId));
     setActiveCard(randomCard);
     setPlayedCardIds(prev => [...prev, randomCard.id]);
   };
@@ -574,15 +745,20 @@ export default function App() {
     const nextRound = roundsPlayed + 1;
     setRoundsPlayed(nextRound);
     
-    const availableCards = INITIAL_CARDS.filter(c => !playedCardIds.includes(c.id));
+    // On vérifie la fin de partie par rapport au MAX_ROUNDS dynamique
+    const cardPool = deckFilter === 'logistics' 
+        ? INITIAL_CARDS.filter(c => c.categoryId === 'logistics') 
+        : INITIAL_CARDS;
     
-    if (nextRound >= MAX_ROUNDS || availableCards.length === 0) { 
+    const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
+    
+    if (nextRound >= maxRounds || availableCards.length === 0) { 
         setActiveCard(null); 
         setActiveCategory(null);
         setShowScoreboard(true); 
     } else { 
         setCurrentPlayerIndex((currentPlayerIndex + 1) % currentPlayers.length); 
-        drawRandomNextCard();
+        drawRandomNextCard(); // Tirage aléatoire pour la continuité
     }
   };
 
@@ -591,11 +767,22 @@ export default function App() {
       return remaining.length === 0;
   };
 
+  // Logique pour n'afficher que les cartes pertinentes
+  const categoriesToRender = deckFilter === 'logistics' 
+    ? [CATEGORIES.LOGISTICS] 
+    : Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics'); // Dans le mode normal, on cache la carte Logistique
+  
+  // CORRECTION 2: Définir le style d'arrière-plan ici
+  const currentBackgroundStyle = deckFilter === 'logistics' 
+    ? COLORS.logisticsBackgroundStyle 
+    : COLORS.defaultBackgroundStyle;
+
+
   return (
     <div 
         className={`min-h-screen font-sans selection:bg-[#FFC20E] selection:text-black flex flex-col overflow-hidden relative text-white`}
-        // Utilisation du style en ligne pour le background principal
-        style={COLORS.backgroundStyle}
+        // Application du style d'arrière-plan dynamique
+        style={currentBackgroundStyle}
     >
       <style>{`
         .stroke-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4); color: transparent; }
@@ -609,8 +796,8 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {view === 'menu' && <MainMenu onNavigate={setView} />}
-      {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen onStart={startGame} onBack={() => setView('menu')} /></div>}
+      {view === 'menu' && <MainMenu onNavigate={setView} startLogisticsChallenge={startLogisticsChallenge} />}
+      {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen onStart={(p, m) => startGame(p, m, 15, 'all')} onBack={() => setView('menu')} /></div>}
       {view === 'story' && <div className="flex-1 flex items-center justify-center p-4 z-50"><StoryScreen onBack={() => setView('menu')} /></div>}
       {view === 'history' && <div className="flex-1 flex items-center justify-center p-4"><HistoryScreen history={gameHistory} onBack={() => setView('menu')} /></div>}
 
@@ -623,7 +810,7 @@ export default function App() {
             </div>
             <div className="flex items-center gap-3 bg-black/30 px-4 py-2 rounded-full border border-white/10 shadow-inner">
                 <CheckSquare size={16} className="text-white/60" />
-                <span className="text-sm font-black tracking-widest">{roundsPlayed} / {MAX_ROUNDS}</span>
+                <span className="text-sm font-black tracking-widest">{roundsPlayed} / {maxRounds}</span>
             </div>
             <div className="flex items-center gap-3 overflow-x-auto no-scrollbar max-w-[40vw]">
                 {players.map((p, i) => (
@@ -642,12 +829,18 @@ export default function App() {
                 <span className="text-white/80 text-[10px] uppercase tracking-[0.3em] font-bold">C'est le tour de {players[currentPlayerIndex]?.name}</span>
               </div>
               <h2 className="text-3xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
-                 Choisissez une carte <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
+                 {deckFilter === 'logistics' ? 'DÉFI LOGISTIQUE EN COURS' : 'CHOISISSEZ UNE CARTE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
               </h2>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 auto-rows-fr pb-20">
-              {Object.values(CATEGORIES).map((cat) => (
-                <CardBack key={cat.id} category={cat} onClick={drawCard} disabled={isCategoryEmpty(cat.id)} />
+              {categoriesToRender.map((cat) => (
+                <CardBack 
+                    key={cat.id} 
+                    category={cat} 
+                    // Si mode logistique, le clic lance le tirage aléatoire et la continuité
+                    onClick={deckFilter === 'logistics' ? drawRandomNextCard : drawCard} 
+                    disabled={isCategoryEmpty(cat.id)} 
+                />
               ))}
             </div>
           </main>
