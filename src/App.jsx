@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp } from 'lucide-react';
 
 // --- Configuration & Données ---
 
@@ -472,6 +472,199 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
   );
 };
 
+
+// --- Écran de Profil des Compétences (NOUVEAU) ---
+const ProfileScreen = ({ player, onBack }) => {
+    if (!player) return <div className="text-white">Chargement du profil...</div>;
+
+    const allCategories = Object.values(CATEGORIES).filter(c => c.id !== 'logistics');
+    
+    // Calculer les scores et les max par catégorie
+    const skillData = allCategories.map(cat => {
+        const stats = player.scoreByCategory[cat.id] || { success: 0, total: 0 };
+        const percentage = stats.total > 0 ? Math.round((stats.success / stats.total) * 100) : 0;
+        return {
+            ...cat,
+            percentage,
+            success: stats.success,
+            total: stats.total
+        };
+    });
+
+    const totalScore = skillData.reduce((sum, item) => sum + item.success, 0);
+    const totalPlayed = skillData.reduce((sum, item) => sum + item.total, 0);
+
+    // Fonction pour générer le graphique radar (simplifié)
+    const RadarChart = ({ data }) => {
+        // AUGMENTATION DE LA TAILLE POUR INCLURE LES LABELS
+        const radius = 130;
+        const center = 150; 
+        const viewBoxSize = center * 2;
+        const numSkills = data.length;
+        const angleSlice = (Math.PI * 2) / numSkills;
+
+        const pathPoints = data.map((skill, i) => {
+            // Mapping du pourcentage (0-100) à la distance du centre (0-radius)
+            const r = (skill.percentage / 100) * radius;
+            const x = center + r * Math.cos(angleSlice * i - Math.PI / 2);
+            const y = center + r * Math.sin(angleSlice * i - Math.PI / 2);
+            return `${x},${y}`;
+        }).join(" ");
+
+        return (
+            // CORRECTION: Le SVG doit être centré et avoir une taille définie pour ne pas être tronqué
+            <svg width="100%" height="auto" viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`} className="max-w-[300px] max-h-[300px] shadow-xl">
+                {/* Axes et cercles de référence */}
+                {[25, 50, 75, 100].map(level => (
+                    <circle 
+                        key={level} 
+                        cx={center} 
+                        cy={center} 
+                        r={(level / 100) * radius} 
+                        stroke="#ffffff20" 
+                        fill="transparent"
+                        strokeDasharray={level === 100 ? 0 : 4}
+                        strokeWidth={1}
+                    />
+                ))}
+                
+                {/* Lignes radiales */}
+                {data.map((_, i) => (
+                    <line 
+                        key={`line-${i}`}
+                        x1={center} 
+                        y1={center} 
+                        x2={center + radius * Math.cos(angleSlice * i - Math.PI / 2)} 
+                        y2={center + radius * Math.sin(angleSlice * i - Math.PI / 2)} 
+                        stroke="#ffffff30" 
+                        strokeWidth={1}
+                    />
+                ))}
+                
+                {/* Surface des données (le profil) */}
+                <polygon points={pathPoints} fill="#FFC20E50" stroke="#FFC20E" strokeWidth="2" />
+                
+                {/* Points des données */}
+                {data.map((skill, i) => {
+                    const r = (skill.percentage / 100) * radius;
+                    const x = center + r * Math.cos(angleSlice * i - Math.PI / 2);
+                    const y = center + r * Math.sin(angleSlice * i - Math.PI / 2);
+                    return (
+                        <circle 
+                            key={`point-${i}`}
+                            cx={x} 
+                            cy={y} 
+                            r={4} 
+                            fill={skill.colorData.hex} 
+                            stroke="#fff"
+                            strokeWidth={1.5}
+                        />
+                    );
+                })}
+
+                {/* Étiquettes des compétences */}
+                {data.map((skill, i) => {
+                    // Position du label légèrement à l'extérieur du cercle
+                    const labelRadius = radius * 1.05; 
+                    const x = center + labelRadius * Math.cos(angleSlice * i - Math.PI / 2);
+                    const y = center + labelRadius * Math.sin(angleSlice * i - Math.PI / 2);
+                    
+                    // Ajuster l'ancre du texte pour qu'il soit bien aligné
+                    let textAnchor;
+                    if (Math.abs(x - center) < 5) { // Si au sommet ou à la base
+                        textAnchor = 'middle';
+                    } else if (x < center) { // Si à gauche
+                        textAnchor = 'end';
+                    } else { // Si à droite
+                        textAnchor = 'start';
+                    }
+                    
+                    // Ajuster la position verticale pour les labels du haut et du bas
+                    const dy = y < center ? -10 : (y > center ? 20 : 5); 
+
+                    return (
+                        <text 
+                            key={`label-${i}`}
+                            x={x} 
+                            y={y + dy} 
+                            textAnchor={textAnchor} 
+                            fill={skill.colorData.hex} 
+                            className="font-bold text-xs uppercase tracking-wider"
+                            style={{ fontSize: '10px' }} // S'assurer que le texte est petit
+                        >
+                            {skill.label.replace('<br/>', '/')}
+                        </text>
+                    );
+                })}
+            </svg>
+        );
+    };
+
+
+    return (
+        <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
+                 <div className="flex items-center gap-3 text-white"><TrendingUp className="text-[#00d468]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">PROFIL DE COMPÉTENCES</h2></div>
+                 <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
+                <div className="mb-8 text-center">
+                    <h3 className="text-3xl font-black text-white">{player.name}</h3>
+                    <p className="text-sm text-white/60 uppercase tracking-widest">Analyse des performances</p>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-10">
+                    
+                    {/* Colonne du Graphique Radar */}
+                    {/* Centrage du graphique sur mobile */}
+                    <div className="flex-1 flex flex-col items-center justify-center p-4 bg-white/5 rounded-2xl shadow-inner border border-white/10 shrink-0">
+                        <h3 className="text-xl font-bold uppercase tracking-wider mb-2 text-[#FFC20E]">Performance Globale</h3>
+                        <p className="lg text-white/70 mb-6">Total joué: {totalPlayed} cartes | Score: {totalScore} pts</p>
+                        
+                        {totalPlayed > 0 ? (
+                           // Centrage du graphique
+                           <div className="w-full flex justify-center">
+                                <RadarChart data={skillData} />
+                           </div>
+                        ) : (
+                            <div className="text-center py-10 text-white/50 italic">Jouez quelques parties pour afficher votre profil !</div>
+                        )}
+                        
+                    </div>
+
+                    {/* Colonne des Détails */}
+                    <div className="md:w-1/2 space-y-4">
+                        <h3 className="text-xl font-bold uppercase tracking-wider border-b border-white/20 pb-2 mb-4">Détails par Compétence</h3>
+                        {skillData.map(skill => (
+                            <div key={skill.id} className="bg-black/20 p-4 rounded-xl border border-white/10">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="font-black flex items-center gap-2 text-sm uppercase" style={{ color: skill.colorData.hex }}>
+                                        <skill.icon size={16} /> {skill.label.replace('<br/>', '/')}
+                                    </span>
+                                    <span className="font-mono text-lg font-bold text-white">{skill.percentage}%</span>
+                                </div>
+                                <div className="w-full h-2 bg-black/50 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full rounded-full transition-all duration-1000" 
+                                        style={{ 
+                                            width: `${skill.percentage}%`, 
+                                            backgroundColor: skill.colorData.hex 
+                                        }} 
+                                    />
+                                </div>
+                                <p className="text-xs text-white/50 mt-2">Réussi: {skill.success} / Total joué: {skill.total}</p>
+                            </div>
+                        ))}
+                        <div className="pt-4 mt-6 border-t border-white/10">
+                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations est inclus dans les totaux globaux mais est un mode spécial, il n'est donc pas affiché dans le graphique radar des compétences générales.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- ECRAN HISTOIRE (Inchangé) ---
 const StoryScreen = ({ onBack }) => (
     <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
@@ -500,7 +693,7 @@ const StoryScreen = ({ onBack }) => (
                     <p className="text-xl md:text-2xl font-medium text-white">On ne le répète jamais assez : <span className="text-[#B02E68] font-bold">les compétences techniques</span> t’ouvrent la porte d’une entreprise, mais ce sont <span className="text-green-400 font-bold">les compétences humaines</span> qui te font gravir les échelons.</p>
                     <div className="relative pl-8 py-2"><div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#B02E68] to-transparent"></div><p className="text-2xl italic font-serif text-white/80">"La collaboration, l’écoute, la gestion de conflit, la prise de décision collective… tout ce qui fait qu’on réussit avec les autres."</p></div>
                     <p>Et pourtant, la majorité des formations universitaires n’enseignent pas ça. On passe des années à apprendre à résoudre des équations, mais presque jamais à résoudre un désaccord. On nous note sur nos résultats, rarement sur notre capacité à convaincre, à fédérer ou à gérer une tension en équipe.</p>
-                    <div className="bg-gradient-to-r from-[#B02E68]/20 to-transparent p-6 rounded-r-2xl border-l-4 border-[#B02E68]"><p className="mb-2 font-bold uppercase text-sm tracking-widest text-[#B02E68]">La Solution</p><p className="text-xl">C’est là que j’ai voulu agir. Pas avec une formation classique, mais avec une expérience vivante, ludique et impactante : <span className="font-black text-white block text-3xl mt-2 tracking-tighter">🎯 SKILLSMASTER</span></p></div>
+                    <div className="bg-gradient-to-r from-[#B02E68]/20 to-transparent p-6 rounded-r-2xl border-l-4 border-[#B02E68]"><p className="mb-2 font-bold uppercase text-sm tracking-widest text-[#B02E68]">La Solution</p><p className="xl">C’est là que j’ai voulu agir. Pas avec une formation classique, mais avec une expérience vivante, ludique et impactante : <span className="font-black text-white block text-3xl mt-2 tracking-tighter">🎯 SKILLSMASTER</span></p></div>
                     <p>Un jeu conçu pour développer les compétences essentielles à la réussite scolaire et professionnelle en Afrique et partout ailleurs. Chaque carte te place face à une situation concrète de communication, de leadership, de créativité ou d’intelligence émotionnelle.</p>
                     <p className="font-bold text-white text-xl">Tu as quelques secondes pour réagir, argumenter, convaincre, coopérer.<br/><span className="text-[#FFC20E]">Et c’est là que tu découvres qui tu es vraiment dans l’action.</span></p>
                     <div className="mt-16 p-8 bg-white text-[#B02E68] rounded-3xl shadow-[0_10px_40px_-10px_rgba(176,46,104,0.5)] text-center relative overflow-hidden"><div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-orange-400 to-pink-500"></div><Quote className="mx-auto text-[#B02E68]/20 mb-4 transform scale-150" size={48} /><p className="text-2xl font-black italic relative z-10">"Et moi, j’ai décidé d’en faire un jeu. Un jeu sérieux, oui. Mais surtout, un jeu qui forme à être humain. 💡"</p></div>
@@ -511,7 +704,7 @@ const StoryScreen = ({ onBack }) => (
 );
 
 // --- Ecrans Menu, History, Setup ---
-const MainMenu = ({ onNavigate, startLogisticsChallenge }) => ( // Ajout de startLogisticsChallenge
+const MainMenu = ({ onNavigate, startLogisticsChallenge, onResumeGame, gameSaved }) => ( // AJOUT: onResumeGame, gameSaved
   <div className="flex flex-col items-center justify-center h-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
      <div className="text-center mb-8 relative">
         <div className="absolute -inset-10 bg-gradient-to-r from-[#FFC20E] to-[#B02E68] blur-3xl opacity-20 animate-pulse"></div>
@@ -519,7 +712,15 @@ const MainMenu = ({ onNavigate, startLogisticsChallenge }) => ( // Ajout de star
         <p className="text-white/80 uppercase tracking-[0.5em] text-xs md:text-sm font-bold">Le jeu des compétences ultimes</p>
      </div>
      <div className="w-full max-w-xs space-y-4 relative z-10">
-       <button onClick={() => { playSound('flip'); onNavigate('setup'); }} className="w-full group bg-white text-[#B02E68] p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_30px_60px_-15px_rgba(255,255,255,0.3)] transition-all flex items-center justify-between px-8 border-4 border-transparent hover:border-[#FFC20E]"><span>JOUER</span> <Play className="group-hover:translate-x-1 transition fill-current" /></button>
+       
+       {/* NOUVEAU: BOUTON REPRENDRE */}
+       {gameSaved && (
+           <button onClick={onResumeGame} className="w-full group bg-[#FFC20E] text-[#B02E68] p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(255,194,14,0.3)] hover:scale-105 hover:shadow-[0_30px_60px_-15px_rgba(255,194,14,0.5)] transition-all flex items-center justify-between px-8 border-4 border-transparent hover:border-white">
+             <span>REPRENDRE</span> <Play className="group-hover:translate-x-1 transition fill-current" />
+           </button>
+       )}
+       
+       <button onClick={() => { playSound('flip'); onNavigate('setup'); }} className="w-full group bg-white text-[#B02E68] p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_30px_60px_-15px_rgba(255,255,255,0.3)] transition-all flex items-center justify-between px-8 border-4 border-transparent hover:border-[#FFC20E]"><span>NOUVELLE PARTIE</span> <Play className="group-hover:translate-x-1 transition fill-current" /></button>
        
        {/* NOUVEAU BOUTON DÉFI LOGISTIQUE (Design immersif) */}
        <button onClick={startLogisticsChallenge} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20"
@@ -527,8 +728,9 @@ const MainMenu = ({ onNavigate, startLogisticsChallenge }) => ( // Ajout de star
           <span>DÉFI LOGISTIQUE</span> <Zap className="group-hover:translate-x-1 transition fill-current text-white" />
        </button>
        
+       <button onClick={() => { playSound('flip'); onNavigate('profile'); }} className="w-full bg-[#FFC20E]/40 hover:bg-[#FFC20E]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>MON PROFIL</span> <TrendingUp size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('story'); }} className="w-full bg-[#B02E68]/40 hover:bg-[#B02E68]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>L'HISTOIRE</span> <BookOpen size={20} /></button>
-       <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
+       <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg://black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
      </div>
   </div>
 );
@@ -563,7 +765,22 @@ const HistoryScreen = ({ history, onBack }) => (
 
 const SetupScreen = ({ onStart, onBack }) => {
   const [mode, setMode] = useState(null);
-  const [players, setPlayers] = useState(['Joueur 1', 'Joueur 2']);
+  // CHANGEMENT: Initialisation des stats par défaut
+  const createPlayer = (id, name) => ({
+      id, 
+      name, 
+      score: 0, 
+      scoreByCategory: { 
+          communication: { success: 0, total: 0 },
+          leadership: { success: 0, total: 0 },
+          critical_thinking: { success: 0, total: 0 },
+          emotional_intelligence: { success: 0, total: 0 },
+          creativity: { success: 0, total: 0 },
+          logistics: { success: 0, total: 0 },
+      }
+  });
+
+  const [players, setPlayers] = useState([createPlayer(1, 'Joueur 1'), createPlayer(2, 'Joueur 2')].map(p => p.name));
   const [soloName, setSoloName] = useState('Joueur 1');
 
   const addPlayer = () => setPlayers([...players, `Joueur ${players.length + 1}`]);
@@ -572,8 +789,11 @@ const SetupScreen = ({ onStart, onBack }) => {
   
   const handleStart = () => {
     playSound('win'); 
-    if (mode === 'solo') onStart([{ id: 1, name: soloName, score: 0 }], 'solo', 15, 'all');
-    else onStart(players.map((p, i) => ({ id: i + 1, name: p, score: 0 })), 'multi', 15, 'all');
+    const playerList = mode === 'solo' 
+        ? [createPlayer(1, soloName)]
+        : players.map((name, i) => createPlayer(i + 1, name));
+        
+    onStart(playerList, mode, 15, 'all');
   };
 
   return (
@@ -654,23 +874,87 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
 
 // --- Application Principale ---
 
+const LOCAL_STORAGE_KEY = 'skillsMasterGame';
+
 export default function App() {
-  const [view, setView] = useState('menu');
-  const [players, setPlayers] = useState([]);
-  const [gameMode, setGameMode] = useState('solo');
-  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+  const initialPlayerState = { 
+      id: 1, 
+      name: 'Champion Solo', 
+      score: 0, 
+      scoreByCategory: { 
+          communication: { success: 0, total: 0 },
+          leadership: { success: 0, total: 0 },
+          critical_thinking: { success: 0, total: 0 },
+          emotional_intelligence: { success: 0, total: 0 },
+          creativity: { success: 0, total: 0 },
+          logistics: { success: 0, total: 0 },
+      }
+  };
+  
+  // NOUVEL ÉTAT POUR DÉTECTER LA SAUVEGARDE
+  const [gameSaved, setGameSaved] = useState(false);
+
+  // FONCTION DE CHARGEMENT DE L'ÉTAT INITIAL
+  // CORRECTION: Retirer setGameSaved de cette fonction pour éviter l'appel direct pendant le rendu
+  const loadInitialState = () => {
+    try {
+      const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        // Ne PAS appeler setGameSaved(true) ici
+        return {
+          players: state.players || [initialPlayerState],
+          gameMode: state.gameMode || 'solo',
+          currentPlayerIndex: state.currentPlayerIndex || 0,
+          maxRounds: state.maxRounds || 15,
+          deckFilter: state.deckFilter || 'all',
+          roundsPlayed: state.roundsPlayed || 0,
+          playedCardIds: state.playedCardIds || [],
+          missedCards: state.missedCards || [],
+          view: 'menu', // Commence toujours par le menu après chargement
+          isSaved: true, // Flag pour détecter la présence d'une sauvegarde
+        };
+      }
+    } catch (e) {
+      console.error("Erreur lors du chargement de l'état du jeu:", e);
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    }
+    // setGameSaved(false); // Ne PAS appeler setGameSaved(false) ici non plus
+    return {
+      players: [initialPlayerState],
+      gameMode: 'solo',
+      currentPlayerIndex: 0,
+      maxRounds: 15,
+      deckFilter: 'all',
+      roundsPlayed: 0,
+      playedCardIds: [],
+      missedCards: [],
+      view: 'menu',
+      isSaved: false, // Pas de sauvegarde trouvée
+    };
+  };
+
+  const initialState = loadInitialState();
+  const [view, setView] = useState(initialState.view);
+  const [players, setPlayers] = useState(initialState.players);
+  const [gameMode, setGameMode] = useState(initialState.gameMode);
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(initialState.currentPlayerIndex);
   const [activeCard, setActiveCard] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [gameHistory, setGameHistory] = useState([]);
   const [showScoreboard, setShowScoreboard] = useState(false);
   
-  // NOUVEAUX ÉTATS POUR GÉRER LE MODE SPÉCIAL
-  const [maxRounds, setMaxRounds] = useState(15);
-  const [deckFilter, setDeckFilter] = useState('all'); // 'all' | 'logistics'
+  const [maxRounds, setMaxRounds] = useState(initialState.maxRounds);
+  const [deckFilter, setDeckFilter] = useState(initialState.deckFilter);
 
-  const [roundsPlayed, setRoundsPlayed] = useState(0);
-  const [playedCardIds, setPlayedCardIds] = useState([]);
-  const [missedCards, setMissedCards] = useState([]);
+  const [roundsPlayed, setRoundsPlayed] = useState(initialState.roundsPlayed);
+  const [playedCardIds, setPlayedCardIds] = useState(initialState.playedCardIds);
+  const [missedCards, setMissedCards] = useState(initialState.missedCards);
+  
+  // NOUVEAU useEffect pour mettre à jour gameSaved APRÈS le rendu initial
+  useEffect(() => {
+    setGameSaved(initialState.isSaved);
+  }, []); // [] garantit que cela ne s'exécute qu'une fois au montage
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -679,6 +963,35 @@ export default function App() {
     document.body.appendChild(script);
     return () => { document.body.removeChild(script); }
   }, []);
+
+  // --- LOGIQUE DE SAUVEGARDE ---
+  const saveGameState = useCallback(() => {
+    if (view === 'playing' && !showScoreboard) {
+      const stateToSave = {
+        players,
+        gameMode,
+        currentPlayerIndex,
+        maxRounds,
+        deckFilter,
+        roundsPlayed,
+        playedCardIds,
+        missedCards,
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
+      setGameSaved(true);
+    } else if (view !== 'playing') {
+       // Supprime la partie si on n'est plus en mode jeu actif
+       localStorage.removeItem(LOCAL_STORAGE_KEY);
+       setGameSaved(false);
+    }
+  }, [players, gameMode, currentPlayerIndex, maxRounds, deckFilter, roundsPlayed, playedCardIds, missedCards, view, showScoreboard]);
+
+  // Surveillance des états pour la sauvegarde
+  useEffect(() => {
+    saveGameState();
+  }, [players, roundsPlayed, view, showScoreboard, currentPlayerIndex, maxRounds, deckFilter, playedCardIds, missedCards, saveGameState]);
+  // --- FIN LOGIQUE DE SAUVEGARDE ---
+
 
   // MISE À JOUR : Ajout des paramètres rounds et deckFilter
   const startGame = (playerList, mode, rounds, filter) => {
@@ -689,23 +1002,54 @@ export default function App() {
     setDeckFilter(filter);
   };
   
+  const resumeGame = () => {
+    setView('playing');
+    // La fonction loadInitialState a déjà mis à jour les autres états
+  };
+  
   // NOUVELLE FONCTION POUR LANCER LE DÉFI LOGISTIQUE
   const startLogisticsChallenge = () => {
       playSound('flip');
-      // On force le mode solo pour l'instant
-      const defaultPlayer = [{ id: 1, name: 'Défieur', score: 0 }];
-      // On met à jour MAX_ROUNDS pour utiliser toutes les cartes Logistique disponibles
+      
+      const createLogisticsPlayer = (name) => ({
+          id: 1, 
+          name, 
+          score: 0, 
+          scoreByCategory: { 
+              communication: { success: 0, total: 0 },
+              leadership: { success: 0, total: 0 },
+              critical_thinking: { success: 0, total: 0 },
+              emotional_intelligence: { success: 0, total: 0 },
+              creativity: { success: 0, total: 0 },
+              logistics: { success: 0, total: 0 },
+          }
+      });
+      
+      // On utilise le nom du joueur solo actuel s'il existe
+      const playerName = players.length > 0 ? players[0].name : 'Défieur';
+      const defaultPlayer = [createLogisticsPlayer(playerName)];
+      
       const LOGISTICS_MAX_ROUNDS = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
       
-      // On lance la partie Logistique avec une seule carte au début (pour forcer l'affichage)
       startGame(defaultPlayer, 'solo', LOGISTICS_MAX_ROUNDS, 'logistics');
   };
 
   const endGame = () => {
     const newHistoryEntry = { date: new Date().toISOString(), mode: gameMode, results: [...players].sort((a,b) => b.score - a.score) };
     setGameHistory([newHistoryEntry, ...gameHistory]);
+    
+    // Si mode solo, on met à jour le profil permanent après la partie
+    if (gameMode === 'solo' && players.length > 0) {
+        // Le profil permanent est le joueur 0 du tableau (s'il existe)
+        const finishedPlayer = players[0];
+        // On met à jour l'état `players` pour refléter le profil mis à jour
+        setPlayers([finishedPlayer]);
+    }
+    
     setShowScoreboard(false); setActiveCard(null); setActiveCategory(null); setView('menu');
     setDeckFilter('all'); // Réinitialiser le filtre
+    localStorage.removeItem(LOCAL_STORAGE_KEY); // S'assurer de supprimer l'état après la fin
+    setGameSaved(false);
   };
   
   // MISE À JOUR DE LA LOGIQUE DE TIRAGE ALÉATOIRE
@@ -737,15 +1081,28 @@ export default function App() {
     setActiveCategory(Object.values(CATEGORIES).find(c => c.id === randomCard.categoryId));
     setActiveCard(randomCard);
     setPlayedCardIds(prev => [...prev, randomCard.id]);
+    
+    // CORRECTION: Retire l'appel à la continuité automatique qui causait la boucle de rendu
+    // setTimeout(() => drawRandomNextCard(), 50);
   };
 
   const handleCardResult = (success, cardData) => {
     const currentPlayers = [...players];
+    const player = currentPlayers[currentPlayerIndex];
+    const categoryId = cardData.categoryId;
+    
+    // Mise à jour des stats du joueur
+    player.scoreByCategory[categoryId].total += 1;
+
     if (success) { 
-        currentPlayers[currentPlayerIndex].score += 1; 
+        player.score += 1; 
+        player.scoreByCategory[categoryId].success += 1;
         setPlayers(currentPlayers); 
-    } else { 
-        if (cardData) setMissedCards(prev => [...prev, cardData]); 
+    }
+    
+    // Mise à jour des cartes manquées
+    if (!success && cardData) { 
+        setMissedCards(prev => [...prev, cardData]); 
     }
     
     const nextRound = roundsPlayed + 1;
@@ -758,13 +1115,16 @@ export default function App() {
     
     const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
     
+    // S'assurer que le jeu quitte le mode carte avant de passer à l'écran suivant
+    setActiveCard(null); 
+    setActiveCategory(null);
+    
     if (nextRound >= maxRounds || availableCards.length === 0) { 
-        setActiveCard(null); 
-        setActiveCategory(null);
         setShowScoreboard(true); 
     } else { 
         setCurrentPlayerIndex((currentPlayerIndex + 1) % currentPlayers.length); 
-        drawRandomNextCard(); // Tirage aléatoire pour la continuité
+        // Lancement de la carte suivante UNIQUEMENT ici
+        drawRandomNextCard(); 
     }
   };
 
@@ -802,8 +1162,9 @@ export default function App() {
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {view === 'menu' && <MainMenu onNavigate={setView} startLogisticsChallenge={startLogisticsChallenge} />}
+      {view === 'menu' && <MainMenu onNavigate={setView} startLogisticsChallenge={startLogisticsChallenge} onResumeGame={resumeGame} gameSaved={gameSaved} />}
       {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen onStart={(p, m) => startGame(p, m, 15, 'all')} onBack={() => setView('menu')} /></div>}
+      {view === 'profile' && <div className="flex-1 flex items-center justify-center p-4 z-50"><ProfileScreen player={players.length > 0 ? players[0] : initialPlayerState} onBack={() => setView('menu')} /></div>}
       {view === 'story' && <div className="flex-1 flex items-center justify-center p-4 z-50"><StoryScreen onBack={() => setView('menu')} /></div>}
       {view === 'history' && <div className="flex-1 flex items-center justify-center p-4"><HistoryScreen history={gameHistory} onBack={() => setView('menu')} /></div>}
 
