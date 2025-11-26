@@ -334,7 +334,8 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
       {/* Utilisation du style en ligne pour le gradient background */}
       <div 
          style={{ background: category.colorData.gradient }}
-         className={`relative w-full md:max-w-6xl h-full md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
+         // CORRECTION DE LA HAUTEUR MOBILE : Utiliser h-[90vh] pour éviter le débordement sur petit écran
+         className={`relative w-full md:max-w-6xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
       >
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
 
@@ -349,7 +350,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
             <div className="flex items-center gap-3">
                 <div className="text-right hidden md:block">
                     <span className="text-[10px] uppercase tracking-[0.2em] opacity-60 block leading-none mb-1">Catégorie</span>
-                    <span className="font-bold text-sm text-white leading-none">{category.label}</span>
+                    <span className="font-bold text-sm text-white leading-none" dangerouslySetInnerHTML={{ __html: category.label }}></span>
                 </div>
                 <div className="text-3xl w-10 h-10 flex items-center justify-center rounded-xl" style={{ backgroundColor: `${hexColor}20`, border: `1px solid ${hexColor}60` }}> <category.icon size={24} style={{ color: hexColor }} /></div>
                 <button onClick={onClose} className="ml-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition"><X size={20}/></button>
@@ -357,6 +358,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
         </div>
 
         {/* CONTENU RESPONSIVE DE LA CARTE */}
+        {/* CORRECTION DU LAYOUT : flex-col sur mobile, flex-row sur desktop */}
         <div className="flex-grow flex flex-col md:flex-row overflow-y-auto relative z-10">
             {feedbackState && (
                 <div className="absolute inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
@@ -387,19 +389,21 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                 </div>
             )}
 
-            {/* Zone de Contenu (Scenario) */}
+            {/* Zone de Contenu (Scenario) - Prends 65% sur desktop, 100% sur mobile */}
             <div className="flex-1 p-6 md:p-10 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar md:border-r md:border-white/10">
                 <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-black/20 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/10 shadow-sm shrink-0">
                     {card.type === 'quiz' ? <><Sparkles size={12} className="text-yellow-300"/> Quiz • 1 Pt</> : <><Users size={12} className="text-yellow-300"/> Défi • Jury</>}
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
+                {/* Ajustement du titre pour mobile */}
+                <h2 className="text-2xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
                 <div className="bg-black/10 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm w-full max-w-2xl">
-                    <p className="text-xl md:text-2xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90">"{card.scenario}"</p>
+                    {/* Ajustement du scénario pour mobile */}
+                    <p className="text-lg md:text-2xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90">"{card.scenario}"</p>
                 </div>
             </div>
 
-            {/* Zone d'Action (Timer/Boutons) */}
-            <div className="md:w-[420px] bg-black/10 flex flex-col shrink-0 border-t md:border-t-0 md:border-l border-white/5 relative h-full md:h-auto">
+            {/* Zone d'Action (Timer/Boutons) - Prends 35% sur desktop, 100% en bas sur mobile */}
+            <div className="md:w-[420px] bg-black/10 flex flex-col shrink-0 border-t md:border-t-0 md:border-l border-white/5 relative h-auto"> {/* h-auto important pour mobile */}
                  <div className="flex-grow p-6 flex flex-col justify-center overflow-y-auto custom-scrollbar">
                     {card.type === 'quiz' ? (
                         <div className="space-y-3 w-full">
