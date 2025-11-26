@@ -4,43 +4,46 @@ import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCi
 // --- Configuration & Données ---
 
 const COLORS = {
-  background: 'bg-[#B02E68]',
-  backgroundGradient: 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#db4d86] via-[#B02E68] to-[#6d133b]',
+  // On ajoute une propriété 'style' safe pour la production
+  backgroundStyle: {
+    background: 'radial-gradient(ellipse at top, #db4d86, #B02E68, #6d133b)',
+    backgroundColor: '#B02E68' // Fallback
+  },
+  // On garde les classes Tailwind pour le dev, mais on ajoute 'style' pour la prod
   cards: {
     communication: { 
-        main: 'bg-[#00A651]', 
-        gradient: 'bg-gradient-to-br from-[#00d468] to-[#007a3b]',
+        id: 'communication',
         shadow: 'shadow-green-500/40',
-        text: 'text-white' 
+        text: 'text-white',
+        style: { background: 'linear-gradient(135deg, #00d468 0%, #007a3b 100%)' }
     },
     leadership: { 
-        main: 'bg-[#F26522]', 
-        gradient: 'bg-gradient-to-br from-[#ff8c55] to-[#c4460b]',
+        id: 'leadership',
         shadow: 'shadow-orange-500/40',
-        text: 'text-white' 
+        text: 'text-white',
+        style: { background: 'linear-gradient(135deg, #ff8c55 0%, #c4460b 100%)' }
     },
     critical_thinking: { 
-        main: 'bg-[#EF4136]', 
-        gradient: 'bg-gradient-to-br from-[#ff6b61] to-[#b32016]',
+        id: 'critical_thinking',
         shadow: 'shadow-red-500/40',
-        text: 'text-white' 
+        text: 'text-white',
+        style: { background: 'linear-gradient(135deg, #ff6b61 0%, #b32016 100%)' }
     },
     emotional_intelligence: { 
-        main: 'bg-[#00AEEF]', 
-        gradient: 'bg-gradient-to-br from-[#4dd4ff] to-[#0086b8]',
+        id: 'emotional_intelligence',
         shadow: 'shadow-sky-500/40',
-        text: 'text-white' 
+        text: 'text-white',
+        style: { background: 'linear-gradient(135deg, #4dd4ff 0%, #0086b8 100%)' }
     },
     creativity: { 
-        main: 'bg-[#FFC20E]', 
-        gradient: 'bg-gradient-to-br from-[#ffe066] to-[#cca300]',
+        id: 'creativity',
         shadow: 'shadow-yellow-500/40',
-        text: 'text-white' 
+        text: 'text-white',
+        style: { background: 'linear-gradient(135deg, #ffe066 0%, #cca300 100%)' }
     }
   }
 };
 
-// Mise à jour des icônes pour un look Premium (Composants Lucide au lieu d'Emojis)
 const CATEGORIES = {
   COMMUNICATION: { id: 'communication', label: 'COMMUNICATION', colorData: COLORS.cards.communication, icon: MessageCircle },
   LEADERSHIP: { id: 'leadership', label: 'LEADERSHIP', colorData: COLORS.cards.leadership, icon: Crown },
@@ -151,15 +154,14 @@ const CardBack = ({ category, onClick, disabled }) => {
     <button 
       onClick={() => { if(!disabled) { playSound('flip'); onClick(category.id); }}}
       disabled={disabled}
-      className={`relative w-full aspect-[3/4] rounded-[2.5rem] transition-all duration-500 group perspective-1000
-        ${disabled ? 'opacity-40 grayscale cursor-not-allowed scale-95' : 'hover:scale-[1.03] hover:-translate-y-2 cursor-pointer'}
+      // On utilise le style en ligne pour le gradient pour éviter la purge Tailwind en prod
+      style={!disabled ? category.colorData.style : {}}
+      className={`relative w-full aspect-[3/4] rounded-[2.5rem] transition-all duration-500 group perspective-1000 p-[3px] shadow-xl overflow-hidden
+        ${disabled ? 'bg-gray-600 opacity-40 grayscale cursor-not-allowed scale-95' : 'hover:scale-[1.03] hover:-translate-y-2 cursor-pointer'}
       `}
     >
-      {/* Container Principal avec Gradient */}
-      <div className={`absolute inset-0 rounded-[2.5rem] bg-gradient-to-br ${category.colorData.gradient} p-[3px] shadow-xl overflow-hidden`}>
-          
-          {/* Surface de la carte */}
-          <div className="absolute inset-0 bg-black/10 rounded-[2.3rem] flex flex-col items-center justify-between p-6 relative overflow-hidden backdrop-blur-sm">
+      {/* Contenu interne */}
+          <div className="absolute inset-[3px] bg-black/10 rounded-[2.3rem] flex flex-col items-center justify-between p-6 relative overflow-hidden backdrop-blur-sm">
              
              {/* Background Effects */}
              <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-black/20 pointer-events-none"></div>
@@ -190,7 +192,6 @@ const CardBack = ({ category, onClick, disabled }) => {
              {/* Shine Effect Overlay */}
              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out pointer-events-none z-20"></div>
           </div>
-      </div>
       
       {/* Badge "Tirer" au survol */}
       {!disabled && (
@@ -230,7 +231,11 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg animate-in fade-in zoom-in duration-300">
-      <div className={`relative w-full md:max-w-6xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ${category.colorData.gradient} ring-4 ring-white/20`}>
+      {/* Utilisation du style en ligne pour le gradient background */}
+      <div 
+         style={category.colorData.style}
+         className={`relative w-full md:max-w-6xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
+      >
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
 
         <div className="bg-black/20 backdrop-blur-md w-full py-3 px-6 border-b border-white/10 shrink-0 flex justify-between items-center z-20 h-16">
@@ -587,7 +592,11 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen ${COLORS.backgroundGradient} font-sans selection:bg-[#FFC20E] selection:text-black flex flex-col overflow-hidden relative text-white`}>
+    <div 
+        className={`min-h-screen font-sans selection:bg-[#FFC20E] selection:text-black flex flex-col overflow-hidden relative text-white`}
+        // Utilisation du style en ligne pour le background principal
+        style={COLORS.backgroundStyle}
+    >
       <style>{`
         .stroke-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4); color: transparent; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
