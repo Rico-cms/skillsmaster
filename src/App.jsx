@@ -334,7 +334,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
       {/* Utilisation du style en ligne pour le gradient background */}
       <div 
          style={{ background: category.colorData.gradient }}
-         className={`relative w-full md:max-w-6xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
+         className={`relative w-full md:max-w-6xl h-full md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
       >
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
 
@@ -356,7 +356,8 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
             </div>
         </div>
 
-        <div className="flex-grow flex flex-col md:flex-row overflow-hidden relative z-10">
+        {/* CONTENU RESPONSIVE DE LA CARTE */}
+        <div className="flex-grow flex flex-col md:flex-row overflow-y-auto relative z-10">
             {feedbackState && (
                 <div className="absolute inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-300">
                     <div className="max-w-2xl w-full">
@@ -386,18 +387,19 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                 </div>
             )}
 
-            <div className="flex-1 p-6 md:p-10 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar md:border-r border-white/10">
+            {/* Zone de Contenu (Scenario) */}
+            <div className="flex-1 p-6 md:p-10 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar md:border-r md:border-white/10">
                 <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-black/20 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/10 shadow-sm shrink-0">
                     {card.type === 'quiz' ? <><Sparkles size={12} className="text-yellow-300"/> Quiz • 1 Pt</> : <><Users size={12} className="text-yellow-300"/> Défi • Jury</>}
                 </div>
-                {/* CORRECTION 1: Diminution des tailles de police pour un meilleur ajustement vertical */}
                 <h2 className="text-3xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
                 <div className="bg-black/10 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm w-full max-w-2xl">
                     <p className="text-xl md:text-2xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90">"{card.scenario}"</p>
                 </div>
             </div>
 
-            <div className="md:w-[420px] bg-black/10 flex flex-col shrink-0 border-t md:border-t-0 md:border-l border-white/5 relative h-full">
+            {/* Zone d'Action (Timer/Boutons) */}
+            <div className="md:w-[420px] bg-black/10 flex flex-col shrink-0 border-t md:border-t-0 md:border-l border-white/5 relative h-full md:h-auto">
                  <div className="flex-grow p-6 flex flex-col justify-center overflow-y-auto custom-scrollbar">
                     {card.type === 'quiz' ? (
                         <div className="space-y-3 w-full">
@@ -803,19 +805,21 @@ export default function App() {
 
       {view === 'playing' && (
         <>
-          <nav className="px-6 py-4 flex justify-between items-center bg-black/10 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 shadow-lg">
-            <div className="flex items-center gap-3">
+          <nav className="px-4 md:px-6 py-4 flex justify-between items-center bg-black/10 backdrop-blur-md border-b border-white/5 sticky top-0 z-40 shadow-lg">
+            <div className="flex items-center gap-2 md:gap-3">
               <div className="bg-yellow-400 p-1.5 rounded-lg text-black shadow-lg shadow-yellow-400/20"><Trophy size={20} strokeWidth={2.5}/></div>
-              <span className="font-black italic text-xl tracking-tighter hidden md:inline">SKILLS<span className="text-[#FFC20E]">MASTER</span></span>
+              <span className="font-black italic text-base md:text-xl tracking-tighter">SKILLS<span className="text-[#FFC20E]">MASTER</span></span>
             </div>
-            <div className="flex items-center gap-3 bg-black/30 px-4 py-2 rounded-full border border-white/10 shadow-inner">
+            {/* Responsiveness: Cache le compteur de tours sur les très petits écrans */}
+            <div className="hidden sm:flex items-center gap-3 bg-black/30 px-4 py-2 rounded-full border border-white/10 shadow-inner">
                 <CheckSquare size={16} className="text-white/60" />
                 <span className="text-sm font-black tracking-widest">{roundsPlayed} / {maxRounds}</span>
             </div>
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar max-w-[40vw]">
+            {/* Responsiveness: Limite la taille de la liste des joueurs */}
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-[40vw] sm:max-w-[30vw]">
                 {players.map((p, i) => (
-                <div key={p.id} className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full border transition-all duration-300 ${i === currentPlayerIndex ? 'bg-white text-[#B02E68] border-white font-black shadow-lg scale-105' : 'bg-black/20 border-transparent text-white/50'}`}>
-                    <span className="text-xs uppercase truncate max-w-[80px]">{p.name}</span>
+                <div key={p.id} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${i === currentPlayerIndex ? 'bg-white text-[#B02E68] border-white font-black shadow-lg scale-105' : 'bg-black/20 border-transparent text-white/50'}`}>
+                    <span className="text-xs uppercase truncate max-w-[60px] md:max-w-[80px]">{p.name}</span>
                     <span className="bg-black/10 px-2 rounded-full text-xs font-mono">{p.score}</span>
                 </div>
                 ))}
@@ -828,10 +832,12 @@ export default function App() {
               <div className="inline-block bg-black/20 backdrop-blur px-4 py-1 rounded-full mb-3 border border-white/10">
                 <span className="text-white/80 text-[10px] uppercase tracking-[0.3em] font-bold">C'est le tour de {players[currentPlayerIndex]?.name}</span>
               </div>
-              <h2 className="text-3xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
+              {/* Responsiveness: Taille du titre adaptée */}
+              <h2 className="text-2xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
                  {deckFilter === 'logistics' ? 'DÉFI LOGISTIQUE EN COURS' : 'CHOISISSEZ UNE CARTE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
               </h2>
             </div>
+            {/* Responsiveness: Grille adaptée aux mobiles (2 colonnes) */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 auto-rows-fr pb-20">
               {categoriesToRender.map((cat) => (
                 <CardBack 
