@@ -269,7 +269,7 @@ const CardBack = ({ category, onClick, disabled }) => {
   const cardStyle = {
     background: disabled ? '#2d2d2d' : category.colorData.gradient,
     border: disabled ? '1px solid #444' : category.colorData.border,
-    boxShadow: disabled ? 'none' : `0 0 40px ${category.colorData.hex}30`, // Ombre plus prononcée
+    boxBoxShadow: disabled ? 'none' : `0 0 40px ${category.colorData.hex}30`, // Ombre plus prononcée
   };
 
   return (
@@ -726,7 +726,7 @@ const ProfileScreen = ({ player, onBack }) => {
                             </div>
                         ))}
                         <div className="pt-4 mt-6 border-t border-white/10">
-                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations et les cartes Mathématiques sont affichés ci-dessus mais exclus du graphique radar pour conserver la symétrie des 5 soft skills.</p>
+                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations et les cartes Mathématiques sont affichés ci-dessus but exclus du graphique radar pour conserver la symétrie des 5 soft skills.</p>
                         </div>
                     </div>
                 </div>
@@ -749,7 +749,7 @@ const StoryScreen = ({ onBack }) => (
                     <div className="relative bg-white/5 border border-white/10 p-8 rounded-3xl flex flex-col md:flex-row items-center gap-8 backdrop-blur-md">
                         <div className="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-br from-[#CF457A] to-[#8A1C4C] rounded-full blur opacity-70"></div>
-                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQGPhAtWKK7wpA/profile-displayphoto-scale_200_200/B4EZky1.SpHgAY-/0/1757494638506?e=2147483647&v=beta&t=1kTBlrqh-i_Zj3pG1zk4P1PE1djT7Ze5LU8e9J5_p8E" alt="Gabriel Emrick Tognimanbou DAHISSIHO" className="relative w-full h-full object-cover rounded-full border-4 border-white/20 shadow-2xl"/>
+                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQGPhAtWKK7wpA/profile-displayphoto-scale_200_200/B4EZky1.SpHgAY-/0/1757494638506?e=2147483647&v=beta&t=1kTBlrqh-i_Zj3pGqZk4P1PE1djT7Ze5LU8e9J5_p8E" alt="Gabriel Emrick Tognimanbou DAHISSIHO" className="relative w-full h-full object-cover rounded-full border-4 border-white/20 shadow-2xl"/>
                             <div className="absolute bottom-2 right-2 bg-white text-[#B02E68] p-1.5 rounded-full shadow-lg"><Award size={20} /></div>
                         </div>
                         <div className="text-center md:text-left space-y-2">
@@ -1038,6 +1038,29 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
 
 const LOCAL_STORAGE_KEY = 'skillsMasterGame';
 
+// Fonction utilitaire pour trouver la catégorie, gère les accents et les majuscules
+const findCategoryByCardId = (cardId) => {
+    // 1. Trouver l'ID de la catégorie dans la liste des cartes (ex: 'creativity')
+    const card = INITIAL_CARDS.find(c => c.id === cardId);
+    if (!card) return null;
+    const categoryId = card.categoryId;
+
+    // 2. Transformer l'ID de la catégorie pour correspondre aux clés de l'objet CATEGORIES
+    // Ex: 'creativity' -> 'CREATIVITE'
+    
+    // Trouver la clé correspondante dans CATEGORIES (la boucle est plus sûre)
+    const categoryKey = Object.keys(CATEGORIES).find(key => CATEGORIES[key].id === categoryId);
+
+    if (categoryKey) {
+        return CATEGORIES[categoryKey];
+    }
+    
+    // Dernier recours (simple recherche par majuscule normalisée)
+    const categoryIdUpper = categoryId.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return CATEGORIES[categoryIdUpper];
+};
+
+
 export default function App() {
   const initialPlayerState = { 
       id: 1, 
@@ -1167,6 +1190,7 @@ export default function App() {
 
   // MISE À JOUR : Ajout des paramètres rounds et deckFilter
   const startGame = (playerList, mode, rounds, filter) => {
+    console.log(`[GameStart] Démarrage du jeu. Mode: ${mode}, Tours: ${rounds}, Filtre: ${filter}`);
     setPlayers(playerList); setGameMode(mode); setView('playing');
     setCurrentPlayerIndex(0); setShowScoreboard(false); setRoundsPlayed(0);
     setPlayedCardIds([]); setMissedCards([]);
@@ -1174,11 +1198,9 @@ export default function App() {
     setDeckFilter(filter);
     setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
     
-    // NOUVEAU : Si en mode Logistique, on tire la première carte automatiquement
-    // Pas de setTimeout pour un démarrage instantané
+    // NOUVEAU : Si en mode Logistique, on force l'état "démarré" pour permettre le premier tirage automatique (si on le souhaite)
     if (filter === 'logistics') {
-        drawRandomNextCard(); 
-        setIsGameStartedState(true); // Le mode logistique est toujours entièrement aléatoire
+        setIsGameStartedState(true); 
     }
   };
   
@@ -1211,82 +1233,87 @@ export default function App() {
     setGameSaved(false);
   };
   
-  // LOGIQUE DE TIRAGE ALÉATOIRE (Utilisé par Logistique et par le mode 'all' après le 1er tour)
-  const drawRandomNextCard = useCallback(() => {
-     // Si nous sommes en mode "logistics", on filtre le pool de cartes
-     const cardPool = deckFilter === 'logistics' 
-         ? INITIAL_CARDS.filter(c => c.categoryId === 'logistics') 
-         // Si c'est le mode 'all', on utilise TOUTES les cartes
-         : INITIAL_CARDS; 
-     
-     // IMPORTANT : On retire les cartes déjà jouées du pool
-     const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
-     
-     // Tentative de Wild Card seulement si le deck n'est pas "logistics"
-     if (deckFilter === 'all' && Math.random() < 0.1) {
-        const wildCards = INITIAL_CARDS.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
-        if (wildCards.length > 0) {
-             const randomCard = wildCards[Math.floor(Math.random() * wildCards.length)];
-             setActiveCategory(CATEGORIES.MATH_WILD);
-             setActiveCard(randomCard);
-             setPlayedCardIds(prev => [...prev, randomCard.id]);
-             return;
-        }
-    }
-     
-     if (availableCards.length === 0) { 
-        setActiveCard(null); 
-        setActiveCategory(null);
-        setShowScoreboard(true); 
-        return; 
-     }
+  // NOUVELLE FONCTION : Encapsule la logique de sélection de carte
+  const getNewCard = (categoryId = 'all') => {
+      const filterId = categoryId === 'all' ? deckFilter : categoryId;
+      
+      // 1. Déterminer le pool de cartes
+      let cardPool = INITIAL_CARDS;
+      if (filterId !== 'all') {
+          // Si on filtre par catégorie (ex: Logistique ou 1er choix)
+          cardPool = INITIAL_CARDS.filter(c => c.categoryId === filterId);
+          console.log(`[getNewCard] Pool filtré par ${filterId}. Cartes disponibles dans le pool: ${cardPool.length}`);
+      } else {
+          // Mode 'all' (tirage aléatoire après le 1er tour)
+          // Tenter la Wild Card à 10%
+          if (Math.random() < 0.1) {
+              const wildCards = INITIAL_CARDS.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
+              if (wildCards.length > 0) {
+                  const randomWildCard = wildCards[Math.floor(Math.random() * wildCards.length)];
+                  console.log(`[getNewCard] Wild Card tirée: ${randomWildCard.id}`);
+                  return { card: randomWildCard, category: findCategoryByCardId(randomWildCard.id) };
+              }
+          }
+          // Sinon, on prend toutes les cartes SAUF les Wild Cards pour le tirage aléatoire des 5 catégories
+          cardPool = INITIAL_CARDS.filter(c => c.categoryId !== 'math_wild');
+      }
 
-     // Tirer une carte au hasard parmi toutes les cartes disponibles dans le deck filtré
-     const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
-     
-     // Si la carte a été trouvée (ce qui devrait toujours être le cas ici)
-     if (randomCard) {
-         // Trouver la catégorie correspondante. Si l'ID est 'creativity', on cherche 'CREATIVITE'
-         const categoryIdUpper = randomCard.categoryId.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-         setActiveCategory(CATEGORIES[categoryIdUpper]);
-         setActiveCard(randomCard);
-         setPlayedCardIds(prev => [...prev, randomCard.id]);
-     }
+      // 2. Filtrer les cartes déjà jouées
+      const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
+      
+      if (availableCards.length === 0) {
+          console.log("[getNewCard] AUCUNE carte disponible dans le pool filtré/global.");
+          return null; 
+      }
 
-  }, [deckFilter, playedCardIds]);
-
-
-  // NOUVELLE LOGIQUE DE TIRAGE BASÉE SUR LA CATÉGORIE SÉLECTIONNÉE (pour le 1er tour du mode 'all')
-  const drawCard = (categoryId) => {
-    // 1. Tenter un tirage Math Wild à 10%
-    if (Math.random() < 0.1) {
-        const wildCards = INITIAL_CARDS.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
-        if (wildCards.length > 0) {
-             const randomCard = wildCards[Math.floor(Math.random() * wildCards.length)];
-             setActiveCategory(CATEGORIES.MATH_WILD);
-             setActiveCard(randomCard);
-             setPlayedCardIds(prev => [...prev, randomCard.id]);
-             setIsGameStartedState(true); // Démarre le jeu en mode auto-draw
-             return;
-        }
-    }
-
-    // 2. Sinon, tirer une carte aléatoire de la catégorie choisie
-    const categoryCards = INITIAL_CARDS.filter(c => c.categoryId === categoryId && c.categoryId !== 'math_wild' && !playedCardIds.includes(c.id));
-    
-    // Si la catégorie est épuisée, ne rien faire
-    if (categoryCards.length === 0) { 
-        return; 
-    }
-    
-    const randomCard = categoryCards[Math.floor(Math.random() * categoryCards.length)];
-    // Trouver la catégorie correspondante. Si l'ID est 'creativity', on cherche 'CREATIVITE'
-    const categoryIdUpper = randomCard.categoryId.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    setActiveCategory(CATEGORIES[categoryIdUpper]);
-    setActiveCard(randomCard);
-    setPlayedCardIds(prev => [...prev, randomCard.id]);
-    setIsGameStartedState(true); // Démarre le jeu en mode auto-draw après le premier choix
+      // 3. Tirer une carte au hasard
+      const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+      
+      // 4. Trouver la catégorie correspondante
+      const category = findCategoryByCardId(randomCard.id);
+      
+      if (!category) {
+          console.error(`[getNewCard] ERREUR: Catégorie non trouvée pour la carte ID: ${randomCard.id}`);
+          return null;
+      }
+      
+      console.log(`[getNewCard] Carte sélectionnée: ${randomCard.id} (Cat: ${category.label})`);
+      return { card: randomCard, category };
   };
+
+  // NOUVELLE FONCTION : Gère la mise à jour de l'état de la carte active de manière sécurisée
+  const handleDrawNext = useCallback((categoryId = null) => {
+      let result;
+      
+      if (categoryId) {
+          // Mode Normal (1er tour) avec choix de catégorie
+          result = getNewCard(categoryId);
+      } else if (deckFilter === 'logistics' || isGameStartedState) {
+          // Mode Logistique (tirage explicite/auto) ou Mode Normal (auto-tirage)
+          result = getNewCard();
+      } else {
+          console.log("[handleDrawNext] État du jeu non prêt pour un tirage aléatoire (attente sélection catégorie).");
+          return;
+      }
+      
+      if (result) {
+          setActiveCategory(result.category);
+          setActiveCard(result.card);
+          setPlayedCardIds(prev => [...prev, result.card.id]);
+          setIsGameStartedState(true); // Assure que le jeu est considéré comme démarré après la première carte
+      } else {
+          // Si le tirage renvoie null (deck vide)
+          if (roundsPlayed < maxRounds) {
+            console.log("[handleDrawNext] Le deck filtré est vide, fin anticipée.");
+            setShowScoreboard(true);
+          }
+      }
+  }, [deckFilter, isGameStartedState, playedCardIds, roundsPlayed, maxRounds]);
+  
+  // Remplacement de drawRandomNextCard et drawCard par des appels à handleDrawNext
+  const drawRandomNextCard = () => handleDrawNext();
+  const drawCard = (categoryId) => handleDrawNext(categoryId);
+
 
   const handleCardResult = (success, cardData) => {
     const currentPlayers = [...players];
@@ -1318,38 +1345,43 @@ export default function App() {
     const nextRound = roundsPlayed + 1;
     setRoundsPlayed(nextRound);
     
-    // 1. SUPPRESSION DE LA TRANSITION VISUELLE INTERMÉDIAIRE
-    // activeCard=null va immédiatement retirer l'ancienne carte.
+    // 1. RETRAIT IMMÉDIAT DE LA CARTE ACTIVE
     setActiveCard(null); 
     setActiveCategory(null);
+    console.log(`[HandleResult] Tour terminé: ${nextRound}/${maxRounds}. Prochain joueur: ${currentPlayers[(currentPlayerIndex + 1) % currentPlayers.length]?.name}`); // Debug Log
 
     // Logique de fin de partie
     if (nextRound >= maxRounds) { 
-        // On utilise un petit délai pour permettre à React de finaliser le rendu du jeu avant le tableau de score.
         setTimeout(() => {
             setShowScoreboard(true); 
-        }, 50); // Maintien d'un petit délai (50ms) UNIQUEMENT pour la transition FIN DE PARTIE -> SCOREBOARD.
+        }, 50);
     } else { 
-        // 2. PASSAGE INSTANTANÉ AU JOUEUR SUIVANT ET À LA NOUVELLE CARTE/SÉLECTION
+        // 2. PASSAGE AU JOUEUR SUIVANT
         setCurrentPlayerIndex((currentPlayerIndex + 1) % currentPlayers.length); 
         
-        // Si la partie est DÉMARRÉE (logistique ou 1er tour du mode 'all' est passé), on tire automatiquement
-        if (isGameStartedState) {
-            drawRandomNextCard(); // Tirage de la nouvelle carte
-        }
-        // Si non démarrée (mode 'all', retour à la sélection), activeCard est déjà null, l'écran de sélection réapparaît immédiatement.
+        // 3. NOUVEAU : Le tirage est désormais automatique pour tous les modes après le premier tour/clic initial.
+        handleDrawNext();
+        
+        // Ancienne logique :
+        // if (deckFilter !== 'logistics') { handleDrawNext(); } // Auto-tirage si mode 'all' après le 1er tour
     }
   };
 
   // VÉRIFIE si une catégorie n'a plus de cartes non-wild disponibles
   const isCategoryEmpty = (categoryId) => {
+      // SI on n'a joué aucune carte, la catégorie ne doit jamais être considérée comme vide (sécurité au démarrage)
+      if (playedCardIds.length === 0) {
+          return false;
+      }
+
       // Filtrer toutes les cartes non-wild de cette catégorie qui n'ont pas encore été jouées
       const remaining = INITIAL_CARDS.filter(c => c.categoryId === categoryId && c.categoryId !== 'math_wild' && !playedCardIds.includes(c.id));
       return remaining.length === 0;
   };
 
-  // Catégories à afficher sur l'écran de jeu
-  const categoriesToRender = Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics' && cat.id !== 'math_wild'); // Le mode normal montre les 5 catégories cliquables
+  // MODIFICATION ICI: Suppression du filtre pour éviter un bug de correspondance avec l'ID 'creativity'
+  // On utilise Object.values(CATEGORIES) et on exclut uniquement les decks spéciaux.
+  const categoriesToRender = Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics' && cat.id !== 'math_wild'); 
   
   // Style d'arrière-plan dynamique
   const currentBackgroundStyle = deckFilter === 'logistics' 
@@ -1491,7 +1523,11 @@ export default function App() {
                     {deckFilter === 'logistics' ? (
                         // En mode Logistique, on doit toujours cliquer pour tirer
                        <button 
-                            onClick={drawRandomNextCard} 
+                            // Le tirage se fait sur le clic du bouton
+                            onClick={() => {
+                                console.log("[USER ACTION] Clic sur TIRER LA PROCHAINE CARTE LOGISTIQUE."); // Debug Log
+                                drawRandomNextCard(); 
+                            }} 
                             className="group bg-white text-[#B02E68] font-black text-xl py-5 px-10 rounded-3xl hover:scale-105 transition shadow-2xl flex items-center justify-center gap-4 hover:shadow-white/30"
                         >
                             TIRER LA PROCHAINE CARTE LOGISTIQUE
