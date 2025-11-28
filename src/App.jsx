@@ -11,10 +11,16 @@ const COLORS = {
     backgroundColor: '#B02E68',
     minHeight: '100vh'
   },
-  // NOUVEAU : Style pour le mode Logistique (Vert/Noir)
+  // Style pour le mode Logistique (Vert/Noir)
   logisticsBackgroundStyle: {
     background: 'radial-gradient(ellipse at top, #059669, #065F46, #000000)', 
     backgroundColor: '#065F46',
+    minHeight: '100vh'
+  },
+  // MISE À JOUR CRITIQUE: Style pour le mode JALO (Jaune/Noir)
+  jaloBackgroundStyle: {
+    background: 'linear-gradient(180deg, #FFC20E, #2d2d2d)', 
+    backgroundColor: '#2d2d2d',
     minHeight: '100vh'
   },
   cards: {
@@ -73,6 +79,16 @@ const COLORS = {
         accentGradient: 'linear-gradient(90deg, #ffa62d, #ff5e00)',
         border: '1px solid rgba(255,166,45,0.5)',
         text: 'text-white'
+    },
+    jalo: { // MISE À JOUR : COULEUR JALO (Jaune/Noir)
+        id: 'jalo',
+        hex: '#FFC20E', // Jaune vif pour l'accent
+        // MISE À JOUR: Utilisation d'un fond plus sombre et moins de dégradé transparent pour un meilleur contraste
+        gradient: 'linear-gradient(135deg, rgba(255,194,14,0.1) 0%, rgba(0,0,0,0.5) 100%)',
+        accentGradient: 'linear-gradient(90deg, #FFC20E, #ff9900)',
+        border: '1px solid rgba(255,194,14,0.3)',
+        // INVERSION CRITIQUE: Le texte par défaut doit être BLANC sur le fond JALO sombre
+        text: 'text-white' 
     }
   }
 };
@@ -86,6 +102,7 @@ const CATEGORIES = {
   CREATIVITE: { id: 'creativity', label: 'CRÉATIVITÉ', colorData: COLORS.cards.creativity, icon: Lightbulb }, 
   LOGISTICS: { id: 'logistics', label: 'LOGISTIQUE<br/>OPÉRATIONS', colorData: COLORS.cards.logistics, icon: Tractor }, // CORRECTION ICI : Ajout du <br/>
   MATH_WILD: { id: 'math_wild', label: 'DÉFI MATHS<br/>(WILD CARD)', colorData: COLORS.cards.math_wild, icon: Zap }, // NOUVELLE CATÉGORIE WILD
+  JALO: { id: 'jalo', label: 'TEAM BUILDING<br/>JALO', colorData: COLORS.cards.jalo, icon: Users }, // NOUVELLE CATÉGORIE JALO
 };
 
 // VALEUR EN POINTS POUR LES CARTES
@@ -194,6 +211,51 @@ const INITIAL_CARDS = [
   { id: 'm_wild_3', categoryId: 'math_wild', type: 'quiz', title: 'ÉQUATION MYSTÈRE', scenario: 'Si $2x + 5 = 15$, que vaut $x$ ?', options: ['3', '5', '10'], correctIndex: 1, explanation: 'En soustrayant 5, on a $2x = 10$. En divisant par 2, on a $x = 5$.', duration: 30, points: WILD_POINTS },
   { id: 'm_wild_4', categoryId: 'math_wild', type: 'quiz', title: 'POURCENTAGE', scenario: 'Vous devez livrer 400 colis. Vous en avez déjà livré 300. Quel pourcentage reste-t-il à livrer ?', options: ['10%', '25%', '75%'], correctIndex: 1, explanation: 'Il reste 100 colis à livrer sur 400. $100/400 = 1/4 = 25\%$.', duration: 30, points: DEFAULT_POINTS },
   { id: 'm_wild_5', categoryId: 'math_wild', type: 'quiz', title: 'GESTION DU TEMPS', scenario: 'Il est 14h30. Si vous avez une réunion de 90 minutes, à quelle heure finit-elle ?', options: ['15h30', '16h00', '16h30'], correctIndex: 0, explanation: '90 minutes = 1h30. 14h30 + 1h30 = 16h00.', duration: 30, points: WILD_POINTS },
+  
+  // --- NOUVELLES CARTES TEAM BUILDING JALO (30 cartes au total) ---
+  // MANCHE 1 - VRAI/FAUX (JALO_Q1 à JALO_Q4)
+  { id: 'jalo_q1', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : INDIVIDUEL', scenario: 'Respecter les délais est surtout une affaire individuelle.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. Le respect des délais est collectif. Un goulot d\'étranglement ou un retard non signalé impacte toute la chaîne (effet domino).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q2', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : AMÉLIORATION', scenario: 'Un process peut être amélioré sans être respecté au départ.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. Pour améliorer un process (Méthode Kaizen), il faut d\'abord le connaître et le respecter pour mesurer son point de départ.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q3', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : IMPACT RETARD', scenario: 'Quand un délai n’est pas tenu, c’est rarement sans impact ailleurs.', options: ['Vrai', 'Faux'], correctIndex: 0, explanation: 'Vrai. Les opérations sont interdépendantes. Un retard a un effet domino sur les équipes suivantes, la qualité, ou la relation client.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q4', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : ALERTER', scenario: 'Informer en avance d\'un retard, ce n\'est pas grave.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. L\'information est cruciale pour l\'ajustement, mais un retard reste grave s\'il est récurrent. Il doit être corrigé, pas seulement signalé. C\'est une preuve de professionnalisme, mais pas une excuse.', duration: 30, points: DEFAULT_POINTS },
+  
+  // NOUVEAUX VRAI/FAUX (JALO_Q9 à JALO_Q12, JALO_Q16, JALO_Q17)
+  { id: 'jalo_q9', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : PRIORITÉ', scenario: 'La règle de priorité doit toujours être dictée par l\'urgence du client.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. La priorité doit être le résultat d’un arbitrage entre l’urgence (délai) et l’importance (impact business/sécurité).', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q10', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : DOCUMENTATION', scenario: 'La documentation d\'un process est surtout utile pour les nouveaux employés.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. La documentation est essentielle pour la cohérence, la formation, et pour servir de base à l\'amélioration continue (Kaizen) pour toute l\'équipe.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q11', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : COMMUNICATION', scenario: 'En cas de doute sur un process, il vaut mieux prendre une initiative rapide.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. Sauf danger imminent, l’initiative rapide peut créer une erreur coûteuse en aval. Il faut toujours consulter le process, le collègue ou le manager avant d\'agir dans l\'incertitude.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q12', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : RÉSILIENCE', scenario: 'L’équipe doit s’adapter au process, jamais l’inverse.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. Les process sont vivants. Si un process n’est pas adapté à l’équipe ou à la réalité du terrain, il doit être challengé et adapté par un processus de gestion du changement.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q16', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : KAÏZEN', scenario: 'L\'Amélioration Continue (Kaïzen) doit être un événement annuel planifié.', options: ['Vrai', 'Faux'], correctIndex: 1, explanation: 'Faux. Le Kaïzen est une démarche quotidienne et constante. Chaque membre de l\'équipe est un acteur de l\'amélioration, à petite échelle.', duration: 30, points: DEFAULT_POINTS },
+  { id: 'jalo_q17', categoryId: 'jalo', type: 'quiz', title: 'VRAI/FAUX : FORMATION', scenario: 'Le process s\'applique dès le jour de la formation, même si on a des doutes.', options: ['Vrai', 'Faux'], correctIndex: 0, explanation: 'Vrai. Pour garantir l\'uniformité et la sécurité, le process doit être appliqué à la lettre. Les doutes ou suggestions sont à remonter via le canal prévu, pas à ignorer.', duration: 30, points: DEFAULT_POINTS },
+  
+  // MANCHE 2 - MISSION CHRONO (JALO_Q5, JALO_Q8)
+  { id: 'jalo_q5', categoryId: 'jalo', type: 'quiz', title: 'MISSION CHRONO : DOCUMENT MANQUANT', scenario: 'Un client attend une livraison à 16h. À 15h30, vous réalisez qu\'un document manque. Que faites-vous ?', options: ['Attendre et espérer résoudre seul', 'Ignorer le process pour livrer vite', 'Alerter immédiatement selon le process', 'Reporter sans prévenir'], correctIndex: 2, explanation: 'La réponse C (Alerter immédiatement selon le process) est la meilleure. Le process permet de mobiliser les bonnes ressources rapidement pour trouver une solution de contournement (ex: envoi partiel, envoi électronique).', duration: 45, points: DEFAULT_POINTS },
+  { id: 'jalo_q8', categoryId: 'jalo', type: 'quiz', title: 'MISSION CHRONO : ERREUR TERRAIN', scenario: 'Vous voyez un collègue du terrain faire une erreur de manipulation critique. Que faites-vous ?', options: ['Attendre qu\'il finisse pour corriger', 'L\'interrompre immédiatement pour le stopper', 'Prendre une photo de l\'erreur', 'Le laisser faire car c\'est son travail'], correctIndex: 1, explanation: 'L\'interrompre immédiatement (B) est la priorité absolue, car une erreur critique peut engager la responsabilité, la sécurité ou causer des dommages irréversibles.', duration: 45, points: DEFAULT_POINTS },
+  
+  // NOUVELLES MISSIONS CHRONO (JALO_Q13 à JALO_Q15, JALO_Q18)
+  { id: 'jalo_q13', categoryId: 'jalo', type: 'quiz', title: 'MISSION CHRONO : ALERTE', scenario: 'Vous identifiez une faille de sécurité dans un process. Que faites-vous ?', options: ['La corriger secrètement et continuer', 'Alerter votre manager et le service Qualité/Sécurité', 'En parler à un collègue seulement'], correctIndex: 1, explanation: 'Alerter immédiatement (B) selon la chaîne de commandement (manager/Qualité/Sécurité) pour engager une correction officielle et urgente.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'jalo_q14', categoryId: 'jalo', type: 'quiz', title: 'MISSION CHRONO : FEEDBACK', scenario: 'Un process est trop lourd. Quelle est la meilleure action pour le simplifier ?', options: ['L\'ignorer pour gagner du temps', 'Documenter la difficulté et proposer une alternative', 'Demander une nouvelle équipe'], correctIndex: 1, explanation: 'La solution constructive est de remonter les inefficacités (B) avec des données pour permettre au responsable du process de l\'améliorer.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'jalo_q15', categoryId: 'jalo', type: 'quiz', title: 'MISSION CHRONO : SURCHARGE', scenario: 'Un collègue est surchargé et vous demande de l\'aide. Que lui demandez-vous en premier ?', options: ['De faire un café', 'Sa liste de tâches complète et les priorités', 'Ce qu\'il pense que vous devez faire'], correctIndex: 1, explanation: 'La première chose est de comprendre la charge (B) pour une délégation ciblée et efficace, basée sur l\'importance et l\'urgence.', duration: 45, points: DEFAULT_POINTS },
+  { id: 'jalo_q18', categoryId: 'jalo', type: 'quiz', title: 'MISSION CHRONO : RÉUNION', scenario: 'Vous êtes convoqué à une réunion qui n\'a pas d\'ordre du jour. Que faites-vous ?', options: ['Vous y allez, on verra bien', 'Vous demandez l\'objectif avant de confirmer', 'Vous n\'y allez pas'], correctIndex: 1, explanation: 'Le respect du temps de chacun passe par la clarté de l\'objectif (B). Demander l\'objectif avant de s\'engager.', duration: 45, points: DEFAULT_POINTS },
+  
+  // MANCHE 3 - LE PIRE SCÉNARIO (Challenge) (JALO_C1 à JALO_C2)
+  { id: 'jalo_c1', categoryId: 'jalo', type: 'challenge', title: 'PIRE SCÉNARIO : MAIL URGENT', scenario: 'DÉFI : Listez 3 conséquences désastreuses du fait de "Ne pas répondre à un mail urgent" pendant 2 jours.', explanation: 'Conséquences : 1. Perte de temps (la personne attend/relance) ; 2. Blocage d\'un process critique ; 3. Image de marque/professionnalisme dégradée.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c2', categoryId: 'jalo', type: 'challenge', title: 'PIRE SCÉNARIO : MODIFICATION SANS VALIDATION', scenario: 'DÉFI : Listez 3 conséquences désastreuses du fait de "Modifier un document sans validation".', explanation: 'Conséquences : 1. Perte de traçabilité ; 2. Erreur introduite qui passe en production ; 3. Conflit avec le responsable validation (audit non-conforme).', duration: 60, points: DEFAULT_POINTS },
+  
+  // NOUVEAUX PIRE SCÉNARIO (JALO_C5, JALO_C6)
+  { id: 'jalo_c5', categoryId: 'jalo', type: 'challenge', title: 'PIRE SCÉNARIO : STOCK', scenario: 'DÉFI : Listez 3 conséquences désastreuses d\'un "Stock obsolète non signalé" pour l\'entreprise.', explanation: 'Conséquences : 1. Perte financière (dépréciation) ; 2. Espace de stockage perdu ; 3. Erreur de livraison au client (si le produit est quand même envoyé).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c6', categoryId: 'jalo', type: 'challenge', title: 'PIRE SCÉNARIO : OUBLI', scenario: 'DÉFI : Listez 3 conséquences de "L\'oubli de l\'étape de vérification finale" dans un process.', explanation: 'Conséquences : 1. Baisse de la qualité (produit défectueux) ; 2. Rappel de produit coûteux ; 3. Image de marque/confiance endommagée.', duration: 60, points: DEFAULT_POINTS },
+  
+  // MANCHE 4 - PROCESS PUZZLE (Challenge) (JALO_C3, JALO_C4)
+  { id: 'jalo_c3', categoryId: 'jalo', type: 'challenge', title: 'PROCESS PUZZLE : FACTURE', scenario: 'DÉFI : Décrivez et justifiez l\'ordre correct (4 étapes) du process JALO pour la validation d\'une facture.', explanation: 'Ordre attendu : 1. Réception/Vérification (Conformité) > 2. Transmission au Manager (Approbation) > 3. Validation Finale/Paiement > 4. Archivage (Classement).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c4', categoryId: 'jalo', type: 'challenge', title: 'PROCESS PUZZLE : DEMANDE RH', scenario: 'DÉFI : Décrivez l\'ordre correct (4 étapes) du process pour le traitement d\'une demande RH (congés/absence).', explanation: 'Ordre attendu : 1. Soumission de la demande par l\'employé > 2. Approbation par le Manager > 3. Traitement/Validation par le Service RH > 4. Confirmation à l\'employé (Mise à jour planning).', duration: 60, points: DEFAULT_POINTS },
+
+  // NOUVEAUX PROCESS PUZZLE / DÉFIS GÉNÉRAUX (JALO_C7 à JALO_C12)
+  { id: 'jalo_c7', categoryId: 'jalo', type: 'challenge', title: 'PROCESS PUZZLE : CHANGEMENT', scenario: 'DÉFI : Décrivez l\'ordre correct (4 étapes) pour mettre en place un nouveau process.', explanation: 'Ordre attendu : 1. Conception/Validation (par le responsable) > 2. Formation de l\'équipe (Transfert de compétence) > 3. Phase pilote/Test > 4. Déploiement général (avec mise à jour de la documentation).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c8', categoryId: 'jalo', type: 'challenge', title: 'PROCESS PUZZLE : ACCUEIL', scenario: 'DÉFI : Décrivez les 4 étapes essentielles du process d\'intégration d\'un nouvel employé.', explanation: 'Ordre attendu : 1. Documents administratifs (Contrat/Informatique) > 2. Présentation à l\'équipe/Missions > 3. Formation aux process critiques > 4. Bilan à 1 mois (Suivi).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c9', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : LE MUR DU NON', scenario: 'Vous devez dire "NON" à une demande qui n\'a pas suivi le process sans froisser le demandeur.', explanation: 'Commencez par l\'empathie ("Je comprends votre besoin") puis expliquez la règle ("Pour garantir X, nous devons suivre le process Y") et offrez une alternative conforme.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c10', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : SIMPLIFICATION', scenario: 'Proposez une idée pour simplifier un process quotidien que vous connaissez (en 3 phrases).', explanation: 'Doit identifier l\'étape, l\'objectif de l\'étape et la solution de simplification (ex: automatisation d\'un email).', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c11', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : CLIENT/PROCESS', scenario: 'Un client demande un service hors process. Comment répondez-vous ?', explanation: 'Montrez que vous comprenez le besoin. Expliquez que cela représente un risque/coût exceptionnel (pourquoi le process existe), puis proposez de soumettre une dérogation ou un devis spécial.', duration: 60, points: DEFAULT_POINTS },
+  { id: 'jalo_c12', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : EFFICACITÉ', scenario: 'Votre équipe a tendance à contourner une étape. Que faites-vous pour y remédier ?', explanation: '1. Analyser *pourquoi* elle est contournée (est-elle inutile?). 2. Si elle est utile : Expliquer l\'importance et les risques. 3. Si elle est inutile : Proposer une modification officielle.', duration: 60, points: DEFAULT_POINTS },
 ];
 
 // --- SOUND MANAGER (Fonctions inchangées) ---
@@ -272,6 +334,10 @@ const CardBack = ({ category, onClick, disabled }) => {
     boxBoxShadow: disabled ? 'none' : `0 0 40px ${category.colorData.hex}30`, // Ombre plus prononcée
   };
 
+  // NOUVEAU: Déterminer la couleur du texte principal
+  const mainTextColor = category.id === 'jalo' ? 'text-black' : 'text-white';
+
+
   return (
     <div
       className={`
@@ -310,14 +376,17 @@ const CardBack = ({ category, onClick, disabled }) => {
             `}>
                  {/* Glow derrière l'icone */}
                  <div className="absolute inset-0 rounded-3xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500" style={{ backgroundColor: category.colorData.hex }}></div>
-                 <Icon size={56} className="text-white drop-shadow-md relative z-10" strokeWidth={1.5} />
+                 {/* CORRECTION JALO: L'icône est noire sur le fond JALO CLAIR, mais ici c'est une carte de sélection sur fond sombre, donc l'icône doit être BLANCHE. */}
+                 {/* La couleur de l'icône est maintenant gérée par la classe text-white par défaut, sauf pour le bouton en bas */}
+                 <Icon size={56} className={`text-white drop-shadow-md relative z-10`} strokeWidth={1.5} /> 
             </div>
           </div>
 
-          {/* TITRE - CORRECTION ICI */}
+          {/* TITRE */}
           <div className="relative z-10 w-full mt-4 flex flex-col items-center">
              <h3 
-                className="font-black text-white text-lg tracking-tight uppercase text-center mb-2 drop-shadow-lg leading-tight"
+                // CORRECTION JALO: Le texte du titre de la carte de sélection est maintenant BLANC.
+                className={`font-black text-white text-lg tracking-tight uppercase text-center mb-2 drop-shadow-lg leading-tight`}
                 // Utilisation de dangerouslySetInnerHTML pour le <br/>
                 dangerouslySetInnerHTML={{ __html: category.label }}
              />
@@ -337,10 +406,12 @@ const CardBack = ({ category, onClick, disabled }) => {
              >
                  <button 
                     onClick={() => { playSound('flip'); onClick(category.id); }}
-                    className="w-full text-black px-6 py-2 rounded-xl font-black text-sm uppercase tracking-widest shadow-2xl flex items-center justify-center gap-2 transform scale-100 transition-all duration-300 pointer-events-auto"
+                    // MISE À JOUR : Couleur du bouton JALO est jaune, le texte est noir
+                    className={`w-full ${category.id === 'jalo' ? 'text-black' : 'text-white'} px-6 py-2 rounded-xl font-black text-sm uppercase tracking-widest shadow-2xl flex items-center justify-center gap-2 transform scale-100 transition-all duration-300 pointer-events-auto`}
                     style={{ background: category.colorData.hex, boxShadow: `0 10px 20px -5px ${category.colorData.hex}80` }}
                  >
-                    <Plus size={16} strokeWidth={4} className="text-black/80" /> JOUER
+                    {/* Le plus doit être noir pour JALO, blanc pour les autres */}
+                    <Plus size={16} strokeWidth={4} className={`${category.id === 'jalo' ? 'text-black/80' : 'text-white/80'}`} /> JOUER
                  </button>
              </div>
         )}
@@ -377,6 +448,12 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
 
   // Affichage des points dynamiques
   const cardPoints = card.points || DEFAULT_POINTS;
+  
+  // NOUVEAU: Déterminer la couleur du texte principal
+  // CORRECTION CRITIQUE: Texte principal doit être BLANC sur le fond sombre JALO
+  const mainTextColor = category.id === 'jalo' ? 'text-white' : 'text-white';
+  const mainBgColor = category.id === 'jalo' ? 'bg-white/5' : 'bg-black/20'; // Utiliser bg-white/5 ou bg-black/20 pour la transparence
+
 
   return (
     // MISE À JOUR : Ajout d'une classe pour la transition d'apparition
@@ -402,7 +479,8 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                     <span className="text-[10px] uppercase tracking-[0.2em] opacity-60 block leading-none mb-1">Catégorie</span>
                     <span className="font-bold text-sm text-white leading-none" dangerouslySetInnerHTML={{ __html: category.label }}></span>
                 </div>
-                <div className="text-3xl w-10 h-10 flex items-center justify-center rounded-xl" style={{ backgroundColor: `${hexColor}20`, border: `1px solid ${hexColor}60` }}> <category.icon size={24} style={{ color: hexColor }} /></div>
+                {/* AJOUT: Couleur dynamique de l'icône */}
+                <div className={`text-3xl w-10 h-10 flex items-center justify-center rounded-xl`} style={{ backgroundColor: `${hexColor}20`, border: `1px solid ${hexColor}60` }}> <category.icon size={24} style={{ color: hexColor }} /></div>
                 <button onClick={onClose} className="ml-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition"><X size={20}/></button>
             </div>
         </div>
@@ -434,21 +512,23 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                                 </div>
                             )}
                         </div>
-                        <button onClick={handleNext} className="w-full text-black font-black py-4 rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-3 text-xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.4)]" style={{ background: hexColor }}>CONTINUER <ArrowRight size={24} strokeWidth={3} /></button>
+                        {/* CORRECTION JALO: Bouton CONTINUER (Jaune sur Noir/Blanc) */}
+                        <button onClick={handleNext} className={`w-full text-black font-black py-4 rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-3 text-xl shadow-[0_0_30px_-5px_rgba(255,255,255,0.4)]`} style={{ background: hexColor }}>CONTINUER <ArrowRight size={24} strokeWidth={3} className={`text-black`} /></button>
                     </div>
                 </div>
             )}
 
             {/* Zone de Contenu (Scenario) - Prends 65% sur desktop, 100% sur mobile */}
             <div className="flex-1 p-6 md:p-10 flex flex-col justify-center items-center text-center overflow-y-auto custom-scrollbar md:border-r md:border-white/10">
-                <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 bg-black/20 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/10 shadow-sm shrink-0">
+                {/* MISE À JOUR : Couleur du texte pour JALO (Blanc) */}
+                <div className={`inline-flex items-center justify-center gap-2 px-4 py-1.5 ${mainBgColor} rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-white/10 shadow-sm shrink-0 ${mainTextColor}`}>
                     {card.type === 'quiz' ? <><Sparkles size={12} className="text-yellow-300"/> Quiz • {cardPoints} Pts</> : <><Users size={12} className="text-yellow-300"/> Défi • Jury</>}
                 </div>
                 {/* Ajustement du titre pour mobile */}
-                <h2 className="text-2xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full">{card.title}</h2>
-                <div className="bg-black/10 p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm w-full max-w-2xl">
-                    {/* Ajustement du scénario pour mobile */}
-                    <p className="text-lg md:text-2xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90">"{card.scenario}"</p>
+                <h2 className={`text-2xl md:text-4xl font-black uppercase mb-8 leading-[0.9] drop-shadow-lg tracking-tighter w-full ${mainTextColor}`}>{card.title}</h2>
+                <div className={`p-6 md:p-8 rounded-3xl border border-white/5 backdrop-blur-sm w-full max-w-2xl ${mainBgColor}`}>
+                    {/* CORRECTION JALO: Scénario en blanc pour la lisibilité */}
+                    <p className={`text-lg md:text-2xl font-medium leading-snug drop-shadow-sm font-serif italic text-white/90`}>"{card.scenario}"</p>
                 </div>
             </div>
 
@@ -457,13 +537,16 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                  <div className="flex-grow p-6 flex flex-col justify-center overflow-y-auto custom-scrollbar">
                     {card.type === 'quiz' ? (
                         <div className="space-y-3 w-full">
-                            <span className="text-xs font-bold uppercase tracking-widest opacity-60 mb-2 block text-center">Choisissez la bonne réponse</span>
+                            {/* MISE À JOUR : Couleur du texte de l'instruction (Blanc) */}
+                            <span className={`text-xs font-bold uppercase tracking-widest opacity-60 mb-2 block text-center ${mainTextColor}`}>Choisissez la bonne réponse</span>
                             {card.options.map((option, idx) => {
                                 // Définition du style du bouton
                                 const isSelected = selectedOption === idx;
                                 const isCorrect = idx === card.correctIndex;
-                                const baseStyle = 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 active:scale-[0.98]';
+                                // AJOUT: Base style pour JALO (TEXTE BLANC)
+                                const baseStyle = category.id === 'jalo' ? 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/30' : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/30';
                                 let statusClass = baseStyle;
+                                // CORRECTION JALO : Le cercle est blanc/transparent sur fond sombre
                                 let statusCircleStyle = { border: '2px solid rgba(255,255,255,0.3)', color: 'white' };
                                 let buttonStyle = {};
 
@@ -475,11 +558,13 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                                         statusClass = 'bg-red-600 border-red-400 text-white opacity-60';
                                         statusCircleStyle = { border: '2px solid white', backgroundColor: 'white', color: '#b91c1c' };
                                     } else {
-                                        statusClass = 'bg-white/5 border-white/10 opacity-40';
+                                        // Texte blanc, faible opacité
+                                        statusClass = 'bg-white/5 border-white/10 text-white opacity-40';
                                     }
                                 } else if (isSelected) {
                                      // Style lorsqu'une option est sélectionnée mais pas encore révélée
                                      buttonStyle = { border: `2px solid ${hexColor}` };
+                                     // Cercle de sélection en jaune (couleur d'accent)
                                      statusCircleStyle = { border: `2px solid ${hexColor}`, backgroundColor: `${hexColor}30`, color: hexColor };
                                 }
                                 
@@ -511,7 +596,8 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                     {card.type === 'challenge' && !feedbackState && (
                         <div className="flex gap-3 mt-4">
                             <button onClick={() => handleResult(false)} className="flex-1 group text-white border border-red-500/30 font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: 'linear-gradient(90deg, #dc262620, #b91c1c50)', borderColor: '#b91c1c' }}><XCircle size={20} className="group-hover:scale-110 transition"/> Raté</button>
-                            <button onClick={() => handleResult(true)} className="flex-1 group text-white font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg" style={{ background: 'linear-gradient(90deg, #10b981, #059669)', borderColor: '#059669' }}><Check size={20} className="group-hover:scale-110 transition"/> Réussi</button>
+                            {/* CORRECTION JALO: Bouton Réussi (Jaune, texte noir) */}
+                            <button onClick={() => handleResult(true)} className={`flex-1 group text-black font-bold py-3 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg`} style={{ background: hexColor, borderColor: hexColor }}><Check size={20} className={`text-black`} /> Réussi</button>
                         </div>
                     )}
                  </div>
@@ -529,7 +615,7 @@ const ProfileScreen = ({ player, onBack }) => {
 
     // Suppression de getCategoryById car elle n'était pas utilisée et sa logique était redondante avec celle de ScoreBoard.
 
-    const allCategories = Object.values(CATEGORIES).filter(c => c.id !== 'logistics' && c.id !== 'math_wild');
+    const allCategories = Object.values(CATEGORIES).filter(c => c.id !== 'logistics' && c.id !== 'math_wild' && c.id !== 'jalo');
     
     // Calculer les scores et les max par catégorie
     const skillData = allCategories.map(cat => {
@@ -543,8 +629,18 @@ const ProfileScreen = ({ player, onBack }) => {
         };
     });
 
-    const totalScore = skillData.reduce((sum, item) => sum + item.success, 0) + (player.scoreByCategory['math_wild']?.success * WILD_POINTS || 0) + (player.scoreByCategory['logistics']?.success * DEFAULT_POINTS || 0);
-    const totalPlayed = skillData.reduce((sum, item) => sum + item.total, 0) + (player.scoreByCategory['math_wild']?.total || 0) + (player.scoreByCategory['logistics']?.total || 0);
+    // Filtre pour inclure JALO dans le calcul du score total
+    const specialCategories = ['math_wild', 'logistics', 'jalo'];
+    const totalScore = skillData.reduce((sum, item) => sum + item.success, 0) + 
+                       (player.scoreByCategory['math_wild']?.success * WILD_POINTS || 0) + 
+                       (player.scoreByCategory['logistics']?.success * DEFAULT_POINTS || 0) + 
+                       (player.scoreByCategory['jalo']?.success * DEFAULT_POINTS || 0); // Ajout JALO
+                       
+    const totalPlayed = skillData.reduce((sum, item) => sum + item.total, 0) + 
+                        (player.scoreByCategory['math_wild']?.total || 0) + 
+                        (player.scoreByCategory['logistics']?.total || 0) +
+                        (player.scoreByCategory['jalo']?.total || 0); // Ajout JALO
+
 
     // Fonction pour générer le graphique radar (simplifié)
     const RadarChart = ({ data }) => {
@@ -689,13 +785,20 @@ const ProfileScreen = ({ player, onBack }) => {
                     {/* Colonne des Détails */}
                     <div className="md:w-1/2 space-y-4">
                         <h3 className="text-xl font-bold uppercase tracking-wider border-b border-white/20 pb-2 mb-4">Détails par Compétence</h3>
-                        {/* Inclure toutes les catégories dans les détails, y compris Math Wild et Logistique */}
+                        {/* Liste de toutes les catégories pour l'affichage des détails */}
                         {[...skillData, 
                             { 
                                 ...CATEGORIES.LOGISTICS, 
                                 success: player.scoreByCategory.logistics?.success || 0,
                                 total: player.scoreByCategory.logistics?.total || 0,
                                 percentage: player.scoreByCategory.logistics?.total > 0 ? Math.round((player.scoreByCategory.logistics.success / player.scoreByCategory.logistics.total) * 100) : 0,
+                                isSpecial: true
+                            },
+                            { 
+                                ...CATEGORIES.JALO, // AJOUT DE JALO
+                                success: player.scoreByCategory.jalo?.success || 0,
+                                total: player.scoreByCategory.jalo?.total || 0,
+                                percentage: player.scoreByCategory.jalo?.total > 0 ? Math.round((player.scoreByCategory.jalo.success / player.scoreByCategory.jalo.total) * 100) : 0,
                                 isSpecial: true
                             },
                             { 
@@ -726,7 +829,7 @@ const ProfileScreen = ({ player, onBack }) => {
                             </div>
                         ))}
                         <div className="pt-4 mt-6 border-t border-white/10">
-                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations et les cartes Mathématiques sont affichés ci-dessus but exclus du graphique radar pour conserver la symétrie des 5 soft skills.</p>
+                           <p className="text-sm italic text-white/70">Le score Logistique/Opérations, JALO et les cartes Mathématiques sont affichés ci-dessus but exclus du graphique radar pour conserver la symétrie des 5 soft skills.</p>
                         </div>
                     </div>
                 </div>
@@ -749,7 +852,20 @@ const StoryScreen = ({ onBack }) => (
                     <div className="relative bg-white/5 border border-white/10 p-8 rounded-3xl flex flex-col md:flex-row items-center gap-8 backdrop-blur-md">
                         <div className="relative w-32 h-32 md:w-40 md:h-40 shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-br from-[#CF457A] to-[#8A1C4C] rounded-full blur opacity-70"></div>
-                            <img src="https://media.licdn.com/dms/image/v2/D4E03AQGPhAtWKK7wpA/profile-displayphoto-scale_200_200/B4EZky1.SpHgAY-/0/1757494638506?e=2147483647&v=beta&t=1kTBlrqh-i_Zj3pGqZk4P1PE1djT7Ze5LU8e9J5_p8E" alt="Gabriel Emrick Tognimanbou DAHISSIHO" className="relative w-full h-full object-cover rounded-full border-4 border-white/20 shadow-2xl"/>
+                            {/* DÉBUT DE LA MODIFICATION: Mise à jour de l'URL LinkedIn potentiellement plus stable */}
+                            <img 
+                                // NOUVELLE URL FOURNIE PAR L'UTILISATEUR
+                                src="https://media.licdn.com/dms/image/v2/D4E03AQGPhAtWKK7wpQ/profile-displayphoto-scale_200_200/B4EZky1.SpHgAY-/0/1757494638506?e=2147483647&v=beta&t=1kTBlrqh-i_Zj3pG1zk4P1PE1djT7Ze5LU8e9J5_p8E" 
+                                alt="Gabriel Emrick Tognimanbou DAHISSIHO (Placeholder si erreur)" 
+                                className="relative w-full h-full object-cover rounded-full border-4 border-white/20 shadow-2xl"
+                                // Image de secours au cas où le lien LinkedIn ne fonctionne pas ou expire
+                                onError={(e) => {
+                                    e.target.onerror = null; // Empêche la boucle infinie en cas d'erreur de la fallback
+                                    // Utilisation d'un placeholder plus générique mais toujours avec le code
+                                    e.target.src = "https://placehold.co/200x200/B02E68/ffffff?text=GE-D+Photo+Fail";
+                                }}
+                            />
+                            {/* FIN DE LA MODIFICATION */}
                             <div className="absolute bottom-2 right-2 bg-white text-[#B02E68] p-1.5 rounded-full shadow-lg"><Award size={20} /></div>
                         </div>
                         <div className="text-center md:text-left space-y-2">
@@ -760,7 +876,7 @@ const StoryScreen = ({ onBack }) => (
                     </div>
                 </div>
                 <div className="space-y-8 text-lg leading-relaxed font-light text-white/90">
-                    <p className="text-xl md:text-2xl font-medium text-white">On ne le répète jamais assez : <span className="text-[#B02E68] font-bold">les compétences techniques</span> t’ouvrent la porte d’une entreprise, mais ce sont <span className="text-green-400 font-bold">les compétences humaines</span> qui te font gravir les échelons.</p>
+                    <p className="text-xl md:text-2xl font-medium text-white">On ne le répète jamais assez : <span className="text-[#B02E68] font-bold">les compétences techniques</span> t’ouvent la porte d’une entreprise, mais ce sont <span className="text-green-400 font-bold">les compétences humaines</span> qui te font gravir les échelons.</p>
                     <div className="relative pl-8 py-2"><div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#B02E68] to-transparent"></div><p className="text-2xl italic font-serif text-white/80">"La collaboration, l’écoute, la gestion de conflit, la prise de décision collective… tout ce qui fait qu’on réussit avec les autres."</p></div>
                     <p>Et pourtant, la majorité des formations universitaires n’enseignent pas ça. On passe des années à apprendre à résoudre des équations, mais presque jamais à résoudre un désaccord. On nous note sur nos résultats, rarement sur notre capacité à convaincre, à fédérer ou à gérer une tension en équipe.</p>
                     <div className="bg-gradient-to-r from-[#B02E68]/20 to-transparent p-6 rounded-r-2xl border-l-4 border-[#B02E68]"><p className="mb-2 font-bold uppercase text-sm tracking-widest text-[#B02E68]">La Solution</p><p className="xl">C’est là que j’ai voulu agir. Pas avec une formation classique, mais avec une expérience vivante, ludique et impactante : <span className="font-black text-white block text-3xl mt-2 tracking-tighter">🎯 SKILLSMASTER</span></p></div>
@@ -773,8 +889,64 @@ const StoryScreen = ({ onBack }) => (
     </div>
 );
 
+// --- NOUVEAU COMPOSANT : Écran d'historique des parties ---
+const HistoryScreen = ({ history, onBack }) => {
+    // Fonction utilitaire pour formater la date
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('fr-FR', {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    };
+    
+    return (
+        <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
+            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
+                 <div className="flex items-center gap-3 text-white"><History className="text-[#4dd4ff]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">HISTORIQUE DES PARTIES</h2></div>
+                 <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
+                {history.length === 0 ? (
+                    <div className="text-center py-20 text-white/50">
+                        <History size={48} className="mx-auto mb-4" />
+                        <p className="text-xl italic">Aucune partie n'a encore été enregistrée.</p>
+                        <p className="text-sm mt-2">Commencez une nouvelle partie pour voir vos résultats ici !</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        {history.map((game, index) => (
+                            <div key={index} className="bg-white/5 p-6 rounded-2xl border border-white/10 shadow-lg transition hover:bg-white/10">
+                                <div className="flex justify-between items-start border-b border-white/10 pb-3 mb-3">
+                                    <div>
+                                        <span className="text-xs font-bold uppercase tracking-widest text-[#FFC20E]">Partie n°{history.length - index} ({game.mode.toUpperCase()})</span>
+                                        <h3 className="text-lg font-black mt-1">{formatDate(game.date)}</h3>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    {[...game.results].sort((a, b) => b.score - a.score).map((player, pIndex) => (
+                                        <div key={player.id} className={`flex justify-between items-center p-3 rounded-lg ${pIndex === 0 ? 'bg-green-600/20 font-bold border-l-4 border-green-400' : 'bg-white/5'}`}>
+                                            <span className="flex items-center gap-2">
+                                                {pIndex === 0 && <Crown size={18} className="text-yellow-400" fill="currentColor" />}
+                                                {player.name}
+                                            </span>
+                                            <span className="font-mono text-xl">{player.score} pts</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+// --- FIN NOUVEAU COMPOSANT : Écran d'historique des parties ---
+
+
 // --- Ecrans Menu, History, Setup ---
-const MainMenu = ({ onNavigate, startLogisticsChallenge, onResumeGame, gameSaved }) => ( // AJOUT: onResumeGame, gameSaved
+const MainMenu = ({ onNavigate, onResumeGame, gameSaved }) => ( // startLogisticsChallenge supprimé, remplacé par onNavigate
   <div className="flex flex-col items-center justify-center h-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
      <div className="text-center mb-8 relative">
         <div className="absolute -inset-10 bg-gradient-to-r from-[#FFC20E] to-[#B02E68] blur-3xl opacity-20 animate-pulse"></div>
@@ -792,10 +964,17 @@ const MainMenu = ({ onNavigate, startLogisticsChallenge, onResumeGame, gameSaved
        
        <button onClick={() => { playSound('flip'); onNavigate('setup'); }} className="w-full group bg-white text-[#B02E68] p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_30px_60px_-15px_rgba(255,255,255,0.3)] transition-all flex items-center justify-between px-8 border-4 border-transparent hover:border-[#FFC20E]"><span>NOUVELLE PARTIE</span> <Play className="group-hover:translate-x-1 transition fill-current" /></button>
        
-       {/* MODIFICATION: startLogisticsChallenge -> onNavigate('logisticsSetup') */}
+       {/* BOUTON DÉFI LOGISTIQUE (navigue vers logisticsSetup) */}
        <button onClick={() => onNavigate('logisticsSetup')} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20"
         style={{ background: COLORS.cards.logistics.accentGradient, boxShadow: `0 0 30px ${COLORS.cards.logistics.hex}50` }}>
           <span>DÉFI LOGISTIQUE</span> <Zap className="group-hover:translate-x-1 transition fill-current text-white" />
+       </button>
+       
+       {/* NOUVEAU: BOUTON TEAM BUILDING JALO (navigue vers jaloSetup) */}
+       <button onClick={() => onNavigate('jaloSetup')} className="w-full group text-black p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-black/20"
+        // MISE À JOUR : Couleur du bouton JALO
+        style={{ background: COLORS.cards.jalo.hex, boxShadow: `0 0 30px ${COLORS.cards.jalo.hex}50` }}>
+          <span>TEAM BUILDING JALO</span> <Users className="group-hover:translate-x-1 transition fill-current text-black" />
        </button>
        
        <button onClick={() => { playSound('flip'); onNavigate('profile'); }} className="w-full bg-[#FFC20E]/40 hover:bg-[#FFC20E]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>MON PROFIL</span> <TrendingUp size={20} /></button>
@@ -805,36 +984,9 @@ const MainMenu = ({ onNavigate, startLogisticsChallenge, onResumeGame, gameSaved
   </div>
 );
 
-// Composants History et Setup (inchangés) ... [omitted for brevity, they are unchanged]
-
-const HistoryScreen = ({ history, onBack }) => (
-    <div className="w-full max-w-2xl bg-black/30 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/10 animate-in zoom-in-95 duration-300 h-[80vh] flex flex-col shadow-2xl">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-black text-white flex items-center gap-3"><History size={32} className="text-[#FFC20E]"/> HISTORIQUE</h2>
-        <button onClick={onBack} className="p-3 bg-white/10 rounded-full text-white hover:bg-white/20 transition hover:rotate-90"><X size={24}/></button>
-      </div>
-      <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
-        {history.length === 0 ? <div className="text-center text-white/40 py-20 italic text-xl">Aucune partie jouée.</div> : 
-            history.map((game, i) => (
-                <div key={i} className="bg-white/5 p-6 rounded-3xl border border-white/5 hover:border-white/20 transition">
-                    <div className="flex justify-between items-center mb-4">
-                        <span className="text-xs text-white/60 uppercase font-bold tracking-widest">{new Date(game.date).toLocaleDateString()} • {new Date(game.date).toLocaleTimeString()}</span>
-                        <span className="bg-[#B02E68] text-white text-[10px] px-3 py-1 rounded-full font-black uppercase tracking-wider">{game.mode === 'solo' ? 'SOLO' : 'MULTI'}</span>
-                    </div>
-                    <div className="space-y-2">
-                        {game.results.map((p, idx) => (
-                            <div key={idx} className="flex justify-between text-white items-center bg-black/20 p-3 rounded-xl"><span className="font-bold flex items-center gap-2">{idx === 0 && <Trophy size={14} className="text-yellow-400"/>}{p.name}</span><span className="font-mono font-black text-[#FFC20E]">{p.score} pts</span></div>
-                        ))}
-                    </div>
-                </div>
-            ))
-        }
-      </div>
-    </div>
-);
-
-// NOUVEAU COMPOSANT : Écran de configuration pour le défi Logistique
-const LogisticsSetupScreen = ({ onStart, onBack, logisticsMaxRounds, categoryId, categoryLabel }) => {
+// NOUVEAU COMPOSANT GÉNÉRIQUE : Écran de configuration pour les Défis
+// Anciennement LogisticsSetupScreen
+const ChallengeSetupScreen = ({ onStart, onBack, maxRounds, categoryId, categoryLabel }) => {
   const [mode, setMode] = useState(null);
   const createPlayer = (id, name) => ({
       id, 
@@ -847,7 +999,8 @@ const LogisticsSetupScreen = ({ onStart, onBack, logisticsMaxRounds, categoryId,
           emotional_intelligence: { success: 0, total: 0 },
           creativity: { success: 0, total: 0 },
           logistics: { success: 0, total: 0 },
-          math_wild: { success: 0, total: 0 }, // AJOUT
+          math_wild: { success: 0, total: 0 }, 
+          jalo: { success: 0, total: 0 }, 
       }
   });
 
@@ -864,15 +1017,20 @@ const LogisticsSetupScreen = ({ onStart, onBack, logisticsMaxRounds, categoryId,
         ? [createPlayer(1, soloName)]
         : players.map((name, i) => createPlayer(i + 1, name));
         
-    // Lance le jeu avec le mode, le nombre de cartes logistiques et le filtre 'logistics'
-    onStart(playerList, mode, logisticsMaxRounds, categoryId); 
+    // Lance le jeu avec le mode, le nombre de cartes (maxRounds) et le filtre (categoryId)
+    onStart(playerList, mode, maxRounds, categoryId); 
   };
+  
+  // MISE À JOUR : Ajout du style spécifique JALO
+  const isJalo = categoryId === 'jalo';
+  const accentColor = isJalo ? COLORS.cards.jalo.hex : '#FFC20E';
 
   return (
     <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-hidden">
         <button onClick={!mode ? onBack : () => setMode(null)} className="absolute top-6 left-6 text-white/50 hover:text-white transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest"><RotateCcw size={14} /> Retour</button>
-        <h2 className="text-4xl font-black text-center text-white mb-2 mt-6 tracking-tighter" dangerouslySetInnerHTML={{ __html: `DÉFI ${categoryLabel.toUpperCase().replace('<BR/>', '/')}` }} />
-        <p className="text-white/60 text-sm text-center mb-8">Choisissez le mode de jeu</p>
+        {/* CORRECTION JALO CRITIQUE : Titre en blanc sur fond noir (car l'écran est sombre) */}
+        <h2 className={`text-4xl font-black text-center mb-2 mt-6 tracking-tighter text-white`} dangerouslySetInnerHTML={{ __html: `DÉFI ${categoryLabel.toUpperCase().replace('<BR/>', '/')}` }} />
+        <p className={`text-sm text-center mb-8 ${isJalo ? 'text-white/80' : 'text-white/60'}`}>Choisissez le mode de jeu</p>
         {!mode ? (
           <div className="space-y-4">
             <button onClick={() => setMode('solo')} className="w-full bg-white text-[#B02E68] font-black text-xl py-6 rounded-3xl hover:scale-105 transition shadow-xl flex items-center justify-center gap-4"><User size={28} /> MODE SOLO</button>
@@ -881,23 +1039,39 @@ const LogisticsSetupScreen = ({ onStart, onBack, logisticsMaxRounds, categoryId,
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-4">
              <div className="mb-8">
-                <label className="text-white/60 text-xs font-bold mb-4 block uppercase tracking-widest pl-2">{mode === 'solo' ? 'Pseudo du champion' : 'Participants'}</label>
+                {/* CORRECTION JALO CRITIQUE : Label en blanc */}
+                <label className={`text-xs font-bold mb-4 block uppercase tracking-widest pl-2 text-white/60`}>{mode === 'solo' ? 'Pseudo du champion' : 'Participants'}</label>
                 {mode === 'solo' ? (
-                  <input type="text" value={soloName} onChange={(e) => setSoloName(e.target.value)} className="w-full bg-white/10 border-2 border-white/10 rounded-2xl px-6 py-4 text-white font-bold text-lg focus:outline-none focus:border-[#FFC20E] transition placeholder-white/20" placeholder="Entrez votre nom..." />
+                  <input 
+                      type="text" 
+                      value={soloName} 
+                      onChange={(e) => setSoloName(e.target.value)} 
+                      // CORRECTION JALO CRITIQUE : Input en BLANC sur fond sombre
+                      className={`w-full bg-white/10 border-white/10 text-white placeholder-white/40 focus:border-[#FFC20E] border-2 rounded-2xl px-6 py-4 font-bold text-lg focus:outline-none transition`} 
+                      placeholder="Entrez votre nom..." 
+                  />
                 ) : (
                   <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-2">
                     {players.map((p, i) => (
                       <div key={i} className="flex gap-2 items-center">
-                        <span className="text-white/40 font-black text-sm w-4">{i+1}</span>
-                        <input type="text" value={p} onChange={(e) => updatePlayerName(i, e.target.value)} className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white text-sm font-bold" />
+                        <span className={`font-black text-sm w-4 text-white/40`}>{i+1}</span>
+                        <input 
+                            type="text" 
+                            value={p} 
+                            onChange={(e) => updatePlayerName(i, e.target.value)} 
+                            // CORRECTION JALO CRITIQUE : Input en BLANC sur fond sombre
+                            className={`flex-1 bg-white/10 border-white/10 text-white focus:border-white border rounded-xl px-4 py-3 text-sm font-bold focus:outline-none transition`} 
+                        />
                         {players.length > 2 && (<button onClick={() => removePlayer(i)} className="p-3 bg-red-500/20 text-red-300 rounded-xl hover:bg-red-500 hover:text-white transition"><X size={16} /></button>)}
                       </div>
                     ))}
-                    <button onClick={addPlayer} className="w-full py-3 border-2 border-dashed border-white/20 rounded-xl text-white/50 hover:bg-white/10 hover:text-white hover:border-white/50 transition text-xs font-black uppercase flex items-center justify-center gap-2 mt-2"><Plus size={14} /> Ajouter un joueur</button>
+                    {/* CORRECTION JALO CRITIQUE : Bouton Ajouter Joueur en blanc/gris */}
+                    <button className={`w-full py-3 border-2 border-dashed rounded-xl transition text-xs font-black uppercase flex items-center justify-center gap-2 mt-2 text-white/50 border-white/20 hover:bg-white/10 hover:text-white hover:border-white/50`} onClick={addPlayer}><Plus size={14} /> Ajouter un joueur</button>
                   </div>
                 )}
              </div>
-             <button onClick={handleStart} className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#FFC20E] to-[#ff9900] text-black font-black text-xl hover:scale-105 transition shadow-[0_0_30px_-5px_rgba(255,194,14,0.4)] flex items-center justify-center gap-3">C'EST PARTI ({logisticsMaxRounds} tours) <ArrowRight size={24} strokeWidth={3} /></button>
+             {/* MISE À JOUR : Couleur du bouton de Démarrage (Jaune, texte noir) */}
+             <button onClick={handleStart} className="w-full py-5 rounded-2xl text-black font-black text-xl hover:scale-105 transition shadow-[0_0_30px_-5px_rgba(255,194,14,0.4)] flex items-center justify-center gap-3" style={{ background: accentColor }}>C'EST PARTI ({maxRounds} tours) <ArrowRight size={24} strokeWidth={3} /></button>
           </div>
         )}
     </div>
@@ -919,6 +1093,7 @@ const SetupScreen = ({ onStart, onBack }) => {
           creativity: { success: 0, total: 0 },
           logistics: { success: 0, total: 0 },
           math_wild: { success: 0, total: 0 }, // AJOUT
+          jalo: { success: 0, total: 0 }, // AJOUT
       }
   });
 
@@ -981,6 +1156,7 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
         // Normaliser l'ID avant de le comparer aux clés de CATEGORIES (sans accent)
         const key = categoryId?.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         // On cherche par la clé majuscule, nettoyée des accents, qui est maintenant 'CREATIVITE'
+        // Cette logique supporte également 'JALO' -> 'JALO'
         return CATEGORIES[key];
     };
 
@@ -1074,6 +1250,7 @@ export default function App() {
           creativity: { success: 0, total: 0 },
           logistics: { success: 0, total: 0 },
           math_wild: { success: 0, total: 0 }, // AJOUT
+          jalo: { success: 0, total: 0 }, // AJOUT
       }
   };
   
@@ -1198,8 +1375,8 @@ export default function App() {
     setDeckFilter(filter);
     setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
     
-    // NOUVEAU : Si en mode Logistique, on force l'état "démarré" pour permettre le premier tirage automatique (si on le souhaite)
-    if (filter === 'logistics') {
+    // NOUVEAU : Si en mode Défi, on force l'état "démarré"
+    if (filter === 'logistics' || filter === 'jalo') {
         setIsGameStartedState(true); 
     }
   };
@@ -1212,6 +1389,12 @@ export default function App() {
   const navigateToLogisticsSetup = () => {
       playSound('flip');
       setView('logisticsSetup');
+  };
+  
+  // NOUVEAU: Navigation pour le défi JALO
+  const navigateToJaloSetup = () => {
+      playSound('flip');
+      setView('jaloSetup');
   };
 
   const endGame = () => {
@@ -1240,7 +1423,7 @@ export default function App() {
       // 1. Déterminer le pool de cartes
       let cardPool = INITIAL_CARDS;
       if (filterId !== 'all') {
-          // Si on filtre par catégorie (ex: Logistique ou 1er choix)
+          // Si on filtre par catégorie (ex: Logistique, JALO ou 1er choix)
           cardPool = INITIAL_CARDS.filter(c => c.categoryId === filterId);
           console.log(`[getNewCard] Pool filtré par ${filterId}. Cartes disponibles dans le pool: ${cardPool.length}`);
       } else {
@@ -1254,12 +1437,21 @@ export default function App() {
                   return { card: randomWildCard, category: findCategoryByCardId(randomWildCard.id) };
               }
           }
-          // Sinon, on prend toutes les cartes SAUF les Wild Cards pour le tirage aléatoire des 5 catégories
-          cardPool = INITIAL_CARDS.filter(c => c.categoryId !== 'math_wild');
+          // Sinon, on prend toutes les cartes SAUF les Wild Cards et les cartes Défi pour le tirage aléatoire des 5 catégories
+          cardPool = INITIAL_CARDS.filter(c => c.categoryId !== 'math_wild' && c.categoryId !== 'logistics' && c.categoryId !== 'jalo');
       }
 
       // 2. Filtrer les cartes déjà jouées
       const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
+      
+      // Si le deck filtré est vide, on boucle sur le deck complet pour les défis
+      if (availableCards.length === 0 && (filterId === 'logistics' || filterId === 'jalo')) {
+         // Dans ce cas, on réinitialise les cartes jouées pour cette catégorie seulement
+         const allChallengeCards = INITIAL_CARDS.filter(c => c.categoryId === filterId);
+         const newCard = allChallengeCards[Math.floor(Math.random() * allChallengeCards.length)];
+         console.log(`[getNewCard] Deck ${filterId} épuisé. Boucle activée.`);
+         return { card: newCard, category: findCategoryByCardId(newCard.id) };
+      }
       
       if (availableCards.length === 0) {
           console.log("[getNewCard] AUCUNE carte disponible dans le pool filtré/global.");
@@ -1288,8 +1480,8 @@ export default function App() {
       if (categoryId) {
           // Mode Normal (1er tour) avec choix de catégorie
           result = getNewCard(categoryId);
-      } else if (deckFilter === 'logistics' || isGameStartedState) {
-          // Mode Logistique (tirage explicite/auto) ou Mode Normal (auto-tirage)
+      } else if (deckFilter === 'logistics' || deckFilter === 'jalo' || isGameStartedState) {
+          // Mode Défi (auto-tirage) ou Mode Normal (auto-tirage après le 1er tour)
           result = getNewCard();
       } else {
           console.log("[handleDrawNext] État du jeu non prêt pour un tirage aléatoire (attente sélection catégorie).");
@@ -1299,7 +1491,18 @@ export default function App() {
       if (result) {
           setActiveCategory(result.category);
           setActiveCard(result.card);
-          setPlayedCardIds(prev => [...prev, result.card.id]);
+          
+          // Logique pour gérer la boucle du deck dans les modes défis
+          if (deckFilter === 'logistics' || deckFilter === 'jalo') {
+              // Si la carte existe déjà, on ne l'ajoute pas à playedCardIds car elle est déjà là, 
+              // mais on continue car on a activé la boucle dans getNewCard().
+              if (!playedCardIds.includes(result.card.id)) {
+                  setPlayedCardIds(prev => [...prev, result.card.id]);
+              }
+          } else {
+              setPlayedCardIds(prev => [...prev, result.card.id]);
+          }
+
           setIsGameStartedState(true); // Assure que le jeu est considéré comme démarré après la première carte
       } else {
           // Si le tirage renvoie null (deck vide)
@@ -1361,9 +1564,6 @@ export default function App() {
         
         // 3. NOUVEAU : Le tirage est désormais automatique pour tous les modes après le premier tour/clic initial.
         handleDrawNext();
-        
-        // Ancienne logique :
-        // if (deckFilter !== 'logistics') { handleDrawNext(); } // Auto-tirage si mode 'all' après le 1er tour
     }
   };
 
@@ -1379,18 +1579,22 @@ export default function App() {
       return remaining.length === 0;
   };
 
-  // MODIFICATION ICI: Suppression du filtre pour éviter un bug de correspondance avec l'ID 'creativity'
-  // On utilise Object.values(CATEGORIES) et on exclut uniquement les decks spéciaux.
-  const categoriesToRender = Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics' && cat.id !== 'math_wild'); 
+  // On utilise Object.values(CATEGORIES) et on exclut les decks spéciaux (logistics, math_wild, jalo)
+  const categoriesToRender = Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics' && cat.id !== 'math_wild' && cat.id !== 'jalo'); 
+  
+  // DONNÉES SPÉCIFIQUES LOGISTIQUE
+  const LOGISTICS_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
+  const LOGISTICS_CATEGORY = CATEGORIES.LOGISTICS;
+  
+  // DONNÉES SPÉCIFIQUES JALO
+  // MISE À JOUR : Calcul basé sur le nouveau nombre de cartes JALO (30)
+  const JALO_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'jalo').length; 
+  const JALO_CATEGORY = CATEGORIES.JALO;
   
   // Style d'arrière-plan dynamique
   const currentBackgroundStyle = deckFilter === 'logistics' 
     ? COLORS.logisticsBackgroundStyle 
-    : COLORS.defaultBackgroundStyle;
-    
-  // DONNÉES SPÉCIFIQUES LOGISTIQUE
-  const LOGISTICS_MAX_CARDS = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
-  const LOGISTICS_CATEGORY = CATEGORIES.LOGISTICS;
+    : (deckFilter === 'jalo' ? COLORS.jaloBackgroundStyle : COLORS.defaultBackgroundStyle);
 
 
   return (
@@ -1432,18 +1636,31 @@ export default function App() {
         }
       `}</style>
 
-      {view === 'menu' && <MainMenu onNavigate={setView} startLogisticsChallenge={navigateToLogisticsSetup} onResumeGame={resumeGame} gameSaved={gameSaved} />}
+      {view === 'menu' && <MainMenu onNavigate={setView} onResumeGame={resumeGame} gameSaved={gameSaved} />}
       {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen onStart={(p, m) => startGame(p, m, 15, 'all')} onBack={() => setView('menu')} /></div>}
       
-      {/* NOUVEL ÉCRAN DE SETUP POUR LA LOGISTIQUE */}
+      {/* ÉCRAN DE SETUP POUR LE DÉFI LOGISTIQUE (Utilise ChallengeSetupScreen) */}
       {view === 'logisticsSetup' && (
           <div className="flex-1 flex items-center justify-center p-4">
-              <LogisticsSetupScreen 
+              <ChallengeSetupScreen 
                   onStart={startGame} 
                   onBack={() => setView('menu')}
-                  logisticsMaxRounds={LOGISTICS_MAX_CARDS}
+                  maxRounds={LOGISTICS_MAX_CARDS_COUNT} // maxRounds
                   categoryId={LOGISTICS_CATEGORY.id}
                   categoryLabel={LOGISTICS_CATEGORY.label}
+              />
+          </div>
+      )}
+
+      {/* NOUVEAU: ÉCRAN DE SETUP POUR LE DÉFI JALO (Utilise ChallengeSetupScreen) */}
+      {view === 'jaloSetup' && (
+          <div className="flex-1 flex items-center justify-center p-4">
+              <ChallengeSetupScreen 
+                  onStart={startGame} 
+                  onBack={() => setView('menu')}
+                  maxRounds={JALO_MAX_CARDS_COUNT} // MISE À JOUR : 30 tours
+                  categoryId={JALO_CATEGORY.id}
+                  categoryLabel={JALO_CATEGORY.label}
               />
           </div>
       )}
@@ -1483,7 +1700,7 @@ export default function App() {
               </div>
               {/* Responsiveness: Taille du titre adaptée */}
               <h2 className="text-2xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
-                 {deckFilter === 'logistics' ? 'DÉFI LOGISTIQUE (ALÉATOIRE)' : 'CHOISISSEZ UNE CATÉGORIE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
+                 {(deckFilter === 'logistics' || deckFilter === 'jalo') ? `DÉFI ${deckFilter.toUpperCase()} (ALÉATOIRE)` : 'CHOISISSEZ UNE CATÉGORIE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
               </h2>
             </div>
             
@@ -1511,27 +1728,28 @@ export default function App() {
                 </div>
             )}
             
-            {/* CAS 2: Écran d'attente/bouton (Mode 'logistics' OU Mode 'all' APRES 1er tour) */}
-            {/* Condition: activeCard est null, mais le jeu est lancé (logistics OU isGameStartedState=true) */}
-            {(!activeCard && (deckFilter === 'logistics' || isGameStartedState)) && (
+            {/* CAS 2: Écran d'attente/bouton (Mode 'logistics' / 'jalo' OU Mode 'all' APRES 1er tour) */}
+            {/* Condition: activeCard est null, mais le jeu est lancé (logistics / jalo OU isGameStartedState=true) */}
+            {(!activeCard && (deckFilter === 'logistics' || deckFilter === 'jalo' || isGameStartedState)) && (
                 <div className="flex flex-col items-center justify-center h-[60vh] animate-in fade-in duration-500">
                     <div className="relative w-80 h-80 flex items-center justify-center mb-8">
                        <div className="absolute inset-0 border-4 border-dashed border-white/20 rounded-full animate-spin-slow"></div>
                        <Zap size={64} className="text-[#FFC20E] animate-pulse"/>
                     </div>
                     
-                    {deckFilter === 'logistics' ? (
-                        // En mode Logistique, on doit toujours cliquer pour tirer
+                    {(deckFilter === 'logistics' || deckFilter === 'jalo') ? (
+                        // En mode Défi (Logistique/Jalo), on doit toujours cliquer pour tirer
                        <button 
                             // Le tirage se fait sur le clic du bouton
                             onClick={() => {
-                                console.log("[USER ACTION] Clic sur TIRER LA PROCHAINE CARTE LOGISTIQUE."); // Debug Log
+                                console.log(`[USER ACTION] Clic sur TIRER LA PROCHAINE CARTE ${deckFilter.toUpperCase()}.`); // Debug Log
                                 drawRandomNextCard(); 
                             }} 
-                            className="group bg-white text-[#B02E68] font-black text-xl py-5 px-10 rounded-3xl hover:scale-105 transition shadow-2xl flex items-center justify-center gap-4 hover:shadow-white/30"
+                            // CORRECTION JALO CRITIQUE : Bouton Jaune, texte noir
+                            className={`group font-black text-xl py-5 px-10 rounded-3xl hover:scale-105 transition shadow-2xl flex items-center justify-center gap-4 hover:shadow-white/30 bg-[#FFC20E] text-black hover:shadow-[#FFC20E]/50`}
                         >
-                            TIRER LA PROCHAINE CARTE LOGISTIQUE
-                            <ArrowRight className="group-hover:translate-x-1 transition fill-current" />
+                            TIRER LA PROCHAINE CARTE {deckFilter.toUpperCase()}
+                            <ArrowRight className="group-hover:translate-x-1 transition fill-current text-black" />
                         </button>
                     ) : (
                         // En mode 'all' après le 1er tour, le tirage est automatique et rapide (c'est l'écran de transition)
@@ -1560,7 +1778,7 @@ export default function App() {
       {showScoreboard && <ScoreBoard players={players} missedCards={missedCards} onEndGame={endGame} />}
 
       {/* NOUVEAU: Copyright Footer */}
-      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'setup' || view === 'logisticsSetup') && (
+      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup') && (
         <footer className="w-full text-center py-4 text-xs font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
             © {new Date().getFullYear()} SKILLSMASTER. Tous droits réservés. Développé par Gabriel Emrick Tognimanbou DAHISSIHO.
         </footer>
