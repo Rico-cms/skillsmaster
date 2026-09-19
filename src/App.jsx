@@ -480,7 +480,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
       <div 
          style={{ background: category.colorData.gradient }}
          // CORRECTION DE LA HAUTEUR MOBILE : Utiliser h-[90vh] pour éviter le débordement sur petit écran
-         className={`relative w-full md:max-w-6xl h-[90vh] md:h-[80vh] rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-4 ring-white/20`}
+         className={`relative w-full md:max-w-6xl h-[100dvh] sm:h-[94vh] md:h-[80vh] sm:rounded-[2.5rem] shadow-[0_0_80px_-20px_rgba(0,0,0,0.6)] overflow-hidden text-white flex flex-col ring-0 sm:ring-4 ring-white/20`}
       >
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`}}></div>
 
@@ -511,12 +511,12 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                     <div className="max-w-2xl w-full">
                         {feedbackState === 'success' ? (
                             <div className="mb-6 transform animate-bounce">
-                                <h2 className="text-5xl font-black text-green-400 italic tracking-tighter flex items-center justify-center gap-3"><CheckCircle size={48} className="text-green-400" /> EXCELLENT !</h2>
+                                <h2 className="text-3xl sm:text-5xl font-black text-green-400 italic tracking-tighter flex items-center justify-center gap-3"><CheckCircle className="w-8 h-8 sm:w-12 sm:h-12 text-green-400" /> EXCELLENT !</h2>
                                 <p className="font-bold text-white text-xl mt-2 tracking-widest">+{cardPoints} POINTS</p>
                             </div>
                         ) : (
                             <div className="mb-6">
-                                <h2 className="text-5xl font-black text-red-400 italic tracking-tighter flex items-center justify-center gap-3"><XCircle size={48} className="text-red-400" /> OUPS...</h2>
+                                <h2 className="text-3xl sm:text-5xl font-black text-red-400 italic tracking-tighter flex items-center justify-center gap-3"><XCircle className="w-8 h-8 sm:w-12 sm:h-12 text-red-400" /> OUPS...</h2>
                                 <p className="font-bold text-white text-xl mt-2 tracking-widest">PAS DE POINT</p>
                             </div>
                         )}
@@ -767,12 +767,12 @@ const ProfileScreen = ({ player, onBack }) => {
 
 
     return (
-        <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
-                 <div className="flex items-center gap-3 text-white"><TrendingUp className="text-[#00d468]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">PROFIL DE COMPÉTENCES</h2></div>
+        <div className="w-full max-w-4xl h-[100dvh] sm:h-[90vh] bg-black/60 backdrop-blur-xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
+            <div className="p-4 sm:p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
+                 <div className="flex items-center gap-2 sm:gap-3 text-white"><TrendingUp className="text-[#00d468] shrink-0" size={24} /><h2 className="text-base sm:text-2xl font-black uppercase tracking-wide sm:tracking-widest">PROFIL DE COMPÉTENCES</h2></div>
                  <button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
             </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 md:p-12 text-white relative z-10">
                 <div className="mb-8 text-center">
                     <h3 className="text-3xl font-black text-white">{player.name}</h3>
                     {/* CORRECTION DE L'AFFICHAGE POUR CLARIFIER LE MODE SOLO */}
@@ -857,12 +857,12 @@ const ProfileScreen = ({ player, onBack }) => {
 
 // --- ECRAN HISTOIRE (Inchangé) ---
 const StoryScreen = ({ onBack }) => (
-    <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
+    <div className="w-full max-w-4xl h-[100dvh] sm:h-[90vh] bg-black/60 backdrop-blur-xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
              <div className="flex items-center gap-3 text-white"><BookOpen className="text-[#B02E68]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">L'Histoire</h2></div>
              <button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
         </div>
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 md:p-12 text-white relative z-10">
             <div className="max-w-3xl mx-auto">
                 <div className="relative group mb-16 animate-in slide-in-from-bottom-4 duration-700">
                     <div className="absolute inset-0 bg-gradient-to-r from-[#B02E68] to-[#F26522] opacity-20 blur-xl rounded-3xl transform -rotate-1 group-hover:rotate-1 transition duration-500"></div>
@@ -918,12 +918,12 @@ const HistoryScreen = ({ history, onBack, onDelete, onClear }) => {
     };
     
     return (
-        <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
-                 <div className="flex items-center gap-3 text-white"><History className="text-[#4dd4ff]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">HISTORIQUE DES PARTIES</h2></div>
+        <div className="w-full max-w-4xl h-[100dvh] sm:h-[90vh] bg-black/60 backdrop-blur-xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
+            <div className="p-4 sm:p-6 border-b border-white/10 flex justify-between items-center gap-2 bg-black/40 z-20">
+                 <div className="flex items-center gap-2 sm:gap-3 text-white min-w-0"><History className="text-[#4dd4ff] shrink-0" size={24} /><h2 className="text-base sm:text-2xl font-black uppercase tracking-wide sm:tracking-widest truncate">HISTORIQUE</h2></div>
                  <div className="flex gap-2">{history.length > 0 && <button type="button" onClick={onClear} className="px-3 py-2 hover:bg-red-500/20 rounded-xl text-red-200 text-xs font-bold">TOUT EFFACER</button>}<button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button></div>
             </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 md:p-12 text-white relative z-10">
                 {history.length === 0 ? (
                     <div className="text-center py-20 text-white/50">
                         <History size={48} className="mx-auto mb-4" />
@@ -964,11 +964,11 @@ const HistoryScreen = ({ history, onBack, onDelete, onClear }) => {
 
 // --- Ecrans Menu, History, Setup ---
 const MainMenu = ({ onNavigate, onResumeGame, gameSaved }) => ( // startLogisticsChallenge supprimé, remplacé par onNavigate
-  <div className="flex flex-col items-center justify-center h-full space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
+  <div className="flex flex-col items-center justify-start sm:justify-center min-h-full py-8 sm:py-4 space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500">
      <div className="text-center mb-8 relative">
         <div className="absolute -inset-10 bg-gradient-to-r from-[#FFC20E] to-[#B02E68] blur-3xl opacity-20 animate-pulse"></div>
-        <h1 className="relative text-6xl md:text-8xl font-black italic tracking-tighter mb-2 text-white drop-shadow-2xl">SKILLS<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFC20E] to-white">MASTER</span></h1>
-        <p className="text-white/80 uppercase tracking-[0.5em] text-xs md:text-sm font-bold">Le jeu des compétences ultimes</p>
+        <h1 className="relative text-[2.65rem] sm:text-6xl md:text-8xl font-black italic tracking-tighter mb-2 text-white drop-shadow-2xl leading-none">SKILLS<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FFC20E] to-white">MASTER</span></h1>
+        <p className="text-white/80 uppercase tracking-[0.25em] sm:tracking-[0.5em] text-[9px] sm:text-xs md:text-sm font-bold">Le jeu des compétences ultimes</p>
      </div>
      <div className="w-full max-w-xs space-y-4 relative z-10">
        
@@ -1044,7 +1044,7 @@ const ChallengeSetupScreen = ({ onStart, onBack, maxRounds, categoryId, category
   const accentColor = isJalo ? COLORS.cards.jalo.hex : '#FFC20E';
 
   return (
-    <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-hidden">
+    <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-y-auto max-h-[100dvh]">
         <button onClick={!mode ? onBack : () => setMode(null)} className="absolute top-6 left-6 text-white/50 hover:text-white transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest"><RotateCcw size={14} /> Retour</button>
         {/* CORRECTION JALO CRITIQUE : Titre en blanc sur fond noir (car l'écran est sombre) */}
         <h2 className={`text-4xl font-black text-center mb-2 mt-6 tracking-tighter text-white`} dangerouslySetInnerHTML={{ __html: `DÉFI ${categoryLabel.toUpperCase().replace('<BR/>', '/')}` }} />
@@ -1136,7 +1136,7 @@ const SetupScreen = ({ onStart, onBack, categories }) => {
   };
 
   return (
-    <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-10 rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-hidden">
+    <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-y-auto max-h-[100dvh]">
         <button onClick={!mode ? onBack : () => setMode(null)} className="absolute top-6 left-6 text-white/50 hover:text-white transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest"><RotateCcw size={14} /> Retour</button>
         <h2 className="text-4xl font-black text-center text-white mb-10 mt-6 tracking-tighter">CONFIGURATION</h2>
         {!mode ? (
@@ -1163,7 +1163,7 @@ const SetupScreen = ({ onStart, onBack, categories }) => {
                   </div>
                 )}
              </div>
-             <div className="grid grid-cols-3 gap-3 mb-5">
+             <div className="grid grid-cols-1 min-[360px]:grid-cols-3 gap-3 mb-5">
                <label className="text-xs text-white/60">TOURS<input aria-label="Nombre de tours" type="number" min="5" max="50" value={rounds} onChange={e => setRounds(Math.max(5, Math.min(50, Number(e.target.value))))} className="field mt-1" /></label>
                <label className="text-xs text-white/60">DIFFICULTÉ<select aria-label="Difficulté" value={difficulty} onChange={e => setDifficulty(e.target.value)} className="field mt-1"><option className="text-black" value="relaxed">Détente</option><option className="text-black" value="normal">Normal</option><option className="text-black" value="expert">Expert</option></select></label>
                <label className="text-xs text-white/60">WILD %<input aria-label="Chance de wild card" type="number" min="0" max="50" value={wildChance} onChange={e => setWildChance(Math.max(0, Math.min(50, Number(e.target.value))))} className="field mt-1" /></label>
@@ -1190,10 +1190,10 @@ const ScoreBoard = ({ players, missedCards, reportEntry, onEndGame, onReplay }) 
 
     return (
     <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
-        <div className="w-full max-w-2xl bg-[#B02E68] rounded-[3rem] p-10 border-4 border-white/20 text-white text-center shadow-2xl animate-in zoom-in duration-500 my-8 relative overflow-hidden">
+        <div className="w-full max-w-2xl bg-[#B02E68] rounded-3xl sm:rounded-[3rem] p-5 sm:p-10 border-2 sm:border-4 border-white/20 text-white text-center shadow-2xl animate-in zoom-in duration-500 my-2 sm:my-8 relative overflow-hidden max-h-[96dvh] overflow-y-auto">
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
             <Trophy className="mx-auto text-yellow-300 mb-6 drop-shadow-lg animate-bounce" size={80} strokeWidth={1.5} />
-            <h2 className="text-5xl font-black italic mb-8 tracking-tighter">RÉSULTATS FINAUX</h2>
+            <h2 className="text-3xl sm:text-5xl font-black italic mb-6 sm:mb-8 tracking-tighter">RÉSULTATS FINAUX</h2>
             <div className="space-y-3 mb-10 relative z-10">
                 {[...players].sort((a,b) => b.score - a.score).map((p, i) => (
                     <div key={p.id} className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${i===0 ? 'bg-white text-[#B02E68] border-transparent scale-105 shadow-xl' : 'bg-black/20 border-white/10 text-white'}`}>
@@ -1206,7 +1206,7 @@ const ScoreBoard = ({ players, missedCards, reportEntry, onEndGame, onReplay }) 
                 ))}
             </div>
             {missedCards && missedCards.length > 0 && (
-                <div className="mb-10 text-left bg-white text-black p-8 rounded-[2rem] shadow-xl relative z-10">
+                <div className="mb-6 sm:mb-10 text-left bg-white text-black p-4 sm:p-8 rounded-2xl sm:rounded-[2rem] shadow-xl relative z-10">
                     <h3 className="text-xl font-black uppercase mb-6 flex items-center gap-3 border-b-2 border-gray-100 pb-4 text-[#B02E68]"><BookOpen size={28} /> 🎓 Points à réviser</h3>
                     <div className="space-y-4 max-h-60 overflow-y-auto custom-scrollbar-dark pr-2">
                         {missedCards.map((card, idx) => {
@@ -1653,7 +1653,7 @@ export default function App() {
 
   return (
     <div 
-        className={`min-h-screen font-sans selection:bg-[#FFC20E] selection:text-black flex flex-col overflow-hidden relative text-white`}
+        className={`min-h-[100dvh] font-sans selection:bg-[#FFC20E] selection:text-black flex flex-col overflow-x-hidden relative text-white`}
         // Application du style d'arrière-plan dynamique
         style={currentBackgroundStyle}
     >
@@ -1737,7 +1737,7 @@ export default function App() {
                 <span className="text-sm font-black tracking-widest">{roundsPlayed} / {maxRounds}</span>
             </div>
             {/* Responsiveness: Limite la taille de la liste des joueurs */}
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-[40vw] sm:max-w-[30vw]">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-[34vw] sm:max-w-[30vw]">
                 {players.map((p, i) => (
                 <div key={p.id} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-300 ${i === currentPlayerIndex ? 'bg-white text-[#B02E68] border-white font-black shadow-lg scale-105' : 'bg-black/20 border-transparent text-white/50'}`}>
                     <span className="text-xs uppercase truncate max-w-[60px] md:max-w-[80px]">{p.name}</span>
@@ -1748,7 +1748,7 @@ export default function App() {
             <div className="flex gap-2"><button type="button" aria-label="Plein écran" onClick={() => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()} className="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition text-white/70"><Maximize size={20}/></button><button type="button" aria-label="Terminer la partie" onClick={() => setShowScoreboard(true)} className="bg-white/10 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition text-white/70"><X size={20} strokeWidth={3} /></button></div>
           </nav>
 
-          <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full flex flex-col">
+          <main className="flex-1 max-w-7xl mx-auto px-3 sm:px-4 py-5 sm:py-8 w-full flex flex-col">
             <div className="text-center mb-8 animate-in slide-in-from-top-4">
               <div className="inline-block bg-black/20 backdrop-blur px-4 py-1 rounded-full mb-3 border border-white/10">
                 <span className="text-white/80 text-[10px] uppercase tracking-[0.3em] font-bold">C'est le tour de {players[currentPlayerIndex]?.name}</span>
@@ -1769,7 +1769,7 @@ export default function App() {
             
             {/* CAS 1: Grille de sélection (Mode 'all', 1er tour SEULEMENT) */}
             {deckFilter === 'all' && !activeCard && !isGameStartedState && (
-                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 auto-rows-fr pb-20 animate-in fade-in duration-500">
+                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 auto-rows-fr pb-20 animate-in fade-in duration-500">
                     {categoriesToRender.map((cat) => (
                         <CardBack 
                             key={cat.id} 
@@ -1837,7 +1837,7 @@ export default function App() {
 
       {/* NOUVEAU: Copyright Footer */}
       {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'library' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup') && (
-        <footer className="w-full text-center py-4 text-xs font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
+        <footer className="w-full text-center px-4 py-3 sm:py-4 text-[10px] sm:text-xs leading-relaxed font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
             © {new Date().getFullYear()} SKILLSMASTER. Tous droits réservés. Développé par Gabriel Emrick Tognimanbou DAHISSIHO.
         </footer>
       )}

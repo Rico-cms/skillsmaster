@@ -32,18 +32,18 @@ export default function CardLibraryScreen({ cards, categories, onChange, onBack 
     }
   };
 
-  return <div className="w-full max-w-5xl h-[92vh] bg-black/70 rounded-[2rem] border border-white/10 text-white flex flex-col overflow-hidden">
-    <header className="p-5 border-b border-white/10 flex items-center justify-between">
-      <div><h2 className="text-2xl font-black">ATELIER DE CARTES</h2><p className="text-white/60 text-sm">Créez, importez et exportez vos propres défis.</p></div>
+  return <div className="w-full max-w-5xl h-[100dvh] sm:h-[92vh] bg-black/70 sm:rounded-[2rem] border border-white/10 text-white flex flex-col overflow-hidden">
+    <header className="p-4 sm:p-5 border-b border-white/10 flex items-start justify-between gap-3">
+      <div><h2 className="text-xl sm:text-2xl font-black">ATELIER DE CARTES</h2><p className="text-white/60 text-xs sm:text-sm">Créez, importez et exportez vos propres défis.</p></div>
       <button aria-label="Retour au menu" onClick={onBack} className="p-2 rounded-full hover:bg-white/10"><X /></button>
     </header>
-    <div className="flex-1 overflow-y-auto p-6 grid lg:grid-cols-2 gap-8">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-6 grid lg:grid-cols-2 gap-8">
       <section className="space-y-4">
         <h3 className="font-black text-[#FFC20E]">NOUVELLE CARTE</h3>
         <input aria-label="Titre" placeholder="Titre" value={draft.title} onChange={e => setDraft({...draft, title: e.target.value})} className="field" />
         <textarea aria-label="Scénario" placeholder="Scénario" value={draft.scenario} onChange={e => setDraft({...draft, scenario: e.target.value})} className="field min-h-24" />
         <textarea aria-label="Explication" placeholder="Explication / conseil" value={draft.explanation} onChange={e => setDraft({...draft, explanation: e.target.value})} className="field min-h-20" />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-2 gap-3">
           <select aria-label="Catégorie" value={draft.categoryId} onChange={e => setDraft({...draft, categoryId: e.target.value})} className="field">{categories.map(c => <option className="text-black" key={c.id} value={c.id}>{c.label.replace('<br/>', ' ')}</option>)}</select>
           <select aria-label="Type" value={draft.type} onChange={e => setDraft({...draft, type: e.target.value})} className="field"><option className="text-black" value="challenge">Défi</option><option className="text-black" value="quiz">Quiz</option></select>
           <input aria-label="Durée" type="number" min="10" value={draft.duration} onChange={e => setDraft({...draft, duration: e.target.value})} className="field" />
