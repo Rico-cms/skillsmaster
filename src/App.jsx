@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp, Library, Maximize, Download, Copy, Trash2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp, Library, Maximize, Download, Copy, Trash2, Globe2 } from 'lucide-react';
 import CardLibraryScreen from './components/CardLibraryScreen.jsx';
 import { buildHistoryEntry, downloadText, GAME_VERSION, makeReportText } from './lib/game-utils.js';
 
@@ -91,6 +91,14 @@ const COLORS = {
         border: '1px solid rgba(255,194,14,0.3)',
         // INVERSION CRITIQUE: Le texte par défaut doit être BLANC sur le fond JALO sombre
         text: 'text-white' 
+    },
+    general_knowledge: {
+        id: 'general_knowledge',
+        hex: '#8b5cf6',
+        gradient: 'linear-gradient(135deg, rgba(139,92,246,0.32) 0%, rgba(30,64,175,0.55) 100%)',
+        accentGradient: 'linear-gradient(90deg, #8b5cf6, #2563eb)',
+        border: '1px solid rgba(167,139,250,0.5)',
+        text: 'text-white'
     }
   }
 };
@@ -105,6 +113,7 @@ const CATEGORIES = {
   LOGISTICS: { id: 'logistics', label: 'LOGISTIQUE<br/>OPÉRATIONS', colorData: COLORS.cards.logistics, icon: Tractor }, // CORRECTION ICI : Ajout du <br/>
   MATH_WILD: { id: 'math_wild', label: 'DÉFI MATHS<br/>(WILD CARD)', colorData: COLORS.cards.math_wild, icon: Zap }, // NOUVELLE CATÉGORIE WILD
   JALO: { id: 'jalo', label: 'TEAM BUILDING<br/>JALO', colorData: COLORS.cards.jalo, icon: Users }, // NOUVELLE CATÉGORIE JALO
+  GENERAL_KNOWLEDGE: { id: 'general_knowledge', label: 'CULTURE<br/>GÉNÉRALE', colorData: COLORS.cards.general_knowledge, icon: Globe2 },
 };
 
 // VALEUR EN POINTS POUR LES CARTES
@@ -266,6 +275,38 @@ const INITIAL_CARDS = [
   { id: 'jalo_c10', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : SIMPLIFICATION', scenario: 'Proposez une idée pour simplifier un process quotidien que vous connaissez (en 3 phrases).', explanation: 'Doit identifier l\'étape, l\'objectif de l\'étape et la solution de simplification (ex: automatisation d\'un email).', duration: 60, points: DEFAULT_POINTS },
   { id: 'jalo_c11', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : CLIENT/PROCESS', scenario: 'Un client demande un service hors process. Comment répondez-vous ?', explanation: 'Montrez que vous comprenez le besoin. Expliquez que cela représente un risque/coût exceptionnel (pourquoi le process existe), puis proposez de soumettre une dérogation ou un devis spécial.', duration: 60, points: DEFAULT_POINTS },
   { id: 'jalo_c12', categoryId: 'jalo', type: 'challenge', title: 'DÉFI : EFFICACITÉ', scenario: 'Votre équipe a tendance à contourner une étape. Que faites-vous pour y remédier ?', explanation: '1. Analyser *pourquoi* elle est contournée (est-elle inutile?). 2. Si elle est utile : Expliquer l\'importance et les risques. 3. Si elle est inutile : Proposer une modification officielle.', duration: 60, points: DEFAULT_POINTS },
+
+  // --- CULTURE GÉNÉRALE : volontairement très aléatoire ---
+  { id: 'gk_01', categoryId: 'general_knowledge', type: 'quiz', title: 'ACTUALITÉ SANTÉ 2025', scenario: 'Quels trois pays ont été certifiés exempts de paludisme par l’OMS en 2025 ?', options: ['Géorgie, Suriname et Timor-Leste', 'Ghana, Kenya et Malawi', 'Brésil, Inde et Égypte'], correctIndex: 0, explanation: 'L’OMS a certifié la Géorgie, le Suriname et le Timor-Leste exempts de paludisme en 2025.', duration: 35, points: 2 },
+  { id: 'gk_02', categoryId: 'general_knowledge', type: 'quiz', title: 'NOBEL DE CHIMIE 2025', scenario: 'Quelle famille de matériaux a été récompensée par le prix Nobel de chimie 2025 ?', options: ['Les pérovskites', 'Les structures métallo-organiques', 'Les supraconducteurs'], correctIndex: 1, explanation: 'Susumu Kitagawa, Richard Robson et Omar M. Yaghi ont été récompensés pour le développement des structures métallo-organiques, ou MOF.', duration: 35, points: 2 },
+  { id: 'gk_03', categoryId: 'general_knowledge', type: 'quiz', title: 'MÉDECINE', scenario: 'Quel organe produit principalement l’insuline ?', options: ['Le foie', 'Le pancréas', 'La rate'], correctIndex: 1, explanation: 'L’insuline est produite par les cellules bêta des îlots de Langerhans du pancréas.', duration: 30, points: 1 },
+  { id: 'gk_04', categoryId: 'general_knowledge', type: 'quiz', title: 'MÉCANIQUE AUTO', scenario: 'À quoi sert principalement un différentiel automobile ?', options: ['À refroidir le moteur', 'À permettre aux roues motrices de tourner à des vitesses différentes', 'À augmenter la pression des pneus'], correctIndex: 1, explanation: 'En virage, la roue extérieure parcourt plus de distance : le différentiel lui permet de tourner plus vite.', duration: 30, points: 1 },
+  { id: 'gk_05', categoryId: 'general_knowledge', type: 'quiz', title: 'ANIMAUX BIZARRES', scenario: 'Combien de cœurs possède une pieuvre ?', options: ['Un', 'Deux', 'Trois'], correctIndex: 2, explanation: 'La pieuvre possède trois cœurs : deux branchiaux et un systémique.', duration: 25, points: 1 },
+  { id: 'gk_06', categoryId: 'general_knowledge', type: 'quiz', title: 'GÉOGRAPHIE PIÈGE', scenario: 'Quel est le plus grand désert du monde ?', options: ['Le Sahara', 'L’Antarctique', 'Le désert de Gobi'], correctIndex: 1, explanation: 'Un désert se définit par ses faibles précipitations : l’Antarctique est donc le plus grand désert mondial.', duration: 30, points: 1 },
+  { id: 'gk_07', categoryId: 'general_knowledge', type: 'quiz', title: 'CUISINE & SCIENCE', scenario: 'Pourquoi les oignons font-ils pleurer ?', options: ['Ils libèrent un composé soufré volatil', 'Ils absorbent l’eau des yeux', 'Leur odeur bloque la respiration'], correctIndex: 0, explanation: 'La coupe libère notamment un composé soufré volatil irritant qui atteint les yeux.', duration: 30, points: 1 },
+  { id: 'gk_08', categoryId: 'general_knowledge', type: 'quiz', title: 'INTERNET', scenario: 'Que signifie le “S” de HTTPS ?', options: ['Server', 'Secure', 'Speed'], correctIndex: 1, explanation: 'HTTPS signifie Hypertext Transfer Protocol Secure : la connexion est protégée par chiffrement TLS.', duration: 25, points: 1 },
+  { id: 'gk_09', categoryId: 'general_knowledge', type: 'quiz', title: 'HISTOIRE AFRICAINE', scenario: 'Quel ancien empire ouest-africain est associé au célèbre souverain Mansa Moussa ?', options: ['L’Empire du Mali', 'L’Empire du Ghana antique', 'L’Empire zoulou'], correctIndex: 0, explanation: 'Mansa Moussa régna sur l’Empire du Mali au XIVe siècle.', duration: 30, points: 1 },
+  { id: 'gk_10', categoryId: 'general_knowledge', type: 'quiz', title: 'AVIATION', scenario: 'À quoi sert principalement la boîte noire d’un avion ?', options: ['À piloter automatiquement', 'À enregistrer les données de vol et les sons du cockpit', 'À communiquer avec les satellites'], correctIndex: 1, explanation: 'Les enregistreurs de vol aident à comprendre le déroulement d’un incident ou accident.', duration: 30, points: 1 },
+  { id: 'gk_11', categoryId: 'general_knowledge', type: 'quiz', title: 'CORPS HUMAIN', scenario: 'Quel est le plus grand organe du corps humain ?', options: ['Le foie', 'La peau', 'Le poumon'], correctIndex: 1, explanation: 'La peau est le plus grand organe du corps par sa surface et sa masse.', duration: 25, points: 1 },
+  { id: 'gk_12', categoryId: 'general_knowledge', type: 'quiz', title: 'MÉCANIQUE', scenario: 'Dans un moteur à quatre temps, quel temps vient après la compression ?', options: ['Admission', 'Combustion/détente', 'Échappement'], correctIndex: 1, explanation: 'Le cycle est admission, compression, combustion-détente, puis échappement.', duration: 30, points: 1 },
+  { id: 'gk_13', categoryId: 'general_knowledge', type: 'quiz', title: 'ESPACE', scenario: 'Quelle planète tourne presque couchée, avec un axe incliné d’environ 98° ?', options: ['Mars', 'Uranus', 'Mercure'], correctIndex: 1, explanation: 'Uranus possède une inclinaison axiale extrême, probablement liée à une collision ancienne.', duration: 30, points: 1 },
+  { id: 'gk_14', categoryId: 'general_knowledge', type: 'quiz', title: 'LANGUE FRANÇAISE', scenario: 'Quel mot est un palindrome ?', options: ['Ressasser', 'Bizarre', 'Papillon'], correctIndex: 0, explanation: '“Ressasser” se lit de la même manière de gauche à droite et de droite à gauche.', duration: 25, points: 1 },
+  { id: 'gk_15', categoryId: 'general_knowledge', type: 'quiz', title: 'MUSIQUE', scenario: 'Combien de touches possède généralement un piano moderne standard ?', options: ['76', '88', '96'], correctIndex: 1, explanation: 'Le piano moderne standard possède 88 touches : 52 blanches et 36 noires.', duration: 25, points: 1 },
+  { id: 'gk_16', categoryId: 'general_knowledge', type: 'quiz', title: 'PHYSIQUE DU QUOTIDIEN', scenario: 'Pourquoi voit-on l’éclair avant d’entendre le tonnerre ?', options: ['L’éclair se produit avant', 'La lumière voyage bien plus vite que le son', 'Le vent retarde toujours le son'], correctIndex: 1, explanation: 'La lumière se propage à environ 300 000 km/s, très loin devant le son dans l’air.', duration: 30, points: 1 },
+  { id: 'gk_17', categoryId: 'general_knowledge', type: 'quiz', title: 'ARCHITECTURE', scenario: 'Dans quel pays se trouve la cité antique de Pétra ?', options: ['Jordanie', 'Égypte', 'Turquie'], correctIndex: 0, explanation: 'Pétra, ancienne capitale nabatéenne taillée dans la roche, se trouve en Jordanie.', duration: 25, points: 1 },
+  { id: 'gk_18', categoryId: 'general_knowledge', type: 'quiz', title: 'ÉLECTRICITÉ', scenario: 'Quelle unité mesure la résistance électrique ?', options: ['Le watt', 'L’ohm', 'Le volt'], correctIndex: 1, explanation: 'La résistance électrique se mesure en ohms, symbole Ω.', duration: 25, points: 1 },
+  { id: 'gk_19', categoryId: 'general_knowledge', type: 'quiz', title: 'BOTANIQUE', scenario: 'Quel fruit porte ses graines visibles à l’extérieur ?', options: ['La fraise', 'La mangue', 'La banane'], correctIndex: 0, explanation: 'Les petits éléments visibles sur la fraise sont des akènes, chacun contenant une graine.', duration: 25, points: 1 },
+  { id: 'gk_20', categoryId: 'general_knowledge', type: 'quiz', title: 'DROIT & SYMBOLES', scenario: 'Pourquoi la Justice est-elle souvent représentée avec une balance ?', options: ['Pour symboliser l’équilibre des arguments', 'Pour mesurer les amendes', 'Pour compter les jurés'], correctIndex: 0, explanation: 'La balance symbolise la mise en balance impartiale des preuves et arguments.', duration: 30, points: 1 },
+  { id: 'gk_21', categoryId: 'general_knowledge', type: 'quiz', title: 'SPORT', scenario: 'Quelle distance officielle mesure un marathon ?', options: ['40 km', '42,195 km', '45 km'], correctIndex: 1, explanation: 'La distance officielle d’un marathon est de 42,195 kilomètres.', duration: 25, points: 1 },
+  { id: 'gk_22', categoryId: 'general_knowledge', type: 'quiz', title: 'OCÉANS', scenario: 'Quel est le point le plus profond connu des océans ?', options: ['La fosse des Mariannes', 'La fosse de Java', 'La fosse des Tonga'], correctIndex: 0, explanation: 'Le Challenger Deep, dans la fosse des Mariannes, est le point océanique connu le plus profond.', duration: 30, points: 1 },
+  { id: 'gk_23', categoryId: 'general_knowledge', type: 'quiz', title: 'CERVEAU', scenario: 'Quelle partie du cerveau joue un rôle majeur dans l’équilibre et la coordination ?', options: ['Le cervelet', 'L’hypothalamus', 'L’hippocampe'], correctIndex: 0, explanation: 'Le cervelet participe fortement à la coordination motrice, la posture et l’équilibre.', duration: 30, points: 1 },
+  { id: 'gk_24', categoryId: 'general_knowledge', type: 'quiz', title: 'CINÉMA', scenario: 'Quel métier organise la continuité visuelle entre les prises d’un film ?', options: ['Le bruiteur', 'Le scripte', 'L’étalonneur'], correctIndex: 1, explanation: 'Le ou la scripte surveille notamment les raccords, le texte et la continuité des scènes.', duration: 30, points: 1 },
+  { id: 'gk_25', categoryId: 'general_knowledge', type: 'quiz', title: 'TRÈS RANDOM', scenario: 'Quelle lettre n’apparaît dans aucun symbole chimique officiel actuel ?', options: ['J', 'K', 'W'], correctIndex: 0, explanation: 'La lettre J n’est utilisée dans aucun symbole officiel d’élément chimique.', duration: 30, points: 2 },
+  { id: 'gk_26', categoryId: 'general_knowledge', type: 'quiz', title: 'HORLOGERIE', scenario: 'Dans quel sens tourne la Terre vue au-dessus du pôle Nord ?', options: ['Sens horaire', 'Sens antihoraire', 'Elle alterne'], correctIndex: 1, explanation: 'Vue du pôle Nord, la Terre tourne dans le sens antihoraire.', duration: 30, points: 1 },
+  { id: 'gk_27', categoryId: 'general_knowledge', type: 'quiz', title: 'MATÉRIAUX', scenario: 'Pourquoi l’acier inoxydable résiste-t-il mieux à la corrosion ?', options: ['Grâce au chrome qui forme une couche protectrice', 'Parce qu’il ne contient aucun fer', 'Grâce à une couche d’huile permanente'], correctIndex: 0, explanation: 'Le chrome forme en surface une fine couche passive d’oxyde protecteur.', duration: 35, points: 1 },
+  { id: 'gk_28', categoryId: 'general_knowledge', type: 'quiz', title: 'CAFÉ', scenario: 'L’espresso contient-il toujours plus de caféine qu’un grand café filtre ?', options: ['Oui, toujours', 'Non, le filtre peut en contenir davantage au total', 'Ils en contiennent exactement autant'], correctIndex: 1, explanation: 'L’espresso est plus concentré, mais sa petite quantité fait qu’un grand café filtre peut apporter plus de caféine au total.', duration: 30, points: 1 },
+  { id: 'gk_29', categoryId: 'general_knowledge', type: 'quiz', title: 'ACTUALITÉ MÉDICALE 2026', scenario: 'Quels sont les deux vaccins contre le paludisme recommandés par l’OMS début 2026 ?', options: ['RTS,S et R21', 'BCG et ROR', 'Dengvaxia et Ervebo'], correctIndex: 0, explanation: 'L’OMS recommande RTS,S et R21/Matrix-M contre le paludisme à P. falciparum chez les enfants des zones concernées.', duration: 35, points: 2 },
+  { id: 'gk_30', categoryId: 'general_knowledge', type: 'quiz', title: 'ULTIME QUESTION ABSURDE', scenario: 'Quel animal produit des crottes approximativement cubiques ?', options: ['Le wombat', 'Le lama', 'Le paresseux'], correctIndex: 0, explanation: 'Le wombat produit des excréments de forme cubique, liés aux propriétés mécaniques de son intestin.', duration: 25, points: 2 },
 ];
 
 // --- SOUND MANAGER (Fonctions inchangées) ---
@@ -993,6 +1034,10 @@ const MainMenu = ({ onNavigate, onResumeGame, gameSaved }) => ( // startLogistic
         style={{ background: COLORS.cards.jalo.hex, boxShadow: `0 0 30px ${COLORS.cards.jalo.hex}50` }}>
           <span>TEAM BUILDING JALO</span> <Users className="group-hover:translate-x-1 transition fill-current text-black" />
        </button>
+
+       <button onClick={() => onNavigate('generalSetup')} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20" style={{ background: COLORS.cards.general_knowledge.accentGradient, boxShadow: `0 0 30px ${COLORS.cards.general_knowledge.hex}50` }}>
+          <span>CULTURE GÉNÉRALE</span> <Globe2 className="group-hover:rotate-12 transition" />
+       </button>
        
        <button onClick={() => { playSound('flip'); onNavigate('profile'); }} className="w-full bg-[#FFC20E]/40 hover:bg-[#FFC20E]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>MON PROFIL</span> <TrendingUp size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('story'); }} className="w-full bg-[#B02E68]/40 hover:bg-[#B02E68]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>L'HISTOIRE</span> <BookOpen size={20} /></button>
@@ -1041,13 +1086,13 @@ const ChallengeSetupScreen = ({ onStart, onBack, maxRounds, categoryId, category
   
   // MISE À JOUR : Ajout du style spécifique JALO
   const isJalo = categoryId === 'jalo';
-  const accentColor = isJalo ? COLORS.cards.jalo.hex : '#FFC20E';
+  const accentColor = COLORS.cards[categoryId]?.hex || '#FFC20E';
 
   return (
     <div className="w-full max-w-lg bg-black/40 backdrop-blur-xl p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl animate-in slide-in-from-right-8 duration-300 relative overflow-y-auto max-h-[100dvh]">
         <button onClick={!mode ? onBack : () => setMode(null)} className="absolute top-6 left-6 text-white/50 hover:text-white transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest"><RotateCcw size={14} /> Retour</button>
         {/* CORRECTION JALO CRITIQUE : Titre en blanc sur fond noir (car l'écran est sombre) */}
-        <h2 className={`text-4xl font-black text-center mb-2 mt-6 tracking-tighter text-white`} dangerouslySetInnerHTML={{ __html: `DÉFI ${categoryLabel.toUpperCase().replace('<BR/>', '/')}` }} />
+        <h2 className={`text-3xl sm:text-4xl font-black text-center mb-2 mt-6 tracking-tighter text-white`} dangerouslySetInnerHTML={{ __html: categoryId === 'general_knowledge' ? 'CULTURE GÉNÉRALE' : `DÉFI ${categoryLabel.toUpperCase().replace('<BR/>', '/')}` }} />
         <p className={`text-sm text-center mb-8 ${isJalo ? 'text-white/80' : 'text-white/60'}`}>Choisissez le mode de jeu</p>
         {!mode ? (
           <div className="space-y-4">
@@ -1406,7 +1451,7 @@ export default function App() {
     setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
     
     // NOUVEAU : Si en mode Défi, on force l'état "démarré"
-    if (filter === 'logistics' || filter === 'jalo') {
+    if (filter !== 'all') {
         setIsGameStartedState(true); 
     }
   };
@@ -1499,7 +1544,7 @@ export default function App() {
       const availableCards = cardPool.filter(c => !playedCardIds.includes(c.id));
       
       // Si le deck filtré est vide, on boucle sur le deck complet pour les défis
-      if (availableCards.length === 0 && (filterId === 'logistics' || filterId === 'jalo')) {
+      if (availableCards.length === 0 && filterId !== 'all') {
          // Dans ce cas, on réinitialise les cartes jouées pour cette catégorie seulement
          const allChallengeCards = allCards.filter(c => c.categoryId === filterId);
          const newCard = randomItem(allChallengeCards);
@@ -1534,7 +1579,7 @@ export default function App() {
       if (categoryId) {
           // Mode Normal (1er tour) avec choix de catégorie
           result = getNewCard(categoryId);
-      } else if (deckFilter === 'logistics' || deckFilter === 'jalo' || isGameStartedState) {
+      } else if (deckFilter !== 'all' || isGameStartedState) {
           // Mode Défi (auto-tirage) ou Mode Normal (auto-tirage après le 1er tour)
           result = getNewCard();
       } else {
@@ -1548,7 +1593,7 @@ export default function App() {
           setActiveCard({ ...result.card, duration: Math.max(10, Math.round(result.card.duration * durationFactor)) });
           
           // Logique pour gérer la boucle du deck dans les modes défis
-          if (deckFilter === 'logistics' || deckFilter === 'jalo') {
+          if (deckFilter !== 'all') {
               // Si la carte existe déjà, on ne l'ajoute pas à playedCardIds car elle est déjà là, 
               // mais on continue car on a activé la boucle dans getNewCard().
               if (!playedCardIds.includes(result.card.id)) {
@@ -1644,6 +1689,9 @@ export default function App() {
   // MISE À JOUR : Calcul basé sur le nouveau nombre de cartes JALO (30)
   const JALO_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'jalo').length; 
   const JALO_CATEGORY = CATEGORIES.JALO;
+  const GENERAL_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'general_knowledge').length;
+  const GENERAL_CATEGORY = CATEGORIES.GENERAL_KNOWLEDGE;
+  const deckDisplayName = Object.values(CATEGORIES).find(category => category.id === deckFilter)?.label.replace('<br/>', ' ') || deckFilter;
   
   // Style d'arrière-plan dynamique
   const currentBackgroundStyle = deckFilter === 'logistics' 
@@ -1719,6 +1767,18 @@ export default function App() {
           </div>
       )}
 
+      {view === 'generalSetup' && (
+          <div className="flex-1 flex items-center justify-center p-4">
+              <ChallengeSetupScreen
+                  onStart={startGame}
+                  onBack={() => setView('menu')}
+                  maxRounds={GENERAL_MAX_CARDS_COUNT}
+                  categoryId={GENERAL_CATEGORY.id}
+                  categoryLabel={GENERAL_CATEGORY.label}
+              />
+          </div>
+      )}
+
       {view === 'profile' && <div className="flex-1 flex items-center justify-center p-4 z-50"><ProfileScreen player={players.length > 0 ? players[0] : initialPlayerState} onBack={() => setView('menu')} /></div>}
       {view === 'story' && <div className="flex-1 flex items-center justify-center p-4 z-50"><StoryScreen onBack={() => setView('menu')} /></div>}
       {view === 'history' && <div className="flex-1 flex items-center justify-center p-4"><HistoryScreen history={gameHistory} onDelete={deleteHistoryEntry} onClear={clearHistory} onBack={() => setView('menu')} /></div>}
@@ -1755,8 +1815,8 @@ export default function App() {
               </div>
               {/* Responsiveness: Taille du titre adaptée */}
               <h2 className="text-2xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
-                 {(deckFilter === 'logistics' || deckFilter === 'jalo')
-                   ? `DÉFI ${deckFilter.toUpperCase()} (ALÉATOIRE)`
+                 {deckFilter !== 'all'
+                   ? `${deckDisplayName.toUpperCase()} (ALÉATOIRE)`
                    : (isGameStartedState ? 'RELEVEZ LE DÉFI' : 'CHOISISSEZ UNE CATÉGORIE')}{' '}
                  <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
               </h2>
@@ -1788,14 +1848,14 @@ export default function App() {
             
             {/* CAS 2: Écran d'attente/bouton (Mode 'logistics' / 'jalo' OU Mode 'all' APRES 1er tour) */}
             {/* Condition: activeCard est null, mais le jeu est lancé (logistics / jalo OU isGameStartedState=true) */}
-            {(!activeCard && (deckFilter === 'logistics' || deckFilter === 'jalo' || isGameStartedState)) && (
+            {(!activeCard && (deckFilter !== 'all' || isGameStartedState)) && (
                 <div className="flex flex-col items-center justify-center h-[60vh] animate-in fade-in duration-500">
                     <div className="relative w-80 h-80 flex items-center justify-center mb-8">
                        <div className="absolute inset-0 border-4 border-dashed border-white/20 rounded-full animate-spin-slow"></div>
                        <Zap size={64} className="text-[#FFC20E] animate-pulse"/>
                     </div>
                     
-                    {(deckFilter === 'logistics' || deckFilter === 'jalo') ? (
+                    {deckFilter !== 'all' ? (
                         // En mode Défi (Logistique/Jalo), on doit toujours cliquer pour tirer
                        <button 
                             // Le tirage se fait sur le clic du bouton
@@ -1806,7 +1866,7 @@ export default function App() {
                             // CORRECTION JALO CRITIQUE : Bouton Jaune, texte noir
                             className={`group font-black text-xl py-5 px-10 rounded-3xl hover:scale-105 transition shadow-2xl flex items-center justify-center gap-4 hover:shadow-white/30 bg-[#FFC20E] text-black hover:shadow-[#FFC20E]/50`}
                         >
-                            TIRER LA PROCHAINE CARTE {deckFilter.toUpperCase()}
+                            TIRER LA PROCHAINE CARTE {deckDisplayName.toUpperCase()}
                             <ArrowRight className="group-hover:translate-x-1 transition fill-current text-black" />
                         </button>
                     ) : (
@@ -1836,7 +1896,7 @@ export default function App() {
       {showScoreboard && <ScoreBoard players={players} missedCards={missedCards} reportEntry={currentReport} onReplay={replayGame} onEndGame={endGame} />}
 
       {/* NOUVEAU: Copyright Footer */}
-      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'library' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup') && (
+      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'library' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup' || view === 'generalSetup') && (
         <footer className="w-full text-center px-4 py-3 sm:py-4 text-[10px] sm:text-xs leading-relaxed font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
             © {new Date().getFullYear()} SKILLSMASTER. Tous droits réservés. Développé par Gabriel Emrick Tognimanbou DAHISSIHO.
         </footer>

@@ -2,6 +2,8 @@
 
 SkillsMaster est un jeu web d'animation et de team building autour des compétences humaines : communication, leadership, esprit critique, intelligence émotionnelle et créativité. Il propose aussi des défis spécialisés Logistique et JALO, ainsi que des cartes bonus de calcul mental.
 
+Un mode Culture générale propose également 30 questions aléatoires couvrant actualité datée, médecine, mécanique, sciences, histoire, arts, sport et curiosités.
+
 ## Fonctionnalités
 
 - Parties solo ou multijoueurs locales
