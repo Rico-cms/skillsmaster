@@ -1,16 +1,48 @@
-# React + Vite
+# SkillsMaster
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SkillsMaster est un jeu web d'animation et de team building autour des compétences humaines : communication, leadership, esprit critique, intelligence émotionnelle et créativité. Il propose aussi des défis spécialisés Logistique et JALO, ainsi que des cartes bonus de calcul mental.
 
-Currently, two official plugins are available:
+## Fonctionnalités
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Parties solo ou multijoueurs locales
+- Quiz et défis chronométrés
+- Scores et statistiques par compétence
+- Reprise automatique d'une partie en cours
+- Historique local des 20 dernières parties
+- Interface responsive, sans compte ni serveur
 
-## React Compiler
+Les sauvegardes sont stockées dans le `localStorage` du navigateur. Elles restent donc sur l'appareil utilisé.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Installation
 
-## Expanding the ESLint configuration
+Prérequis : Node.js 20.19+ ou 22.12+ et npm.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+Vite affiche ensuite l'adresse locale de l'application, généralement `http://localhost:5173`.
+
+## Vérifications
+
+```bash
+npm run check
+```
+
+Cette commande exécute ESLint puis génère le build de production. Pour prévisualiser ce build :
+
+```bash
+npm run preview
+```
+
+## Structure
+
+- `src/App.jsx` : données des cartes, logique de jeu et composants d'interface
+- `src/index.css` : chargement de Tailwind CSS
+- `src/main.jsx` : point d'entrée React
+- `vite.config.js` : configuration Vite/Tailwind
+
+## Stack
+
+React 19, Vite 7, Tailwind CSS 4 et Lucide React.

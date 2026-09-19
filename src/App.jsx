@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp } from 'lucide-react';
 
 // --- Configuration & Données ---
@@ -209,8 +209,8 @@ const INITIAL_CARDS = [
   { id: 'm_wild_1', categoryId: 'math_wild', type: 'quiz', title: 'CALCUL MENTAL', scenario: 'Si un produit coûte 80€ et est soldé à 25%, quel est son prix final ?', options: ['65€', '60€', '55€'], correctIndex: 1, explanation: '25% de 80€ est (80 / 4) = 20€. Le prix final est 80€ - 20€ = 60€.', duration: 30, points: WILD_POINTS },
   { id: 'm_wild_2', categoryId: 'math_wild', type: 'quiz', title: 'SUITE LOGIQUE', scenario: 'Quel est le prochain chiffre de cette série : 1, 1, 2, 3, 5, 8, ?', options: ['12', '13', '14'], correctIndex: 1, explanation: 'C\'est la suite de Fibonacci : chaque nombre est la somme des deux précédents (5 + 8 = 13).', duration: 30, points: WILD_POINTS },
   { id: 'm_wild_3', categoryId: 'math_wild', type: 'quiz', title: 'ÉQUATION MYSTÈRE', scenario: 'Si $2x + 5 = 15$, que vaut $x$ ?', options: ['3', '5', '10'], correctIndex: 1, explanation: 'En soustrayant 5, on a $2x = 10$. En divisant par 2, on a $x = 5$.', duration: 30, points: WILD_POINTS },
-  { id: 'm_wild_4', categoryId: 'math_wild', type: 'quiz', title: 'POURCENTAGE', scenario: 'Vous devez livrer 400 colis. Vous en avez déjà livré 300. Quel pourcentage reste-t-il à livrer ?', options: ['10%', '25%', '75%'], correctIndex: 1, explanation: 'Il reste 100 colis à livrer sur 400. $100/400 = 1/4 = 25\%$.', duration: 30, points: DEFAULT_POINTS },
-  { id: 'm_wild_5', categoryId: 'math_wild', type: 'quiz', title: 'GESTION DU TEMPS', scenario: 'Il est 14h30. Si vous avez une réunion de 90 minutes, à quelle heure finit-elle ?', options: ['15h30', '16h00', '16h30'], correctIndex: 0, explanation: '90 minutes = 1h30. 14h30 + 1h30 = 16h00.', duration: 30, points: WILD_POINTS },
+  { id: 'm_wild_4', categoryId: 'math_wild', type: 'quiz', title: 'POURCENTAGE', scenario: 'Vous devez livrer 400 colis. Vous en avez déjà livré 300. Quel pourcentage reste-t-il à livrer ?', options: ['10%', '25%', '75%'], correctIndex: 1, explanation: 'Il reste 100 colis à livrer sur 400. $100/400 = 1/4 = 25%$.', duration: 30, points: WILD_POINTS },
+  { id: 'm_wild_5', categoryId: 'math_wild', type: 'quiz', title: 'GESTION DU TEMPS', scenario: 'Il est 14h30. Si vous avez une réunion de 90 minutes, à quelle heure finit-elle ?', options: ['15h30', '16h00', '16h30'], correctIndex: 1, explanation: '90 minutes = 1h30. 14h30 + 1h30 = 16h00.', duration: 30, points: WILD_POINTS },
   
   // --- NOUVELLES CARTES TEAM BUILDING JALO (30 cartes au total) ---
   // MANCHE 1 - VRAI/FAUX (JALO_Q1 à JALO_Q4)
@@ -294,14 +294,26 @@ const triggerMassiveConfetti = () => {
 const Timer = ({ duration, onComplete, autoStart = false, isStopped = false }) => {
   const [timeLeft, setTimeLeft] = useState(duration);
   const [isActive, setIsActive] = useState(autoStart);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
   
   useEffect(() => {
-    if (isStopped) { setIsActive(false); return; }
-    let interval = null;
-    if (isActive && timeLeft > 0) interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
-    else if (timeLeft === 0) { setIsActive(false); onComplete && onComplete(); }
+    if (!isActive || isStopped || timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      setTimeLeft(currentTime => {
+        if (currentTime <= 1) {
+          setIsActive(false);
+          onCompleteRef.current?.();
+          return 0;
+        }
+        return currentTime - 1;
+      });
+    }, 1000);
     return () => clearInterval(interval);
-  }, [isActive, timeLeft, onComplete, isStopped]);
+  }, [isActive, isStopped, timeLeft]);
 
   return (
     <div className="w-full bg-black/10 p-4 rounded-2xl backdrop-blur-sm transition-all border border-white/10 shadow-inner">
@@ -314,7 +326,7 @@ const Timer = ({ duration, onComplete, autoStart = false, isStopped = false }) =
       </div>
       {!isStopped && (
         <div className="flex justify-center">
-          <button onClick={() => setIsActive(!isActive)} className="w-10 h-10 flex items-center justify-center bg-white text-black rounded-full hover:scale-110 transition shadow-lg">
+          <button type="button" aria-label={isActive ? 'Mettre le minuteur en pause' : 'Démarrer le minuteur'} onClick={() => setIsActive(!isActive)} className="w-10 h-10 flex items-center justify-center bg-white text-black rounded-full hover:scale-110 transition shadow-lg">
             {isActive ? <Pause size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
           </button>
         </div>
@@ -331,12 +343,8 @@ const CardBack = ({ category, onClick, disabled }) => {
   const cardStyle = {
     background: disabled ? '#2d2d2d' : category.colorData.gradient,
     border: disabled ? '1px solid #444' : category.colorData.border,
-    boxBoxShadow: disabled ? 'none' : `0 0 40px ${category.colorData.hex}30`, // Ombre plus prononcée
+    boxShadow: disabled ? 'none' : `0 0 40px ${category.colorData.hex}30`, // Ombre plus prononcée
   };
-
-  // NOUVEAU: Déterminer la couleur du texte principal
-  const mainTextColor = category.id === 'jalo' ? 'text-black' : 'text-white';
-
 
   return (
     <div
@@ -481,7 +489,7 @@ const CardFront = ({ card, category, onClose, onResult, playerName }) => {
                 </div>
                 {/* AJOUT: Couleur dynamique de l'icône */}
                 <div className={`text-3xl w-10 h-10 flex items-center justify-center rounded-xl`} style={{ backgroundColor: `${hexColor}20`, border: `1px solid ${hexColor}60` }}> <category.icon size={24} style={{ color: hexColor }} /></div>
-                <button onClick={onClose} className="ml-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition"><X size={20}/></button>
+                <button type="button" aria-label="Fermer la carte" onClick={onClose} className="ml-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-white/50 hover:text-white transition"><X size={20}/></button>
             </div>
         </div>
 
@@ -630,7 +638,6 @@ const ProfileScreen = ({ player, onBack }) => {
     });
 
     // Filtre pour inclure JALO dans le calcul du score total
-    const specialCategories = ['math_wild', 'logistics', 'jalo'];
     const totalScore = skillData.reduce((sum, item) => sum + item.success, 0) + 
                        (player.scoreByCategory['math_wild']?.success * WILD_POINTS || 0) + 
                        (player.scoreByCategory['logistics']?.success * DEFAULT_POINTS || 0) + 
@@ -643,7 +650,7 @@ const ProfileScreen = ({ player, onBack }) => {
 
 
     // Fonction pour générer le graphique radar (simplifié)
-    const RadarChart = ({ data }) => {
+    const renderRadarChart = (data) => {
         // AUGMENTATION DE LA TAILLE POUR INCLURE LES LABELS
         const radius = 130;
         const center = 150; 
@@ -753,7 +760,7 @@ const ProfileScreen = ({ player, onBack }) => {
         <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
                  <div className="flex items-center gap-3 text-white"><TrendingUp className="text-[#00d468]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">PROFIL DE COMPÉTENCES</h2></div>
-                 <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
+                 <button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
                 <div className="mb-8 text-center">
@@ -774,7 +781,7 @@ const ProfileScreen = ({ player, onBack }) => {
                         {totalPlayed > 0 ? (
                            // Centrage du graphique
                            <div className="w-full flex justify-center">
-                                <RadarChart data={skillData} />
+                                {renderRadarChart(skillData)}
                            </div>
                         ) : (
                             <div className="text-center py-10 text-white/50 italic">Jouez quelques parties pour afficher votre profil !</div>
@@ -843,7 +850,7 @@ const StoryScreen = ({ onBack }) => (
     <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
              <div className="flex items-center gap-3 text-white"><BookOpen className="text-[#B02E68]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">L'Histoire</h2></div>
-             <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
+             <button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
             <div className="max-w-3xl mx-auto">
@@ -904,7 +911,7 @@ const HistoryScreen = ({ history, onBack }) => {
         <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
                  <div className="flex items-center gap-3 text-white"><History className="text-[#4dd4ff]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">HISTORIQUE DES PARTIES</h2></div>
-                 <button onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
+                 <button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
                 {history.length === 0 ? (
@@ -979,7 +986,7 @@ const MainMenu = ({ onNavigate, onResumeGame, gameSaved }) => ( // startLogistic
        
        <button onClick={() => { playSound('flip'); onNavigate('profile'); }} className="w-full bg-[#FFC20E]/40 hover:bg-[#FFC20E]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>MON PROFIL</span> <TrendingUp size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('story'); }} className="w-full bg-[#B02E68]/40 hover:bg-[#B02E68]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>L'HISTOIRE</span> <BookOpen size={20} /></button>
-       <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg://black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
+       <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
      </div>
   </div>
 );
@@ -1213,6 +1220,18 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
 // --- Application Principale ---
 
 const LOCAL_STORAGE_KEY = 'skillsMasterGame';
+const HISTORY_STORAGE_KEY = 'skillsMasterHistory';
+const MAX_HISTORY_ENTRIES = 20;
+
+const loadGameHistory = () => {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]');
+    return Array.isArray(history) ? history.slice(0, MAX_HISTORY_ENTRIES) : [];
+  } catch (error) {
+    console.error("Erreur lors du chargement de l'historique:", error);
+    return [];
+  }
+};
 
 // Fonction utilitaire pour trouver la catégorie, gère les accents et les majuscules
 const findCategoryByCardId = (cardId) => {
@@ -1254,13 +1273,6 @@ export default function App() {
       }
   };
   
-  // NOUVEL ÉTAT POUR DÉTECTER LA SAUVEGARDE
-  const [gameSaved, setGameSaved] = useState(false);
-  // NOUVEL ÉTAT POUR DÉTECTER SI LE PREMIER TOUR (AVEC CHOIX DE CATÉGORIE) EST PASSÉ
-  const [isGameStarted, setIsGameStarted] = useState(false);
-  // ÉTAT DE TRANSITION SUPPRIMÉ pour un passage instantané
-  // const [isTransitioningState, setIsTransitioningState] = useState(false); // Supprimé
-  
   // FONCTION DE CHARGEMENT DE L'ÉTAT INITIAL
   const loadInitialState = () => {
     try {
@@ -1300,14 +1312,15 @@ export default function App() {
     };
   };
 
-  const initialState = loadInitialState();
+  const [initialState] = useState(loadInitialState);
+  const [gameSaved, setGameSaved] = useState(initialState.isSaved);
   const [view, setView] = useState(initialState.view);
   const [players, setPlayers] = useState(initialState.players);
   const [gameMode, setGameMode] = useState(initialState.gameMode);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(initialState.currentPlayerIndex);
   const [activeCard, setActiveCard] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [gameHistory, setGameHistory] = useState([]);
+  const [gameHistory, setGameHistory] = useState(loadGameHistory);
   const [showScoreboard, setShowScoreboard] = useState(false);
   
   const [maxRounds, setMaxRounds] = useState(initialState.maxRounds);
@@ -1318,15 +1331,6 @@ export default function App() {
   const [missedCards, setMissedCards] = useState(initialState.missedCards);
   const [isGameStartedState, setIsGameStartedState] = useState(initialState.isGameStarted); // Utilisation d'un état séparé pour éviter la confusion
   
-  // NOUVEAU useEffect pour mettre à jour gameSaved APRÈS le rendu initial
-  useEffect(() => {
-    setGameSaved(initialState.isSaved);
-    // Si la partie était déjà commencée (reprise), on met à jour l'état de démarrage
-    if (initialState.isSaved) {
-        setIsGameStartedState(initialState.isGameStarted);
-    }
-  }, []); // [] garantit que cela ne s'exécute qu'une fois au montage
-
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js";
@@ -1336,7 +1340,7 @@ export default function App() {
   }, []);
 
   // --- LOGIQUE DE SAUVEGARDE ---
-  const saveGameState = useCallback(() => {
+  useEffect(() => {
     if (view === 'playing' && !showScoreboard) {
       const stateToSave = {
         players,
@@ -1350,18 +1354,8 @@ export default function App() {
         isGameStarted: isGameStartedState, // Sauvegarde l'état de démarrage
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
-      setGameSaved(true);
-    } else if (view !== 'playing') {
-       // Supprime la partie si on n'est plus en mode jeu actif
-       localStorage.removeItem(LOCAL_STORAGE_KEY);
-       setGameSaved(false);
     }
   }, [players, gameMode, currentPlayerIndex, maxRounds, deckFilter, roundsPlayed, playedCardIds, missedCards, view, showScoreboard, isGameStartedState]);
-
-  // Surveillance des états pour la sauvegarde
-  useEffect(() => {
-    saveGameState();
-  }, [players, roundsPlayed, view, showScoreboard, currentPlayerIndex, maxRounds, deckFilter, playedCardIds, missedCards, isGameStartedState, saveGameState]);
   // --- FIN LOGIQUE DE SAUVEGARDE ---
 
 
@@ -1373,6 +1367,7 @@ export default function App() {
     setPlayedCardIds([]); setMissedCards([]);
     setMaxRounds(rounds);
     setDeckFilter(filter);
+    setGameSaved(true);
     setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
     
     // NOUVEAU : Si en mode Défi, on force l'état "démarré"
@@ -1385,21 +1380,13 @@ export default function App() {
     setView('playing');
   };
   
-  // MODIFICATION: startLogisticsChallenge est maintenant une fonction de navigation
-  const navigateToLogisticsSetup = () => {
-      playSound('flip');
-      setView('logisticsSetup');
-  };
-  
-  // NOUVEAU: Navigation pour le défi JALO
-  const navigateToJaloSetup = () => {
-      playSound('flip');
-      setView('jaloSetup');
-  };
-
   const endGame = () => {
     const newHistoryEntry = { date: new Date().toISOString(), mode: gameMode, results: [...players].sort((a,b) => b.score - a.score) };
-    setGameHistory([newHistoryEntry, ...gameHistory]);
+    setGameHistory(currentHistory => {
+      const nextHistory = [newHistoryEntry, ...currentHistory].slice(0, MAX_HISTORY_ENTRIES);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+      return nextHistory;
+    });
     
     // Si mode solo, on met à jour le profil permanent après la partie
     if (gameMode === 'solo' && players.length > 0) {
@@ -1474,7 +1461,7 @@ export default function App() {
   };
 
   // NOUVELLE FONCTION : Gère la mise à jour de l'état de la carte active de manière sécurisée
-  const handleDrawNext = useCallback((categoryId = null) => {
+  const handleDrawNext = (categoryId = null) => {
       let result;
       
       if (categoryId) {
@@ -1511,7 +1498,7 @@ export default function App() {
             setShowScoreboard(true);
           }
       }
-  }, [deckFilter, isGameStartedState, playedCardIds, roundsPlayed, maxRounds]);
+  };
   
   // Remplacement de drawRandomNextCard et drawCard par des appels à handleDrawNext
   const drawRandomNextCard = () => handleDrawNext();
@@ -1519,26 +1506,25 @@ export default function App() {
 
 
   const handleCardResult = (success, cardData) => {
-    const currentPlayers = [...players];
-    const player = currentPlayers[currentPlayerIndex];
     const categoryId = cardData.categoryId;
-    
-    // Points attribués
     const points = cardData.points || DEFAULT_POINTS;
+    const currentPlayers = players.map((player, index) => {
+      if (index !== currentPlayerIndex) return player;
 
-    // Mise à jour des stats du joueur
-    if (!player.scoreByCategory[categoryId]) {
-        // Initialisation si la catégorie n'existe pas encore (sécurité)
-        player.scoreByCategory[categoryId] = { success: 0, total: 0 };
-    }
-    
-    player.scoreByCategory[categoryId].total += 1;
-
-    if (success) { 
-        player.score += points; // Utiliser les points spécifiques de la carte
-        player.scoreByCategory[categoryId].success += 1;
-        setPlayers(currentPlayers); 
-    }
+      const categoryStats = player.scoreByCategory[categoryId] || { success: 0, total: 0 };
+      return {
+        ...player,
+        score: player.score + (success ? points : 0),
+        scoreByCategory: {
+          ...player.scoreByCategory,
+          [categoryId]: {
+            success: categoryStats.success + (success ? 1 : 0),
+            total: categoryStats.total + 1,
+          },
+        },
+      };
+    });
+    setPlayers(currentPlayers);
     
     // Mise à jour des cartes manquées
     if (!success && cardData) { 
@@ -1690,7 +1676,7 @@ export default function App() {
                 </div>
                 ))}
             </div>
-            <button onClick={() => setShowScoreboard(true)} className="bg-white/10 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition text-white/70"><X size={20} strokeWidth={3} /></button>
+            <button type="button" aria-label="Terminer la partie" onClick={() => setShowScoreboard(true)} className="bg-white/10 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition text-white/70"><X size={20} strokeWidth={3} /></button>
           </nav>
 
           <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full flex flex-col">
@@ -1700,7 +1686,10 @@ export default function App() {
               </div>
               {/* Responsiveness: Taille du titre adaptée */}
               <h2 className="text-2xl md:text-5xl font-black text-white uppercase drop-shadow-xl flex items-center justify-center gap-3 tracking-tighter">
-                 {(deckFilter === 'logistics' || deckFilter === 'jalo') ? `DÉFI ${deckFilter.toUpperCase()} (ALÉATOIRE)` : 'CHOISISSEZ UNE CATÉGORIE'} <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
+                 {(deckFilter === 'logistics' || deckFilter === 'jalo')
+                   ? `DÉFI ${deckFilter.toUpperCase()} (ALÉATOIRE)`
+                   : (isGameStartedState ? 'RELEVEZ LE DÉFI' : 'CHOISISSEZ UNE CATÉGORIE')}{' '}
+                 <span className="text-[#FFC20E] animate-pulse"><Award size={32} /></span>
               </h2>
             </div>
             
