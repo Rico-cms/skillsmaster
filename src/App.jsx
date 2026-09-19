@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp, Library, Maximize, Download, Copy, Trash2 } from 'lucide-react';
+import CardLibraryScreen from './components/CardLibraryScreen.jsx';
+import { buildHistoryEntry, downloadText, GAME_VERSION, makeReportText } from './lib/game-utils.js';
 
 // --- Configuration & Données ---
 
@@ -108,6 +110,14 @@ const CATEGORIES = {
 // VALEUR EN POINTS POUR LES CARTES
 const DEFAULT_POINTS = 1;
 const WILD_POINTS = 10; // 10 points pour les cartes mathématiques
+
+const randomUnit = () => {
+  const values = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(values);
+  return values[0] / 2 ** 32;
+};
+
+const randomItem = items => items[Math.floor(randomUnit() * items.length)];
 
 const INITIAL_CARDS = [
   // --- Communication (13 cartes) ---
@@ -897,7 +907,7 @@ const StoryScreen = ({ onBack }) => (
 );
 
 // --- NOUVEAU COMPOSANT : Écran d'historique des parties ---
-const HistoryScreen = ({ history, onBack }) => {
+const HistoryScreen = ({ history, onBack, onDelete, onClear }) => {
     // Fonction utilitaire pour formater la date
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -911,7 +921,7 @@ const HistoryScreen = ({ history, onBack }) => {
         <div className="w-full max-w-4xl h-[90vh] bg-black/60 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-500">
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/40 z-20">
                  <div className="flex items-center gap-3 text-white"><History className="text-[#4dd4ff]" size={28} /><h2 className="text-2xl font-black uppercase tracking-widest">HISTORIQUE DES PARTIES</h2></div>
-                 <button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button>
+                 <div className="flex gap-2">{history.length > 0 && <button type="button" onClick={onClear} className="px-3 py-2 hover:bg-red-500/20 rounded-xl text-red-200 text-xs font-bold">TOUT EFFACER</button>}<button type="button" aria-label="Retour au menu" onClick={onBack} className="p-2 hover:bg-white/10 rounded-full transition text-white"><X size={24} /></button></div>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-12 text-white relative z-10">
                 {history.length === 0 ? (
@@ -928,7 +938,7 @@ const HistoryScreen = ({ history, onBack }) => {
                                     <div>
                                         <span className="text-xs font-bold uppercase tracking-widest text-[#FFC20E]">Partie n°{history.length - index} ({game.mode.toUpperCase()})</span>
                                         <h3 className="text-lg font-black mt-1">{formatDate(game.date)}</h3>
-                                    </div>
+                                    </div><div className="flex gap-2"><button aria-label="Exporter le rapport" title="Exporter" onClick={() => downloadText(`skillsmaster-${game.id || index}.txt`, makeReportText(game))} className="p-2 rounded-lg hover:bg-white/10"><Download size={17}/></button><button aria-label="Supprimer cette partie" title="Supprimer" onClick={() => onDelete(game.id, index)} className="p-2 rounded-lg hover:bg-red-500/20 text-red-200"><Trash2 size={17}/></button></div>
                                 </div>
                                 <div className="space-y-2">
                                     {[...game.results].sort((a, b) => b.score - a.score).map((player, pIndex) => (
@@ -987,6 +997,7 @@ const MainMenu = ({ onNavigate, onResumeGame, gameSaved }) => ( // startLogistic
        <button onClick={() => { playSound('flip'); onNavigate('profile'); }} className="w-full bg-[#FFC20E]/40 hover:bg-[#FFC20E]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>MON PROFIL</span> <TrendingUp size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('story'); }} className="w-full bg-[#B02E68]/40 hover:bg-[#B02E68]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>L'HISTOIRE</span> <BookOpen size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
+       <button onClick={() => onNavigate('library')} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>ATELIER DE CARTES</span> <Library size={20} /></button>
      </div>
   </div>
 );
@@ -1085,7 +1096,7 @@ const ChallengeSetupScreen = ({ onStart, onBack, maxRounds, categoryId, category
   );
 };
 
-const SetupScreen = ({ onStart, onBack }) => {
+const SetupScreen = ({ onStart, onBack, categories }) => {
   const [mode, setMode] = useState(null);
   // CHANGEMENT: Initialisation des stats par défaut
   const createPlayer = (id, name) => ({
@@ -1106,6 +1117,10 @@ const SetupScreen = ({ onStart, onBack }) => {
 
   const [players, setPlayers] = useState([createPlayer(1, 'Joueur 1'), createPlayer(2, 'Joueur 2')].map(p => p.name));
   const [soloName, setSoloName] = useState('Joueur 1');
+  const [rounds, setRounds] = useState(15);
+  const [difficulty, setDifficulty] = useState('normal');
+  const [wildChance, setWildChance] = useState(10);
+  const [enabledCategories, setEnabledCategories] = useState(categories.map(category => category.id));
 
   const addPlayer = () => setPlayers([...players, `Joueur ${players.length + 1}`]);
   const removePlayer = (index) => players.length > 2 && setPlayers(players.filter((_, i) => i !== index)); // Min 2 joueurs en mode multi normal
@@ -1117,7 +1132,7 @@ const SetupScreen = ({ onStart, onBack }) => {
         ? [createPlayer(1, soloName)]
         : players.map((name, i) => createPlayer(i + 1, name));
         
-    onStart(playerList, mode, 15, 'all');
+    onStart(playerList, mode, rounds, 'all', { difficulty, wildChance, enabledCategories });
   };
 
   return (
@@ -1148,6 +1163,12 @@ const SetupScreen = ({ onStart, onBack }) => {
                   </div>
                 )}
              </div>
+             <div className="grid grid-cols-3 gap-3 mb-5">
+               <label className="text-xs text-white/60">TOURS<input aria-label="Nombre de tours" type="number" min="5" max="50" value={rounds} onChange={e => setRounds(Math.max(5, Math.min(50, Number(e.target.value))))} className="field mt-1" /></label>
+               <label className="text-xs text-white/60">DIFFICULTÉ<select aria-label="Difficulté" value={difficulty} onChange={e => setDifficulty(e.target.value)} className="field mt-1"><option className="text-black" value="relaxed">Détente</option><option className="text-black" value="normal">Normal</option><option className="text-black" value="expert">Expert</option></select></label>
+               <label className="text-xs text-white/60">WILD %<input aria-label="Chance de wild card" type="number" min="0" max="50" value={wildChance} onChange={e => setWildChance(Math.max(0, Math.min(50, Number(e.target.value))))} className="field mt-1" /></label>
+             </div>
+             <fieldset className="mb-5"><legend className="text-xs text-white/60 mb-2">CATÉGORIES ACTIVES</legend><div className="flex flex-wrap gap-2">{categories.map(category => <label key={category.id} className="text-xs bg-white/10 rounded-full px-3 py-2"><input type="checkbox" className="mr-2" checked={enabledCategories.includes(category.id)} onChange={() => setEnabledCategories(current => current.includes(category.id) ? (current.length > 1 ? current.filter(id => id !== category.id) : current) : [...current, category.id])}/>{category.label.replace('<br/>', ' ')}</label>)}</div></fieldset>
              <button onClick={handleStart} className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#FFC20E] to-[#ff9900] text-black font-black text-xl hover:scale-105 transition shadow-[0_0_30px_-5px_rgba(255,194,14,0.4)] flex items-center justify-center gap-3">C'EST PARTI <ArrowRight size={24} strokeWidth={3} /></button>
           </div>
         )}
@@ -1155,7 +1176,7 @@ const SetupScreen = ({ onStart, onBack }) => {
   );
 };
 
-const ScoreBoard = ({ players, missedCards, onEndGame }) => {
+const ScoreBoard = ({ players, missedCards, reportEntry, onEndGame, onReplay }) => {
     useEffect(() => { playSound('gameover'); triggerMassiveConfetti(); }, []);
     
     // Ajout d'une fonction de recherche de catégorie sécurisée
@@ -1211,7 +1232,8 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
                     </div>
                 </div>
             )}
-            <button onClick={onEndGame} className="w-full bg-white text-[#B02E68] font-black py-5 rounded-2xl hover:bg-gray-100 transition shadow-xl relative z-10 uppercase tracking-widest">Retour au menu</button>
+            <div className="grid sm:grid-cols-2 gap-3 relative z-10 mb-3"><button onClick={() => navigator.clipboard?.writeText(makeReportText(reportEntry))} className="secondary-button"><Copy size={18}/> Copier le bilan</button><button onClick={() => downloadText('rapport-skillsmaster.txt', makeReportText(reportEntry))} className="secondary-button"><Download size={18}/> Télécharger</button></div>
+            <div className="grid sm:grid-cols-2 gap-3 relative z-10"><button onClick={onReplay} className="bg-[#FFC20E] text-black font-black py-5 rounded-2xl uppercase tracking-widest">Rejouer</button><button onClick={onEndGame} className="bg-white text-[#B02E68] font-black py-5 rounded-2xl hover:bg-gray-100 transition shadow-xl uppercase tracking-widest">Retour au menu</button></div>
         </div>
     </div>
     );
@@ -1221,6 +1243,7 @@ const ScoreBoard = ({ players, missedCards, onEndGame }) => {
 
 const LOCAL_STORAGE_KEY = 'skillsMasterGame';
 const HISTORY_STORAGE_KEY = 'skillsMasterHistory';
+const CUSTOM_CARDS_STORAGE_KEY = 'skillsMasterCustomCards';
 const MAX_HISTORY_ENTRIES = 20;
 
 const loadGameHistory = () => {
@@ -1234,9 +1257,9 @@ const loadGameHistory = () => {
 };
 
 // Fonction utilitaire pour trouver la catégorie, gère les accents et les majuscules
-const findCategoryByCardId = (cardId) => {
+const findCategoryByCardId = (cardId, cards = INITIAL_CARDS) => {
     // 1. Trouver l'ID de la catégorie dans la liste des cartes (ex: 'creativity')
-    const card = INITIAL_CARDS.find(c => c.id === cardId);
+    const card = cards.find(c => c.id === cardId);
     if (!card) return null;
     const categoryId = card.categoryId;
 
@@ -1291,6 +1314,7 @@ export default function App() {
           view: 'menu', // Commence toujours par le menu après chargement
           isSaved: true, // Flag pour détecter la présence d'une sauvegarde
           isGameStarted: state.isGameStarted || false, // Charger l'état de démarrage
+          gameSettings: state.gameSettings || { difficulty: 'normal', wildChance: 10, enabledCategories: ['communication', 'leadership', 'critical_thinking', 'emotional_intelligence', 'creativity'] },
         };
       }
     } catch (e) {
@@ -1309,6 +1333,7 @@ export default function App() {
       view: 'menu',
       isSaved: false, // Pas de sauvegarde trouvée
       isGameStarted: false,
+      gameSettings: { difficulty: 'normal', wildChance: 10, enabledCategories: ['communication', 'leadership', 'critical_thinking', 'emotional_intelligence', 'creativity'] },
     };
   };
 
@@ -1321,6 +1346,9 @@ export default function App() {
   const [activeCard, setActiveCard] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null);
   const [gameHistory, setGameHistory] = useState(loadGameHistory);
+  const [customCards, setCustomCards] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(CUSTOM_CARDS_STORAGE_KEY) || '[]'); } catch { return []; }
+  });
   const [showScoreboard, setShowScoreboard] = useState(false);
   
   const [maxRounds, setMaxRounds] = useState(initialState.maxRounds);
@@ -1330,6 +1358,9 @@ export default function App() {
   const [playedCardIds, setPlayedCardIds] = useState(initialState.playedCardIds);
   const [missedCards, setMissedCards] = useState(initialState.missedCards);
   const [isGameStartedState, setIsGameStartedState] = useState(initialState.isGameStarted); // Utilisation d'un état séparé pour éviter la confusion
+  const [gameSettings, setGameSettings] = useState(initialState.gameSettings);
+  const [gameStartedAt, setGameStartedAt] = useState(() => new Date().toISOString());
+  const allCards = [...INITIAL_CARDS, ...customCards];
   
   useEffect(() => {
     const script = document.createElement('script');
@@ -1343,6 +1374,7 @@ export default function App() {
   useEffect(() => {
     if (view === 'playing' && !showScoreboard) {
       const stateToSave = {
+        version: GAME_VERSION,
         players,
         gameMode,
         currentPlayerIndex,
@@ -1352,21 +1384,24 @@ export default function App() {
         playedCardIds,
         missedCards,
         isGameStarted: isGameStartedState, // Sauvegarde l'état de démarrage
+        gameSettings,
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
     }
-  }, [players, gameMode, currentPlayerIndex, maxRounds, deckFilter, roundsPlayed, playedCardIds, missedCards, view, showScoreboard, isGameStartedState]);
+  }, [players, gameMode, currentPlayerIndex, maxRounds, deckFilter, roundsPlayed, playedCardIds, missedCards, view, showScoreboard, isGameStartedState, gameSettings]);
   // --- FIN LOGIQUE DE SAUVEGARDE ---
 
 
   // MISE À JOUR : Ajout des paramètres rounds et deckFilter
-  const startGame = (playerList, mode, rounds, filter) => {
+  const startGame = (playerList, mode, rounds, filter, settings = gameSettings) => {
     console.log(`[GameStart] Démarrage du jeu. Mode: ${mode}, Tours: ${rounds}, Filtre: ${filter}`);
     setPlayers(playerList); setGameMode(mode); setView('playing');
     setCurrentPlayerIndex(0); setShowScoreboard(false); setRoundsPlayed(0);
     setPlayedCardIds([]); setMissedCards([]);
     setMaxRounds(rounds);
     setDeckFilter(filter);
+    setGameSettings(settings);
+    setGameStartedAt(new Date().toISOString());
     setGameSaved(true);
     setIsGameStartedState(false); // Réinitialiser le drapeau de démarrage
     
@@ -1380,13 +1415,19 @@ export default function App() {
     setView('playing');
   };
   
-  const endGame = () => {
-    const newHistoryEntry = { date: new Date().toISOString(), mode: gameMode, results: [...players].sort((a,b) => b.score - a.score) };
+  const currentReport = { date: gameStartedAt, mode: gameMode, roundsPlayed, maxRounds, deckFilter, missedCount: missedCards.length, results: [...players].sort((a, b) => b.score - a.score) };
+
+  const saveHistory = () => {
+    const newHistoryEntry = buildHistoryEntry({ players, mode: gameMode, roundsPlayed, maxRounds, deckFilter, missedCards });
     setGameHistory(currentHistory => {
       const nextHistory = [newHistoryEntry, ...currentHistory].slice(0, MAX_HISTORY_ENTRIES);
       localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
       return nextHistory;
     });
+  };
+
+  const endGame = () => {
+    saveHistory();
     
     // Si mode solo, on met à jour le profil permanent après la partie
     if (gameMode === 'solo' && players.length > 0) {
@@ -1402,30 +1443,56 @@ export default function App() {
     localStorage.removeItem(LOCAL_STORAGE_KEY); // S'assurer de supprimer l'état après la fin
     setGameSaved(false);
   };
+
+  const replayGame = () => {
+    saveHistory();
+    const resetPlayers = players.map(player => ({ ...player, score: 0, scoreByCategory: {} }));
+    startGame(resetPlayers, gameMode, maxRounds, deckFilter, gameSettings);
+  };
+
+  const updateCustomCards = cards => {
+    setCustomCards(cards);
+    localStorage.setItem(CUSTOM_CARDS_STORAGE_KEY, JSON.stringify(cards));
+  };
+
+  const deleteHistoryEntry = (id, fallbackIndex) => {
+    if (!window.confirm('Supprimer cette partie de l’historique ?')) return;
+    setGameHistory(current => {
+      const next = current.filter((entry, index) => id ? entry.id !== id : index !== fallbackIndex);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const clearHistory = () => {
+    if (!window.confirm('Effacer tout l’historique ? Cette action est irréversible.')) return;
+    setGameHistory([]);
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+  };
   
   // NOUVELLE FONCTION : Encapsule la logique de sélection de carte
   const getNewCard = (categoryId = 'all') => {
       const filterId = categoryId === 'all' ? deckFilter : categoryId;
       
       // 1. Déterminer le pool de cartes
-      let cardPool = INITIAL_CARDS;
+      let cardPool = allCards;
       if (filterId !== 'all') {
           // Si on filtre par catégorie (ex: Logistique, JALO ou 1er choix)
-          cardPool = INITIAL_CARDS.filter(c => c.categoryId === filterId);
+          cardPool = allCards.filter(c => c.categoryId === filterId);
           console.log(`[getNewCard] Pool filtré par ${filterId}. Cartes disponibles dans le pool: ${cardPool.length}`);
       } else {
           // Mode 'all' (tirage aléatoire après le 1er tour)
           // Tenter la Wild Card à 10%
-          if (Math.random() < 0.1) {
-              const wildCards = INITIAL_CARDS.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
+          if (randomUnit() < gameSettings.wildChance / 100) {
+              const wildCards = allCards.filter(c => c.categoryId === 'math_wild' && !playedCardIds.includes(c.id));
               if (wildCards.length > 0) {
-                  const randomWildCard = wildCards[Math.floor(Math.random() * wildCards.length)];
+                  const randomWildCard = randomItem(wildCards);
                   console.log(`[getNewCard] Wild Card tirée: ${randomWildCard.id}`);
-                  return { card: randomWildCard, category: findCategoryByCardId(randomWildCard.id) };
+                  return { card: randomWildCard, category: findCategoryByCardId(randomWildCard.id, allCards) };
               }
           }
           // Sinon, on prend toutes les cartes SAUF les Wild Cards et les cartes Défi pour le tirage aléatoire des 5 catégories
-          cardPool = INITIAL_CARDS.filter(c => c.categoryId !== 'math_wild' && c.categoryId !== 'logistics' && c.categoryId !== 'jalo');
+          cardPool = allCards.filter(c => gameSettings.enabledCategories.includes(c.categoryId));
       }
 
       // 2. Filtrer les cartes déjà jouées
@@ -1434,10 +1501,10 @@ export default function App() {
       // Si le deck filtré est vide, on boucle sur le deck complet pour les défis
       if (availableCards.length === 0 && (filterId === 'logistics' || filterId === 'jalo')) {
          // Dans ce cas, on réinitialise les cartes jouées pour cette catégorie seulement
-         const allChallengeCards = INITIAL_CARDS.filter(c => c.categoryId === filterId);
-         const newCard = allChallengeCards[Math.floor(Math.random() * allChallengeCards.length)];
+         const allChallengeCards = allCards.filter(c => c.categoryId === filterId);
+         const newCard = randomItem(allChallengeCards);
          console.log(`[getNewCard] Deck ${filterId} épuisé. Boucle activée.`);
-         return { card: newCard, category: findCategoryByCardId(newCard.id) };
+         return { card: newCard, category: findCategoryByCardId(newCard.id, allCards) };
       }
       
       if (availableCards.length === 0) {
@@ -1446,10 +1513,10 @@ export default function App() {
       }
 
       // 3. Tirer une carte au hasard
-      const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+      const randomCard = randomItem(availableCards);
       
       // 4. Trouver la catégorie correspondante
-      const category = findCategoryByCardId(randomCard.id);
+      const category = findCategoryByCardId(randomCard.id, allCards);
       
       if (!category) {
           console.error(`[getNewCard] ERREUR: Catégorie non trouvée pour la carte ID: ${randomCard.id}`);
@@ -1477,7 +1544,8 @@ export default function App() {
       
       if (result) {
           setActiveCategory(result.category);
-          setActiveCard(result.card);
+          const durationFactor = gameSettings.difficulty === 'relaxed' ? 1.5 : gameSettings.difficulty === 'expert' ? 0.7 : 1;
+          setActiveCard({ ...result.card, duration: Math.max(10, Math.round(result.card.duration * durationFactor)) });
           
           // Logique pour gérer la boucle du deck dans les modes défis
           if (deckFilter === 'logistics' || deckFilter === 'jalo') {
@@ -1561,12 +1629,12 @@ export default function App() {
       }
 
       // Filtrer toutes les cartes non-wild de cette catégorie qui n'ont pas encore été jouées
-      const remaining = INITIAL_CARDS.filter(c => c.categoryId === categoryId && c.categoryId !== 'math_wild' && !playedCardIds.includes(c.id));
+      const remaining = allCards.filter(c => c.categoryId === categoryId && c.categoryId !== 'math_wild' && !playedCardIds.includes(c.id));
       return remaining.length === 0;
   };
 
   // On utilise Object.values(CATEGORIES) et on exclut les decks spéciaux (logistics, math_wild, jalo)
-  const categoriesToRender = Object.values(CATEGORIES).filter(cat => cat.id !== 'logistics' && cat.id !== 'math_wild' && cat.id !== 'jalo'); 
+  const categoriesToRender = Object.values(CATEGORIES).filter(cat => gameSettings.enabledCategories.includes(cat.id));
   
   // DONNÉES SPÉCIFIQUES LOGISTIQUE
   const LOGISTICS_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'logistics').length;
@@ -1623,7 +1691,7 @@ export default function App() {
       `}</style>
 
       {view === 'menu' && <MainMenu onNavigate={setView} onResumeGame={resumeGame} gameSaved={gameSaved} />}
-      {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen onStart={(p, m) => startGame(p, m, 15, 'all')} onBack={() => setView('menu')} /></div>}
+      {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen categories={Object.values(CATEGORIES).filter(category => !['logistics', 'math_wild', 'jalo'].includes(category.id))} onStart={startGame} onBack={() => setView('menu')} /></div>}
       
       {/* ÉCRAN DE SETUP POUR LE DÉFI LOGISTIQUE (Utilise ChallengeSetupScreen) */}
       {view === 'logisticsSetup' && (
@@ -1653,7 +1721,8 @@ export default function App() {
 
       {view === 'profile' && <div className="flex-1 flex items-center justify-center p-4 z-50"><ProfileScreen player={players.length > 0 ? players[0] : initialPlayerState} onBack={() => setView('menu')} /></div>}
       {view === 'story' && <div className="flex-1 flex items-center justify-center p-4 z-50"><StoryScreen onBack={() => setView('menu')} /></div>}
-      {view === 'history' && <div className="flex-1 flex items-center justify-center p-4"><HistoryScreen history={gameHistory} onBack={() => setView('menu')} /></div>}
+      {view === 'history' && <div className="flex-1 flex items-center justify-center p-4"><HistoryScreen history={gameHistory} onDelete={deleteHistoryEntry} onClear={clearHistory} onBack={() => setView('menu')} /></div>}
+      {view === 'library' && <div className="flex-1 flex items-center justify-center p-4"><CardLibraryScreen cards={customCards} categories={Object.values(CATEGORIES)} onChange={updateCustomCards} onBack={() => setView('menu')} /></div>}
 
       {view === 'playing' && (
         <>
@@ -1676,7 +1745,7 @@ export default function App() {
                 </div>
                 ))}
             </div>
-            <button type="button" aria-label="Terminer la partie" onClick={() => setShowScoreboard(true)} className="bg-white/10 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition text-white/70"><X size={20} strokeWidth={3} /></button>
+            <div className="flex gap-2"><button type="button" aria-label="Plein écran" onClick={() => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()} className="bg-white/10 hover:bg-white/20 p-2.5 rounded-xl transition text-white/70"><Maximize size={20}/></button><button type="button" aria-label="Terminer la partie" onClick={() => setShowScoreboard(true)} className="bg-white/10 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition text-white/70"><X size={20} strokeWidth={3} /></button></div>
           </nav>
 
           <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full flex flex-col">
@@ -1764,10 +1833,10 @@ export default function App() {
         <CardFront key={activeCard.id} card={activeCard} category={activeCategory} onClose={() => { setActiveCard(null); setActiveCategory(null); }} onResult={handleCardResult} playerName={players[currentPlayerIndex]?.name} />
       )}
 
-      {showScoreboard && <ScoreBoard players={players} missedCards={missedCards} onEndGame={endGame} />}
+      {showScoreboard && <ScoreBoard players={players} missedCards={missedCards} reportEntry={currentReport} onReplay={replayGame} onEndGame={endGame} />}
 
       {/* NOUVEAU: Copyright Footer */}
-      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup') && (
+      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'library' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup') && (
         <footer className="w-full text-center py-4 text-xs font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
             © {new Date().getFullYear()} SKILLSMASTER. Tous droits réservés. Développé par Gabriel Emrick Tognimanbou DAHISSIHO.
         </footer>

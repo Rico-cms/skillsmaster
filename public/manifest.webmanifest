@@ -1,0 +1,12 @@
+{
+  "name": "SkillsMaster",
+  "short_name": "SkillsMaster",
+  "description": "Le jeu des compétences humaines",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#6d133b",
+  "theme_color": "#B02E68",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
