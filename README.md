@@ -4,6 +4,8 @@ SkillsMaster est un jeu web d'animation et de team building autour des compéten
 
 Un mode Culture générale propose également 30 questions aléatoires couvrant actualité datée, médecine, mécanique, sciences, histoire, arts, sport et curiosités.
 
+L’espace « Univers HCA », conçu autour des activités de Happy Coders Academy Abidjan, contient deux quiz de 18 questions : un parcours enfants sur le coding, la robotique, l’IA et la citoyenneté numérique, et un parcours animateurs sur la pédagogie active, l’inclusion, la sécurité et la gestion d’atelier.
+
 ## Fonctionnalités
 
 - Parties solo ou multijoueurs locales

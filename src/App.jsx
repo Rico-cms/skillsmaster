@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp, Library, Maximize, Download, Copy, Trash2, Globe2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Trophy, Users, User, Check, CheckCircle, XCircle, Plus, History, Award, ArrowRight, Info, CheckSquare, Volume2, VolumeX, BookOpen, Quote, Sparkles, Brain, Heart, Lightbulb, MessageCircle, Crown, Zap, Tractor, TrendingUp, Library, Maximize, Download, Copy, Trash2, Globe2, GraduationCap, Baby, Bot } from 'lucide-react';
 import CardLibraryScreen from './components/CardLibraryScreen.jsx';
+import { HCA_CARDS } from './data/hca-cards.js';
 import { buildHistoryEntry, downloadText, GAME_VERSION, makeReportText } from './lib/game-utils.js';
 
 // --- Configuration & Données ---
@@ -99,6 +100,22 @@ const COLORS = {
         accentGradient: 'linear-gradient(90deg, #8b5cf6, #2563eb)',
         border: '1px solid rgba(167,139,250,0.5)',
         text: 'text-white'
+    },
+    hca_kids: {
+        id: 'hca_kids',
+        hex: '#22d3ee',
+        gradient: 'linear-gradient(135deg, rgba(34,211,238,0.3) 0%, rgba(37,99,235,0.55) 100%)',
+        accentGradient: 'linear-gradient(90deg, #22d3ee, #2563eb)',
+        border: '1px solid rgba(103,232,249,0.5)',
+        text: 'text-white'
+    },
+    hca_facilitators: {
+        id: 'hca_facilitators',
+        hex: '#f97316',
+        gradient: 'linear-gradient(135deg, rgba(249,115,22,0.3) 0%, rgba(190,24,93,0.55) 100%)',
+        accentGradient: 'linear-gradient(90deg, #f97316, #db2777)',
+        border: '1px solid rgba(251,146,60,0.5)',
+        text: 'text-white'
     }
   }
 };
@@ -114,6 +131,8 @@ const CATEGORIES = {
   MATH_WILD: { id: 'math_wild', label: 'DÉFI MATHS<br/>(WILD CARD)', colorData: COLORS.cards.math_wild, icon: Zap }, // NOUVELLE CATÉGORIE WILD
   JALO: { id: 'jalo', label: 'TEAM BUILDING<br/>JALO', colorData: COLORS.cards.jalo, icon: Users }, // NOUVELLE CATÉGORIE JALO
   GENERAL_KNOWLEDGE: { id: 'general_knowledge', label: 'CULTURE<br/>GÉNÉRALE', colorData: COLORS.cards.general_knowledge, icon: Globe2 },
+  HCA_KIDS: { id: 'hca_kids', label: 'HCA<br/>ENFANTS', colorData: COLORS.cards.hca_kids, icon: Baby },
+  HCA_FACILITATORS: { id: 'hca_facilitators', label: 'HCA<br/>ANIMATEURS', colorData: COLORS.cards.hca_facilitators, icon: GraduationCap },
 };
 
 // VALEUR EN POINTS POUR LES CARTES
@@ -128,7 +147,7 @@ const randomUnit = () => {
 
 const randomItem = items => items[Math.floor(randomUnit() * items.length)];
 
-const INITIAL_CARDS = [
+const CORE_CARDS = [
   // --- Communication (13 cartes) ---
   { id: 'c1', categoryId: 'communication', type: 'challenge', title: 'PRÉSENTATION EXPRESS', scenario: 'Les réseaux sociaux : menace ou opportunité ? Mini-discours de 1 min.', explanation: 'Conseil : Commencez par une accroche forte ("Saviez-vous que..."), donnez 2 arguments opposés, et concluez avec votre avis personnel.', duration: 60, points: DEFAULT_POINTS },
   { id: 'c2', categoryId: 'communication', type: 'challenge', title: 'PITCH DE VENTE', scenario: 'Vendez ce stylo (ou un objet proche) au jury en 45 secondes.', explanation: 'Ne vendez pas l\'objet, vendez ce qu\'il permet de faire (ex: "Signer le contrat de votre vie"). Créez le besoin.', duration: 45, points: DEFAULT_POINTS },
@@ -307,7 +326,10 @@ const INITIAL_CARDS = [
   { id: 'gk_28', categoryId: 'general_knowledge', type: 'quiz', title: 'CAFÉ', scenario: 'L’espresso contient-il toujours plus de caféine qu’un grand café filtre ?', options: ['Oui, toujours', 'Non, le filtre peut en contenir davantage au total', 'Ils en contiennent exactement autant'], correctIndex: 1, explanation: 'L’espresso est plus concentré, mais sa petite quantité fait qu’un grand café filtre peut apporter plus de caféine au total.', duration: 30, points: 1 },
   { id: 'gk_29', categoryId: 'general_knowledge', type: 'quiz', title: 'ACTUALITÉ MÉDICALE 2026', scenario: 'Quels sont les deux vaccins contre le paludisme recommandés par l’OMS début 2026 ?', options: ['RTS,S et R21', 'BCG et ROR', 'Dengvaxia et Ervebo'], correctIndex: 0, explanation: 'L’OMS recommande RTS,S et R21/Matrix-M contre le paludisme à P. falciparum chez les enfants des zones concernées.', duration: 35, points: 2 },
   { id: 'gk_30', categoryId: 'general_knowledge', type: 'quiz', title: 'ULTIME QUESTION ABSURDE', scenario: 'Quel animal produit des crottes approximativement cubiques ?', options: ['Le wombat', 'Le lama', 'Le paresseux'], correctIndex: 0, explanation: 'Le wombat produit des excréments de forme cubique, liés aux propriétés mécaniques de son intestin.', duration: 25, points: 2 },
+
 ];
+
+const INITIAL_CARDS = [...CORE_CARDS, ...HCA_CARDS];
 
 // --- SOUND MANAGER (Fonctions inchangées) ---
 const playSound = (type, volume = 0.5) => {
@@ -674,7 +696,7 @@ const ProfileScreen = ({ player, onBack }) => {
 
     // Suppression de getCategoryById car elle n'était pas utilisée et sa logique était redondante avec celle de ScoreBoard.
 
-    const allCategories = Object.values(CATEGORIES).filter(c => c.id !== 'logistics' && c.id !== 'math_wild' && c.id !== 'jalo');
+    const allCategories = Object.values(CATEGORIES).filter(c => !['logistics', 'math_wild', 'jalo', 'general_knowledge', 'hca_kids', 'hca_facilitators'].includes(c.id));
     
     // Calculer les scores et les max par catégorie
     const skillData = allCategories.map(cat => {
@@ -1038,12 +1060,35 @@ const MainMenu = ({ onNavigate, onResumeGame, gameSaved }) => ( // startLogistic
        <button onClick={() => onNavigate('generalSetup')} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20" style={{ background: COLORS.cards.general_knowledge.accentGradient, boxShadow: `0 0 30px ${COLORS.cards.general_knowledge.hex}50` }}>
           <span>CULTURE GÉNÉRALE</span> <Globe2 className="group-hover:rotate-12 transition" />
        </button>
+
+       <button onClick={() => onNavigate('hca')} className="w-full group text-white p-5 rounded-3xl font-black text-xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:scale-105 transition-all flex items-center justify-between px-8 border-4 border-white/20 bg-gradient-to-r from-cyan-500 to-orange-500">
+          <span>UNIVERS HCA</span> <Bot className="group-hover:rotate-12 transition" />
+       </button>
        
        <button onClick={() => { playSound('flip'); onNavigate('profile'); }} className="w-full bg-[#FFC20E]/40 hover:bg-[#FFC20E]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>MON PROFIL</span> <TrendingUp size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('story'); }} className="w-full bg-[#B02E68]/40 hover:bg-[#B02E68]/60 border border-white/20 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/50"><span>L'HISTOIRE</span> <BookOpen size={20} /></button>
        <button onClick={() => { playSound('flip'); onNavigate('history'); }} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>HISTORIQUE</span> <History size={20} /></button>
        <button onClick={() => onNavigate('library')} className="w-full bg-black/20 hover:bg-black/40 border border-white/10 text-white p-5 rounded-3xl font-bold text-lg shadow-lg backdrop-blur-md transition-all flex items-center justify-between px-8 hover:border-white/30"><span>ATELIER DE CARTES</span> <Library size={20} /></button>
      </div>
+  </div>
+);
+
+const HcaHubScreen = ({ onNavigate, onBack }) => (
+  <div className="w-full max-w-3xl bg-black/55 backdrop-blur-xl p-5 sm:p-10 rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
+    <button onClick={onBack} className="text-white/60 hover:text-white transition flex items-center gap-2 text-xs font-bold uppercase tracking-widest"><RotateCcw size={14}/> Retour</button>
+    <div className="text-center mt-5 mb-8">
+      <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-orange-500 flex items-center justify-center mb-4 shadow-xl"><Bot size={36}/></div>
+      <h2 className="text-3xl sm:text-5xl font-black tracking-tighter">UNIVERS HCA</h2>
+      <p className="text-white/65 mt-2">Deux quiz conçus pour Happy Coders Academy.</p>
+    </div>
+    <div className="grid sm:grid-cols-2 gap-4">
+      <button onClick={() => onNavigate('hcaKidsSetup')} className="text-left p-6 rounded-3xl border border-cyan-200/30 hover:scale-[1.02] transition shadow-xl" style={{background: COLORS.cards.hca_kids.gradient}}>
+        <Baby size={36} className="text-cyan-300 mb-4"/><h3 className="text-2xl font-black">ENFANTS HCA</h3><p className="text-sm text-white/70 mt-2">Coding, robotique, IA, sécurité numérique et logique — 4 à 17 ans.</p><span className="inline-flex items-center gap-2 mt-5 font-bold text-cyan-200">18 questions <ArrowRight size={16}/></span>
+      </button>
+      <button onClick={() => onNavigate('hcaFacilitatorsSetup')} className="text-left p-6 rounded-3xl border border-orange-200/30 hover:scale-[1.02] transition shadow-xl" style={{background: COLORS.cards.hca_facilitators.gradient}}>
+        <GraduationCap size={36} className="text-orange-300 mb-4"/><h3 className="text-2xl font-black">ANIMATEURS HCA</h3><p className="text-sm text-white/70 mt-2">Pédagogie active, sécurité, inclusion, gestion de groupe et débogage.</p><span className="inline-flex items-center gap-2 mt-5 font-bold text-orange-200">18 questions <ArrowRight size={16}/></span>
+      </button>
+    </div>
   </div>
 );
 
@@ -1691,6 +1736,8 @@ export default function App() {
   const JALO_CATEGORY = CATEGORIES.JALO;
   const GENERAL_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'general_knowledge').length;
   const GENERAL_CATEGORY = CATEGORIES.GENERAL_KNOWLEDGE;
+  const HCA_KIDS_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'hca_kids').length;
+  const HCA_FACILITATORS_MAX_CARDS_COUNT = INITIAL_CARDS.filter(c => c.categoryId === 'hca_facilitators').length;
   const deckDisplayName = Object.values(CATEGORIES).find(category => category.id === deckFilter)?.label.replace('<br/>', ' ') || deckFilter;
   
   // Style d'arrière-plan dynamique
@@ -1739,7 +1786,7 @@ export default function App() {
       `}</style>
 
       {view === 'menu' && <MainMenu onNavigate={setView} onResumeGame={resumeGame} gameSaved={gameSaved} />}
-      {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen categories={Object.values(CATEGORIES).filter(category => !['logistics', 'math_wild', 'jalo'].includes(category.id))} onStart={startGame} onBack={() => setView('menu')} /></div>}
+      {view === 'setup' && <div className="flex-1 flex items-center justify-center p-4"><SetupScreen categories={Object.values(CATEGORIES).filter(category => !['logistics', 'math_wild', 'jalo', 'hca_kids', 'hca_facilitators'].includes(category.id))} onStart={startGame} onBack={() => setView('menu')} /></div>}
       
       {/* ÉCRAN DE SETUP POUR LE DÉFI LOGISTIQUE (Utilise ChallengeSetupScreen) */}
       {view === 'logisticsSetup' && (
@@ -1777,6 +1824,14 @@ export default function App() {
                   categoryLabel={GENERAL_CATEGORY.label}
               />
           </div>
+      )}
+
+      {view === 'hca' && <div className="flex-1 flex items-center justify-center p-4"><HcaHubScreen onNavigate={setView} onBack={() => setView('menu')} /></div>}
+      {view === 'hcaKidsSetup' && (
+          <div className="flex-1 flex items-center justify-center p-4"><ChallengeSetupScreen onStart={startGame} onBack={() => setView('hca')} maxRounds={HCA_KIDS_MAX_CARDS_COUNT} categoryId="hca_kids" categoryLabel="HCA ENFANTS" /></div>
+      )}
+      {view === 'hcaFacilitatorsSetup' && (
+          <div className="flex-1 flex items-center justify-center p-4"><ChallengeSetupScreen onStart={startGame} onBack={() => setView('hca')} maxRounds={HCA_FACILITATORS_MAX_CARDS_COUNT} categoryId="hca_facilitators" categoryLabel="HCA ANIMATEURS" /></div>
       )}
 
       {view === 'profile' && <div className="flex-1 flex items-center justify-center p-4 z-50"><ProfileScreen player={players.length > 0 ? players[0] : initialPlayerState} onBack={() => setView('menu')} /></div>}
@@ -1896,7 +1951,7 @@ export default function App() {
       {showScoreboard && <ScoreBoard players={players} missedCards={missedCards} reportEntry={currentReport} onReplay={replayGame} onEndGame={endGame} />}
 
       {/* NOUVEAU: Copyright Footer */}
-      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'library' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup' || view === 'generalSetup') && (
+      {(view === 'menu' || view === 'profile' || view === 'story' || view === 'history' || view === 'library' || view === 'setup' || view === 'logisticsSetup' || view === 'jaloSetup' || view === 'generalSetup' || view === 'hca' || view === 'hcaKidsSetup' || view === 'hcaFacilitatorsSetup') && (
         <footer className="w-full text-center px-4 py-3 sm:py-4 text-[10px] sm:text-xs leading-relaxed font-light text-white/50 bg-black/10 backdrop-blur-sm border-t border-white/5 mt-auto z-0">
             © {new Date().getFullYear()} SKILLSMASTER. Tous droits réservés. Développé par Gabriel Emrick Tognimanbou DAHISSIHO.
         </footer>
